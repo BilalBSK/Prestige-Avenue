@@ -1,17 +1,7 @@
-const { PrismaClient, BookingStatus, PaymentStatus, Role } = require("@prisma/client");
+const { PrismaClient, Role } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 
 const prisma = new PrismaClient();
-
-function money(value) {
-  return Number(value.toFixed(2));
-}
-
-function breakdown(totalPrice) {
-  const depositDueNow = money(totalPrice * 0.4);
-  const remainingBalance = money(totalPrice - depositDueNow);
-  return { depositDueNow, remainingBalance };
-}
 
 async function ensureUser({ name, email, password, role, phone }) {
   const hashedPassword = await bcrypt.hash(password, 12);
@@ -29,65 +19,6 @@ async function ensureUser({ name, email, password, role, phone }) {
       password: hashedPassword,
       role,
       phone,
-    },
-  });
-}
-
-async function ensureCar(data) {
-  const existing = await prisma.car.findFirst({
-    where: {
-      brand: data.brand,
-      model: data.model,
-      year: data.year,
-    },
-  });
-
-  if (existing) {
-    return prisma.car.update({
-      where: { id: existing.id },
-      data,
-    });
-  }
-
-  return prisma.car.create({ data });
-}
-
-async function upsertBooking({
-  userId,
-  carId,
-  startDate,
-  endDate,
-  totalPrice,
-  status,
-  paymentStatus,
-}) {
-  const { depositDueNow, remainingBalance } = breakdown(totalPrice);
-  const token = `seed-${carId}-${startDate.toISOString().slice(0, 10)}-${status}`;
-
-  return prisma.booking.upsert({
-    where: { submissionToken: token },
-    update: {
-      userId,
-      carId,
-      startDate,
-      endDate,
-      totalPrice,
-      depositDueNow,
-      remainingBalance,
-      status,
-      paymentStatus,
-    },
-    create: {
-      userId,
-      carId,
-      startDate,
-      endDate,
-      totalPrice,
-      depositDueNow,
-      remainingBalance,
-      status,
-      paymentStatus,
-      submissionToken: token,
     },
   });
 }
@@ -117,157 +48,174 @@ async function main() {
     phone: "+33 6 11 22 33 44",
   });
 
-  const cars = await Promise.all([
-    ensureCar({
+  // Nettoyage complet avant d'insérer la vraie flotte.
+  await prisma.blockedDate.deleteMany({});
+  await prisma.booking.deleteMany({});
+  await prisma.car.deleteMany({});
+
+  await prisma.car.create({
+    data: {
+      slug: "renault-clio-6-alpine",
+      brand: "Renault",
+      model: "Clio 6",
+      trim: "Esprit Alpine",
+      year: 2025,
+      category: "CITADINE",
+      power: 156,
+      transmission: "AUTOMATIC",
+      fuelType: "HYBRID",
+      seats: 5,
+      doors: 5,
+      pricePerDay: 34.99,
+      pricePerKm: 0.3,
+      includedKmPerDay: 200,
+      weekendPackagePrice: 320.0,
+      weekendPackageIncludedKm: 600,
+      depositAmount: 1500.0,
+      minDriverAge: 21,
+      minLicenseYears: 2,
+      shortTagline:
+        "La citadine statutaire : lignes élégantes et technologies embarquées.",
+      description:
+        "La Renault Clio affirme une vision plus statutaire de la citadine : lignes élégantes, technologies embarquées intuitives et finitions soignées s'unissent pour offrir un confort haut de gamme et une présence qui dépasse largement son format compact.",
+      highlights: [
+        "156 ch",
+        "29 aides à la conduite",
+        "Profil coupé hybride",
+        "Finitions Esprit Alpine",
+      ],
+      features: [
+        {
+          title: "Sécurité augmentée",
+          body: "Nouvelle Clio propose 29 systèmes avancés d'aide à la conduite qui rendent votre expérience au volant plus sûre. En complément, les dispositifs safety score et safety coach fournissent des conseils personnalisés pour optimiser votre conduite.",
+        },
+        {
+          title: "Lignes sportives",
+          body: "Le profil « coupé » de la citadine hybride réinvente les codes du segment. Feux traités comme des éléments esthétiques à part entière, découpe des vitres et becquet lui confèrent une silhouette sportive et une énergie latine.",
+        },
+      ],
+      mainImage:
+        "https://images.unsplash.com/photo-1606152421802-db97b2c7a11f?auto=format&fit=crop&w=1600&q=80",
+      galleryImages: [
+        "https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=1600&q=80",
+      ],
+      videoUrl: null,
+      status: "AVAILABLE",
+      isFeatured: true,
+      displayOrder: 1,
+    },
+  });
+
+  await prisma.car.create({
+    data: {
+      slug: "audi-a3-sportback-2025",
       brand: "Audi",
       model: "A3 Sportback",
-      year: 2024,
-      pricePerDay: 220,
-      weekendPrice: 280,
-      depositAmount: 1500,
+      trim: "TFSI e S line",
+      year: 2025,
+      category: "COMPACTE",
+      power: 272,
+      transmission: "AUTOMATIC",
+      fuelType: "PLUG_IN_HYBRID",
+      seats: 5,
+      doors: 5,
+      pricePerDay: 39.99,
+      pricePerKm: 0.3,
+      includedKmPerDay: 200,
+      weekendPackagePrice: 490.0,
+      weekendPackageIncludedKm: 600,
+      depositAmount: 2500.0,
+      minDriverAge: 23,
+      minLicenseYears: 3,
+      shortTagline:
+        "L'hybride rechargeable premium, 272 ch et jusqu'à 142 km en électrique.",
       description:
-        "Compacte premium, finition S line, parfaite pour les trajets urbains et business.",
+        "Prenez le volant de la Nouvelle Audi A3 Sportback TFSI e et entrez dans une nouvelle ère de performance. Jusqu'à 142 km d'autonomie en électrique, une technologie de pointe et un design athlétique qui attire tous les regards. L'hybride rechargeable allie puissance, efficience et réduction des émissions pour transformer chacun de vos trajets en expérience premium.",
+      highlights: [
+        "272 ch",
+        "142 km d'autonomie électrique",
+        "Cockpit digital",
+        "Hybride rechargeable",
+      ],
+      features: [
+        {
+          title: "Une expérience de conduite intelligente",
+          body: "L'intérieur de l'Audi A3 Sportback propose un cockpit digital orienté vers le conducteur, des écrans haute définition, des matériaux soigneusement travaillés et un éclairage d'ambiance élégant qui rendent chaque trajet aussi confortable que technologique.",
+        },
+        {
+          title: "La référence des compactes premium",
+          body: "L'Audi A3 Sportback combine un design sportif affirmé, des technologies de dernière génération et un intérieur raffiné pour offrir une expérience de conduite aussi dynamique qu'élégante, parfaite pour le quotidien comme pour les grands trajets.",
+        },
+      ],
       mainImage:
-        "https://images.unsplash.com/photo-1619976216263-2f2fce8f1f37?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1600&q=80",
       galleryImages: [
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1600&q=80",
       ],
       videoUrl: null,
       status: "AVAILABLE",
-    }),
-    ensureCar({
-      brand: "Mercedes-Benz",
-      model: "Classe C",
-      year: 2023,
-      pricePerDay: 290,
-      weekendPrice: 350,
-      depositAmount: 2200,
-      description: "Berline executive avec interieur cuir et conduite confortable.",
-      mainImage:
-        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80",
-      galleryImages: [
-        "https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=1200&q=80",
-      ],
-      videoUrl: null,
-      status: "AVAILABLE",
-    }),
-    ensureCar({
-      brand: "BMW",
-      model: "Série 4 Coupe",
-      year: 2022,
-      pricePerDay: 340,
-      weekendPrice: 410,
-      depositAmount: 2500,
-      description: "Coupe sportif premium, ideal pour weekend et evenements.",
-      mainImage:
-        "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1200&q=80",
-      galleryImages: [
-        "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=80",
-      ],
-      videoUrl: null,
-      status: "AVAILABLE",
-    }),
-    ensureCar({
-      brand: "Porsche",
-      model: "Macan",
+      isFeatured: true,
+      displayOrder: 2,
+    },
+  });
+
+  await prisma.car.create({
+    data: {
+      slug: "renault-clio-5-alpine",
+      brand: "Renault",
+      model: "Clio 5",
+      trim: "Esprit Alpine",
       year: 2024,
-      pricePerDay: 520,
-      weekendPrice: 620,
-      depositAmount: 4000,
-      description: "SUV performance haut de gamme pour deplacements premium.",
-      mainImage:
-        "https://images.unsplash.com/photo-1603386329225-868f9b1ee6c9?auto=format&fit=crop&w=1200&q=80",
-      galleryImages: [
-        "https://images.unsplash.com/photo-1519643381401-22c77e60520e?auto=format&fit=crop&w=1200&q=80",
+      category: "CITADINE",
+      power: 145,
+      transmission: "AUTOMATIC",
+      fuelType: "HYBRID",
+      seats: 5,
+      doors: 5,
+      pricePerDay: 29.99,
+      pricePerKm: 0.3,
+      includedKmPerDay: 200,
+      weekendPackagePrice: 280.0,
+      weekendPackageIncludedKm: 600,
+      depositAmount: 1500.0,
+      minDriverAge: 21,
+      minLicenseYears: 2,
+      shortTagline:
+        "Le sport chic à portée de main, jusqu'à 80% électrique en ville.",
+      description:
+        "La Renault Clio 5 finition Alpine ne passe jamais inaperçue : look sportif, détails exclusifs et ambiance moderne à bord en font le choix parfait pour ceux qui veulent se démarquer avec style, sans compromis sur le confort.",
+      highlights: [
+        "145 ch",
+        "80% conduite électrique en ville",
+        "Jantes Alpine 17\"",
+        "Finitions bleu/blanc/rouge",
       ],
-      videoUrl: null,
-      status: "MAINTENANCE",
-    }),
-    ensureCar({
-      brand: "Range Rover",
-      model: "Velar",
-      year: 2023,
-      pricePerDay: 480,
-      weekendPrice: 560,
-      depositAmount: 3800,
-      description: "SUV luxueux avec design moderne et finition premium.",
+      features: [
+        {
+          title: "Version Esprit Alpine",
+          body: "Un style incisif et stimulant : flancs sculptés, calandre élargie gris chromée, éclairage full LED en forme de demi losange à l'avant. La sportivité s'exprime dans la version Esprit Alpine. Jantes la flèche 17'', badge spécifique et lame F1 gris schiste mat emblématique pour l'extérieur. À l'intérieur, selleries parées du logo Alpine brodé, de surpiqûres et écusson spécifiques. Les coutures bleu/blanc/rouge du volant font référence à l'ADN Esprit Alpine.",
+        },
+        {
+          title: "Le sport chic à portée de main",
+          body: "La Renault Clio 5 en version Alpine combine caractère, élégance et technologies modernes pour offrir une citadine qui attire tous les regards et transforme chaque trajet en moment privilégié.",
+        },
+      ],
       mainImage:
-        "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1617813480220-92c66a28fca6?auto=format&fit=crop&w=1600&q=80",
       galleryImages: [
-        "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1627454822464-d3cca3a03f1b?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1608889476561-6242cfdbf622?auto=format&fit=crop&w=1600&q=80",
       ],
       videoUrl: null,
       status: "AVAILABLE",
-    }),
-  ]);
-
-  const audiA3 = cars.find((car) => car.brand === "Audi" && car.model === "A3 Sportback");
-  const mercedes = cars.find((car) => car.brand === "Mercedes-Benz");
-  const bmw = cars.find((car) => car.brand === "BMW");
-
-  if (!audiA3 || !mercedes || !bmw) {
-    throw new Error("Cars seed incomplete.");
-  }
-
-  await prisma.blockedDate.upsert({
-    where: { id: "seed-blocked-audi-maintenance" },
-    update: {
-      carId: audiA3.id,
-      startDate: new Date("2026-04-10T00:00:00.000Z"),
-      endDate: new Date("2026-04-14T00:00:00.000Z"),
-      reason: "Maintenance preventive",
-    },
-    create: {
-      id: "seed-blocked-audi-maintenance",
-      carId: audiA3.id,
-      startDate: new Date("2026-04-10T00:00:00.000Z"),
-      endDate: new Date("2026-04-14T00:00:00.000Z"),
-      reason: "Maintenance preventive",
+      isFeatured: true,
+      displayOrder: 3,
     },
   });
 
-  await upsertBooking({
-    userId: user1.id,
-    carId: audiA3.id,
-    startDate: new Date("2026-03-20T00:00:00.000Z"),
-    endDate: new Date("2026-03-23T00:00:00.000Z"),
-    totalPrice: 780,
-    status: BookingStatus.CONFIRMED,
-    paymentStatus: PaymentStatus.PAID,
-  });
-
-  await upsertBooking({
-    userId: user2.id,
-    carId: mercedes.id,
-    startDate: new Date("2026-03-25T00:00:00.000Z"),
-    endDate: new Date("2026-03-26T00:00:00.000Z"),
-    totalPrice: 290,
-    status: BookingStatus.PENDING,
-    paymentStatus: PaymentStatus.UNPAID,
-  });
-
-  await upsertBooking({
-    userId: user1.id,
-    carId: bmw.id,
-    startDate: new Date("2026-02-20T00:00:00.000Z"),
-    endDate: new Date("2026-02-23T00:00:00.000Z"),
-    totalPrice: 970,
-    status: BookingStatus.COMPLETED,
-    paymentStatus: PaymentStatus.PAID,
-  });
-
-  await upsertBooking({
-    userId: admin.id,
-    carId: audiA3.id,
-    startDate: new Date("2026-01-16T00:00:00.000Z"),
-    endDate: new Date("2026-01-19T00:00:00.000Z"),
-    totalPrice: 760,
-    status: BookingStatus.CANCELLED,
-    paymentStatus: PaymentStatus.REFUNDED,
-  });
-
-  console.log("Seed done: cars, users, bookings, blocked dates inserted/updated.");
+  console.log("Seed done: 3 cars + admin & test users.");
   console.log("Admin login: admin@prestige-avenue.com / Admin12345!");
 }
 
