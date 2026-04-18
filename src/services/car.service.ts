@@ -9,8 +9,8 @@ export interface CarsFilterInput {
 
 export async function getFeaturedCars(limit = 3) {
   return prisma.car.findMany({
-    where: { status: "AVAILABLE" },
-    orderBy: { createdAt: "desc" },
+    where: { status: "AVAILABLE", isFeatured: true },
+    orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
     take: limit,
   });
 }
@@ -28,7 +28,11 @@ export async function getCars(filters: CarsFilterInput = {}) {
           }
         : {}),
     },
-    orderBy: [{ pricePerDay: "asc" }, { createdAt: "desc" }],
+    orderBy: [
+      { displayOrder: "asc" },
+      { pricePerDay: "asc" },
+      { createdAt: "desc" },
+    ],
   });
 }
 
