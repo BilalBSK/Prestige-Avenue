@@ -133,7 +133,7 @@ export async function createCheckoutSessionForBooking(input: CreateCheckoutInput
         model: true,
         status: true,
         pricePerDay: true,
-        weekendPrice: true,
+        weekendPackagePrice: true,
         depositAmount: true,
       },
     });
