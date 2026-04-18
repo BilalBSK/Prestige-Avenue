@@ -54,6 +54,15 @@ function CarCardComponent({ car }: CarCardProps) {
             </h3>
             <p className="car-model text-base font-light tracking-wide text-zinc-400 transition-all duration-500 group-hover:text-zinc-300">
               {car.model}
+              {car.trim ? ` — ${car.trim}` : ""}
+            </p>
+            {car.shortTagline && (
+              <p className="text-xs font-light text-zinc-500 transition-colors duration-500 group-hover:text-zinc-400">
+                {car.shortTagline}
+              </p>
+            )}
+            <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+              {car.power} ch
             </p>
           </div>
 
