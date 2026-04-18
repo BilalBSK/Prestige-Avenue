@@ -2,7 +2,7 @@
 
 import { useCsrfToken } from "@/hooks/use-csrf-token";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDays, addMonths, eachDayOfInterval, format, isWeekend } from "date-fns";
+import { addDays, addMonths, format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,15 +26,17 @@ type BookingFormValues = z.infer<typeof bookingSchema>;
 interface BookingFormProps {
   carId: string;
   pricePerDay: number;
-  weekendPrice: number | null;
+  weekendPackagePrice: number | null;
   depositAmount: number;
+  pricePerKm: number | null;
+  includedKmPerDay: number | null;
 }
 
 function calculateEstimate(
   startDateValue: string | undefined,
   endDateValue: string | undefined,
   pricePerDay: number,
-  weekendPrice: number | null,
+  weekendPackagePrice: number | null,
 ) {
   if (!startDateValue || !endDateValue) {
     return 0;
@@ -43,28 +45,38 @@ function calculateEstimate(
   const startDate = new Date(startDateValue);
   const endDate = new Date(endDateValue);
 
-  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || endDate <= startDate) {
+  if (
+    Number.isNaN(startDate.getTime()) ||
+    Number.isNaN(endDate.getTime()) ||
+    endDate <= startDate
+  ) {
     return 0;
   }
 
-  const days = eachDayOfInterval({
-    start: startDate,
-    end: addDays(endDate, -1),
-  });
+  const days = Math.round(
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
-  return days.reduce((acc, day) => {
-    if (isWeekend(day) && weekendPrice !== null) {
-      return acc + weekendPrice;
-    }
-    return acc + pricePerDay;
-  }, 0);
+  const isWeekendPackage =
+    days === 3 &&
+    startDate.getDay() === 5 &&
+    endDate.getDay() === 1 &&
+    weekendPackagePrice !== null;
+
+  if (isWeekendPackage) {
+    return Number(weekendPackagePrice!.toFixed(2));
+  }
+
+  return Number((days * pricePerDay).toFixed(2));
 }
 
 export function BookingForm({
   carId,
   pricePerDay,
-  weekendPrice,
+  weekendPackagePrice,
   depositAmount,
+  pricePerKm,
+  includedKmPerDay,
 }: BookingFormProps) {
   const csrfToken = useCsrfToken();
   const [serverError, setServerError] = useState<string>("");
@@ -90,8 +102,8 @@ export function BookingForm({
   const maxEndDate = format(addDays(addMonths(new Date(), 2), 1), "yyyy-MM-dd");
 
   const estimatedTotal = useMemo(
-    () => calculateEstimate(startDate, endDate, pricePerDay, weekendPrice),
-    [startDate, endDate, pricePerDay, weekendPrice],
+    () => calculateEstimate(startDate, endDate, pricePerDay, weekendPackagePrice),
+    [startDate, endDate, pricePerDay, weekendPackagePrice],
   );
   const estimatedDeposit = useMemo(() => Number((estimatedTotal * 0.4).toFixed(2)), [estimatedTotal]);
   const estimatedRemaining = useMemo(
@@ -239,6 +251,11 @@ export function BookingForm({
         <p>Acompte a payer (40%): {estimatedDeposit.toFixed(2)} EUR</p>
         <p>Solde restant: {estimatedRemaining.toFixed(2)} EUR</p>
         <p className="text-xs text-zinc-500">Caution vehicule: {depositAmount.toFixed(2)} EUR</p>
+        {includedKmPerDay !== null && pricePerKm !== null && (
+          <p className="text-xs text-zinc-500">
+            Kilométrage inclus : {includedKmPerDay} km/jour. Au-delà : {pricePerKm.toFixed(2)} €/km (facturé au retour si dépassement).
+          </p>
+        )}
         <p className="mt-2 text-xs text-zinc-400">
           Regles: weekend uniquement du vendredi au lundi, reservations 1 jour uniquement du lundi
           au jeudi et entre J+7 et J+14.
