@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum CarStatus {
+  AVAILABLE
+  MAINTENANCE
+  DISABLED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+  FAILED
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)
+  phone     String?
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+
+  @@index([createdAt])
+}
+
+model Car {
+  id           String       @id @default(cuid())
+  brand        String
+  model        String
+  year         Int
+  pricePerDay  Decimal      @db.Decimal(10, 2)
+  weekendPrice Decimal?     @db.Decimal(10, 2)
+  depositAmount Decimal     @db.Decimal(10, 2)
+  description  String
+  mainImage    String
+  galleryImages String[]
+  videoUrl     String?
+  status       CarStatus    @default(AVAILABLE)
+  createdAt    DateTime     @default(now())
+  bookings     Booking[]
+  blockedDates BlockedDate[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  carId           String
+  startDate       DateTime
+  endDate         DateTime
+  totalPrice      Decimal       @db.Decimal(10, 2)
+  depositDueNow   Decimal       @db.Decimal(10, 2)
+  remainingBalance Decimal      @db.Decimal(10, 2)
+  status          BookingStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(UNPAID)
+  stripeSessionId String?       @unique
+  submissionToken String?       @unique
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car             Car           @relation(fields: [carId], references: [id], onDelete: Restrict)
+
+  @@index([carId, startDate, endDate])
+  @@index([userId, createdAt])
+  @@index([status, paymentStatus])
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  carId     String
+  startDate DateTime
+  endDate   DateTime
+  reason    String
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId, startDate, endDate])
+}

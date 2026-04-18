@@ -1,0 +1,38 @@
+{
+  "name": "prestige-avenue-seed",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-code": "^2.1.78",
+    "@auth/prisma-adapter": "^2.11.1",
+    "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "^6.19.2",
+    "bcryptjs": "^3.0.3",
+    "date-fns": "^4.1.0",
+    "next": "^15.5.12",
+    "next-auth": "^4.24.13",
+    "prisma": "^6.19.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-hook-form": "^7.71.2",
+    "stripe": "^20.4.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "^15.5.12",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
