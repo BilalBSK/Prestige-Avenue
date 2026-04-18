@@ -6,7 +6,6 @@ import {
   getISODay,
   isFriday,
   isMonday,
-  isWeekend,
   startOfDay,
 } from "date-fns";
 
@@ -45,30 +44,29 @@ export function calculateRentalDays(startDate: Date, endDate: Date): number {
   return days;
 }
 
-export function calculateTotalPrice(car: Pick<Car, "pricePerDay" | "weekendPrice">, startDate: Date, endDate: Date): number {
-  const lastChargedDay = addDays(endDate, -1);
-  const chargedDays = eachDayOfInterval({ start: startDate, end: lastChargedDay });
+export function calculateTotalPrice(
+  car: Pick<Car, "pricePerDay" | "weekendPackagePrice">,
+  startDate: Date,
+  endDate: Date,
+): number {
+  const rentalDays = calculateRentalDays(startDate, endDate);
 
-  const total = chargedDays.reduce((acc, currentDay) => {
-    if (isWeekend(currentDay) && car.weekendPrice) {
-      return acc + Number(car.weekendPrice);
-    }
-    return acc + Number(car.pricePerDay);
-  }, 0);
+  if (
+    rentalDays === 3 &&
+    isFriday(startDate) &&
+    isMonday(endDate) &&
+    car.weekendPackagePrice
+  ) {
+    return Number(Number(car.weekendPackagePrice).toFixed(2));
+  }
 
-  return Number(total.toFixed(2));
+  return Number((rentalDays * Number(car.pricePerDay)).toFixed(2));
 }
 
 export interface BookingPriceBreakdown {
   totalPrice: number;
   depositDueNow: number;
   remainingBalance: number;
-}
-
-function containsWeekendDays(startDate: Date, endDate: Date): boolean {
-  const lastChargedDay = addDays(endDate, -1);
-  const chargedDays = eachDayOfInterval({ start: startDate, end: lastChargedDay });
-  return chargedDays.some((day) => getISODay(day) >= 5);
 }
 
 export function validateBusinessBookingRules(startDate: Date, endDate: Date, now = new Date()): void {
@@ -99,7 +97,10 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
     return;
   }
 
-  if (containsWeekendDays(startDate, endDate)) {
+  const days = eachDayOfInterval({ start: startDate, end: lastChargedDay });
+  const hasWeekendDay = days.some((day) => getISODay(day) >= 5);
+
+  if (hasWeekendDay) {
     const isFullWeekendOnly = isFriday(startDate) && isMonday(endDate) && rentalDays === 3;
     if (!isFullWeekendOnly) {
       throw new Error(
