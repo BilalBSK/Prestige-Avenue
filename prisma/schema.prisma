@@ -32,6 +32,29 @@ enum PaymentStatus {
   FAILED
 }
 
+enum CarCategory {
+  CITADINE
+  COMPACTE
+  BERLINE
+  SUV
+  COUPE
+  CABRIOLET
+  SPORTIVE
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  PLUG_IN_HYBRID
+  ELECTRIC
+}
+
 model User {
   id        String    @id @default(cuid())
   name      String
@@ -46,23 +69,51 @@ model User {
 }
 
 model Car {
-  id           String       @id @default(cuid())
-  brand        String
-  model        String
-  year         Int
-  pricePerDay  Decimal      @db.Decimal(10, 2)
-  weekendPrice Decimal?     @db.Decimal(10, 2)
-  depositAmount Decimal     @db.Decimal(10, 2)
-  description  String
-  mainImage    String
-  galleryImages String[]
-  videoUrl     String?
-  status       CarStatus    @default(AVAILABLE)
-  createdAt    DateTime     @default(now())
-  bookings     Booking[]
-  blockedDates BlockedDate[]
+  id                         String       @id @default(cuid())
+  slug                       String       @unique
+  brand                      String
+  model                      String
+  trim                       String?
+  year                       Int
+  category                   CarCategory
+
+  power                      Int
+  transmission               Transmission
+  fuelType                   FuelType
+  seats                      Int          @default(5)
+  doors                      Int          @default(5)
+
+  pricePerDay                Decimal      @db.Decimal(10, 2)
+  pricePerKm                 Decimal?     @db.Decimal(10, 2)
+  includedKmPerDay           Int?
+  weekendPackagePrice        Decimal?     @db.Decimal(10, 2)
+  weekendPackageIncludedKm   Int?
+  depositAmount              Decimal      @db.Decimal(10, 2)
+
+  minDriverAge               Int          @default(21)
+  minLicenseYears            Int          @default(2)
+
+  shortTagline               String?
+  description                String
+  highlights                 String[]
+  features                   Json         @default("[]")
+
+  mainImage                  String
+  galleryImages              String[]
+  videoUrl                   String?
+
+  status                     CarStatus    @default(AVAILABLE)
+  isFeatured                 Boolean      @default(false)
+  displayOrder               Int          @default(0)
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt
+
+  bookings                   Booking[]
+  blockedDates               BlockedDate[]
 
   @@index([status])
+  @@index([isFeatured, displayOrder])
+  @@index([category, status])
   @@index([createdAt])
 }
 
