@@ -31,10 +31,25 @@ export function FeaturesEditor({ value, onChange, maxItems = 10 }: FeaturesEdito
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {value.map((item, i) => (
-        <div key={i} className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-950 p-3">
-          <Field label={`Titre ${i + 1}`}>
+        <div
+          key={i}
+          className="relative space-y-4 border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/50 p-6"
+        >
+          <div className="flex items-center justify-between border-b border-[color:var(--admin-line)] pb-3">
+            <span className="admin-mono text-[0.62rem] uppercase tracking-[0.32em] text-[color:var(--admin-accent)]">
+              Équipement · {String(i + 1).padStart(2, "0")}
+            </span>
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              className="admin-mono text-[0.6rem] uppercase tracking-[0.28em] text-[color:var(--admin-text-muted)] transition-colors duration-200 hover:text-[color:var(--admin-danger-soft)]"
+            >
+              Supprimer
+            </button>
+          </div>
+          <Field label="Intitulé">
             <Input
               value={item.title}
               onChange={(e) => update(i, { title: e.target.value })}
@@ -49,19 +64,22 @@ export function FeaturesEditor({ value, onChange, maxItems = 10 }: FeaturesEdito
               placeholder="Expliquez cet équipement en 1-2 phrases."
             />
           </Field>
-          <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)}>
-            Supprimer cet équipement
-          </Button>
         </div>
       ))}
-      {value.length < maxItems && (
-        <Button type="button" variant="secondary" size="sm" onClick={add}>
-          + Ajouter un équipement
-        </Button>
-      )}
-      <p className="text-xs text-zinc-500">
-        {value.length}/{maxItems}
-      </p>
+      <div className="flex items-center justify-between border-t border-[color:var(--admin-line)] pt-4">
+        <p className="admin-mono text-[0.62rem] uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]">
+          <span className="admin-tabular text-[color:var(--admin-text)]">
+            {String(value.length).padStart(2, "0")}
+          </span>
+          <span className="mx-2 text-[color:var(--admin-text-muted)]/50">/</span>
+          <span className="admin-tabular">{String(maxItems).padStart(2, "0")}</span>
+        </p>
+        {value.length < maxItems && (
+          <Button type="button" variant="secondary" size="sm" onClick={add}>
+            + Ajouter un équipement
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

@@ -5,14 +5,20 @@ import { CSS } from "@dnd-kit/utilities";
 import { CarCategory, CarStatus } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { buttonVariants } from "../ui/button";
 import { DeleteCarButton } from "./delete-car-button";
 import { ToggleFeaturedSwitch } from "./toggle-featured-switch";
 
-const STATUS_STYLE: Record<CarStatus, { label: string; dot: string }> = {
-  AVAILABLE: { label: "Disponible", dot: "bg-emerald-500" },
-  MAINTENANCE: { label: "Maintenance", dot: "bg-amber-500" },
-  DISABLED: { label: "Désactivée", dot: "bg-red-500" },
+const STATUS_STYLE: Record<CarStatus, { label: string; tone: "accent" | "warn" | "danger" }> = {
+  AVAILABLE: { label: "Disponible", tone: "accent" },
+  MAINTENANCE: { label: "Maintenance", tone: "warn" },
+  DISABLED: { label: "Désactivée", tone: "danger" },
+};
+
+const TONE_CLASSES: Record<"accent" | "warn" | "danger", string> = {
+  accent: "bg-[color:var(--admin-accent)]",
+  warn: "bg-[#caa25a]",
+  danger: "bg-[color:var(--admin-danger)]",
 };
 
 export interface CarRow {
@@ -32,10 +38,11 @@ export interface CarRow {
 
 interface CarsListRowProps {
   car: CarRow;
+  index: number;
   bookingCount: number;
 }
 
-export function CarsListRow({ car, bookingCount }: CarsListRowProps) {
+export function CarsListRow({ car, index, bookingCount }: CarsListRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: car.id });
 
@@ -47,59 +54,100 @@ export function CarsListRow({ car, bookingCount }: CarsListRowProps) {
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.6 : 1,
+        opacity: isDragging ? 0.55 : 1,
       }}
-      className="border-b border-zinc-800 hover:bg-zinc-900/50"
+      className="admin-row group relative border-b border-[color:var(--admin-line)] transition-colors duration-300"
     >
-      <td className="w-10 px-2">
+      <td className="w-12 px-3 py-5">
         <button
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab text-zinc-500 hover:text-zinc-200"
+          className="admin-mono flex h-6 w-6 cursor-grab items-center justify-center text-[color:var(--admin-text-muted)]/60 transition-colors duration-300 hover:text-[color:var(--admin-accent)] active:cursor-grabbing"
           aria-label="Réordonner"
         >
           ⋮⋮
         </button>
       </td>
-      <td className="w-16 px-2 py-3">
-        <div className="relative h-12 w-12 overflow-hidden rounded-md bg-zinc-900">
+      <td className="w-14 px-3 py-5">
+        <span className="admin-mono admin-tabular text-[0.65rem] tracking-[0.28em] text-[color:var(--admin-text-muted)]">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+      </td>
+      <td className="w-20 px-3 py-5">
+        <div className="relative aspect-[4/3] w-16 overflow-hidden border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
           {car.mainImage && (
-            <Image src={car.mainImage} alt="" fill className="object-cover" unoptimized />
+            <Image
+              src={car.mainImage}
+              alt=""
+              fill
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              unoptimized
+            />
           )}
         </div>
       </td>
-      <td className="px-3 py-3">
-        <div className="font-medium text-zinc-100">
-          {car.brand} {car.model}
-          {car.trim ? ` — ${car.trim}` : ""}
+      <td className="px-4 py-5">
+        <div className="admin-serif text-[1.05rem] leading-tight tracking-tight text-[color:var(--admin-text)]">
+          {car.brand}{" "}
+          <span className="text-[color:var(--admin-text-muted)]">{car.model}</span>
         </div>
-        <div className="text-xs text-zinc-500">{car.slug}</div>
+        {car.trim && (
+          <div className="mt-0.5 text-[0.78rem] italic text-[color:var(--admin-text-muted)]/80">
+            {car.trim}
+          </div>
+        )}
+        <div className="admin-mono mt-1.5 text-[0.6rem] uppercase tracking-[0.28em] text-[color:var(--admin-text-muted)]/60">
+          /{car.slug}
+        </div>
       </td>
-      <td className="px-3 py-3 text-xs uppercase tracking-wide text-zinc-400">
-        {car.category}
-      </td>
-      <td className="px-3 py-3">
-        <span className="inline-flex items-center gap-1.5 text-xs text-zinc-300">
-          <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
-          {statusStyle.label}
+      <td className="px-4 py-5">
+        <span className="admin-mono text-[0.65rem] uppercase tracking-[0.3em] text-[color:var(--admin-text-muted)]">
+          {car.category}
         </span>
       </td>
-      <td className="px-3 py-3 text-right tabular-nums text-zinc-200">
-        {car.pricePerDay.toFixed(2)} €
+      <td className="px-4 py-5">
+        <span className="inline-flex items-center gap-2.5">
+          <span className={`h-1 w-1 rounded-full ${TONE_CLASSES[statusStyle.tone]}`} />
+          <span className="text-[0.82rem] tracking-wide text-[color:var(--admin-text)]">
+            {statusStyle.label}
+          </span>
+        </span>
       </td>
-      <td className="px-3 py-3 text-right tabular-nums text-zinc-200">
-        {car.weekendPackagePrice !== null ? `${car.weekendPackagePrice.toFixed(0)} €` : "—"}
+      <td className="px-4 py-5 text-right">
+        <div className="admin-mono admin-tabular text-[0.95rem] text-[color:var(--admin-text)]">
+          {Math.round(car.pricePerDay)}
+          <span className="ml-1 text-[0.62rem] uppercase tracking-[0.2em] text-[color:var(--admin-text-muted)]">
+            €/j
+          </span>
+        </div>
       </td>
-      <td className="px-3 py-3 text-center">
-        <ToggleFeaturedSwitch carId={car.id} initial={car.isFeatured} />
+      <td className="px-4 py-5 text-right">
+        {car.weekendPackagePrice !== null ? (
+          <div className="admin-mono admin-tabular text-[0.95rem] text-[color:var(--admin-text)]">
+            {Math.round(car.weekendPackagePrice)}
+            <span className="ml-1 text-[0.62rem] uppercase tracking-[0.2em] text-[color:var(--admin-text-muted)]">
+              €
+            </span>
+          </div>
+        ) : (
+          <span className="admin-mono text-[0.7rem] text-[color:var(--admin-text-muted)]/50">
+            —
+          </span>
+        )}
       </td>
-      <td className="px-3 py-3">
-        <div className="flex justify-end gap-1">
-          <Link href={`/admin/cars/${car.id}/edit`}>
-            <Button variant="secondary" size="sm">
-              Éditer
-            </Button>
+      <td className="px-4 py-5">
+        <div className="flex justify-center">
+          <ToggleFeaturedSwitch carId={car.id} initial={car.isFeatured} />
+        </div>
+      </td>
+      <td className="px-4 py-5">
+        <div className="flex items-center justify-end gap-1">
+          <Link
+            href={`/admin/cars/${car.id}/edit`}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            Éditer
           </Link>
           <DeleteCarButton
             carId={car.id}

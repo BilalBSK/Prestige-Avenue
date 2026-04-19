@@ -10,11 +10,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <ToastProvider>
-      <div className="flex min-h-screen bg-black text-zinc-100">
+      <div className="admin-theme admin-vignette relative isolate flex min-h-screen">
+        <div className="admin-grain" aria-hidden />
         <AdminSidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col">
           <AdminTopbar userName={session.user?.name} userEmail={session.user?.email} />
-          <main className="flex-1 overflow-x-auto px-6 py-6">{children}</main>
+          <main className="flex-1 overflow-x-auto px-6 py-10 md:px-10 lg:px-14">
+            <div className="mx-auto w-full max-w-[1280px]">{children}</div>
+          </main>
         </div>
       </div>
       <ConfirmDialogHost />

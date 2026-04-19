@@ -15,7 +15,10 @@ function withCsrfCookie(request: NextRequest, response: NextResponse) {
 }
 
 export async function middleware(request: NextRequest) {
-  return withCsrfCookie(request, NextResponse.next());
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  return withCsrfCookie(request, response);
 }
 
 export const config = {

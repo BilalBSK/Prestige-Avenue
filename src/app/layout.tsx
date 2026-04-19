@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Bodoni_Moda } from "next/font/google";
+import { Geist, Geist_Mono, Bodoni_Moda, Fraunces, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -22,6 +23,28 @@ const bodoniModa = Bodoni_Moda({
   weight: ["400", "500", "600", "700"],
 });
 
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+  axes: ["SOFT", "opsz"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600"],
+});
+
 export const metadata: Metadata = {
   title: "Prestige Avenue - Reservation de vehicules premium",
   description:
@@ -30,22 +53,32 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") ?? headerList.get("x-invoke-path") ?? "";
+  const isAdmin = pathname.startsWith("/admin");
+
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${bodoniModa.variable} min-h-screen bg-black text-zinc-100 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bodoniModa.variable} ${fraunces.variable} ${dmSans.variable} ${jetBrainsMono.variable} min-h-screen bg-black text-zinc-100 antialiased`}
       >
-        <ScrollProgress />
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <main className="flex-1 pt-20 md:pt-24">{children}</main>
-          <SiteFooter />
-        </div>
+        {isAdmin ? (
+          children
+        ) : (
+          <>
+            <ScrollProgress />
+            <div className="flex min-h-screen flex-col">
+              <SiteHeader />
+              <main className="flex-1 pt-20 md:pt-24">{children}</main>
+              <SiteFooter />
+            </div>
+          </>
+        )}
       </body>
     </html>
   );

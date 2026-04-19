@@ -18,13 +18,17 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         type="number"
         inputMode="decimal"
         aria-invalid={error || undefined}
-        className={`h-10 w-full rounded-lg border bg-black/60 px-3 pr-14 text-sm text-zinc-100 tabular-nums placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 ${
-          error ? "border-red-500" : "border-zinc-700"
+        className={`admin-mono h-11 w-full border-0 border-b bg-transparent px-0 ${
+          unit ? "pr-14" : "pr-0"
+        } text-[0.92rem] text-[color:var(--admin-text)] transition-colors duration-300 placeholder:text-[color:var(--admin-text-muted)]/50 focus:outline-none ${
+          error
+            ? "border-[color:var(--admin-danger)]"
+            : "border-[color:var(--admin-line-strong)] focus:border-[color:var(--admin-accent)]"
         } ${className}`}
         {...props}
       />
       {unit && (
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
+        <span className="admin-mono pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[0.7rem] uppercase tracking-widest text-[color:var(--admin-text-muted)]">
           {unit}
         </span>
       )}

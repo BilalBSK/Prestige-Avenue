@@ -7,17 +7,25 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 const STATUS_OPTIONS = [
-  { value: "", label: "Tous statuts" },
+  { value: "", label: "Tous les statuts" },
   { value: "AVAILABLE", label: "Disponible" },
   { value: "MAINTENANCE", label: "Maintenance" },
   { value: "DISABLED", label: "Désactivée" },
 ] satisfies { value: string | CarStatus; label: string }[];
 
 const FEATURED_OPTIONS = [
-  { value: "", label: "Toutes" },
-  { value: "yes", label: "Mises en avant" },
-  { value: "no", label: "Hors mise en avant" },
+  { value: "", label: "Toute la flotte" },
+  { value: "yes", label: "En vitrine" },
+  { value: "no", label: "Hors vitrine" },
 ];
+
+function FilterLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="admin-mono mb-2 block text-[0.58rem] uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]">
+      {children}
+    </label>
+  );
+}
 
 export function CarsFilters() {
   const router = useRouter();
@@ -34,25 +42,25 @@ export function CarsFilters() {
   );
 
   return (
-    <div className="flex flex-wrap items-end gap-3">
-      <div className="min-w-[220px] flex-1">
-        <label className="mb-1 block text-xs text-zinc-500">Recherche</label>
+    <div className="admin-fade-up admin-fade-up-d1 grid gap-6 border border-[color:var(--admin-line)] bg-[color:var(--admin-bg-elev)]/30 px-6 py-5 md:grid-cols-[1fr_14rem_14rem]">
+      <div>
+        <FilterLabel>Recherche</FilterLabel>
         <Input
           defaultValue={params.get("q") ?? ""}
-          placeholder="Marque, modèle, slug"
+          placeholder="Marque, modèle, finition, slug…"
           onChange={(e) => update("q", e.target.value)}
         />
       </div>
-      <div className="w-48">
-        <label className="mb-1 block text-xs text-zinc-500">Statut</label>
+      <div>
+        <FilterLabel>Statut</FilterLabel>
         <Select
           options={STATUS_OPTIONS}
           defaultValue={params.get("status") ?? ""}
           onChange={(e) => update("status", e.target.value)}
         />
       </div>
-      <div className="w-48">
-        <label className="mb-1 block text-xs text-zinc-500">Mise en avant</label>
+      <div>
+        <FilterLabel>Mise en avant</FilterLabel>
         <Select
           options={FEATURED_OPTIONS}
           defaultValue={params.get("featured") ?? ""}

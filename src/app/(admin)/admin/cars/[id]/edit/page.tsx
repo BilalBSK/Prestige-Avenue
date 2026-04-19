@@ -1,4 +1,5 @@
 import { CarForm } from "@/components/admin/cars/car-form";
+import { PageHeader, PageMetaItem } from "@/components/admin/ui/page-header";
 import { getCarForAdmin } from "@/server/admin/cars.queries";
 import { type CarInput, featureSchema } from "@/server/admin/cars.schema";
 import { notFound } from "next/navigation";
@@ -47,16 +48,27 @@ export default async function EditCarPage({ params }: { params: Promise<{ id: st
   if (!car) notFound();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">
-          Éditer : {car.brand} {car.model}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Les modifications sont visibles immédiatement sur le site public.
-        </p>
-      </div>
+    <>
+      <PageHeader
+        eyebrow="Catalogue — Édition"
+        title={
+          <>
+            {car.brand}{" "}
+            <span className="italic text-[color:var(--admin-text-muted)]">{car.model}</span>
+          </>
+        }
+        lede={car.trim ? `Finition ${car.trim}. Mise à jour publiée immédiatement sur le site.` : "Mise à jour publiée immédiatement sur le site public."}
+        meta={
+          <>
+            <PageMetaItem label="Réf." value={`/${car.slug}`} />
+            <span className="text-[color:var(--admin-text-muted)]/40">·</span>
+            <PageMetaItem label="Année" value={car.year} />
+            <span className="text-[color:var(--admin-text-muted)]/40">·</span>
+            <PageMetaItem label="Statut" value={car.status} />
+          </>
+        }
+      />
       <CarForm mode="edit" carId={car.id} initial={toFormValues(car)} uploadFolder={car.id} />
-    </div>
+    </>
   );
 }

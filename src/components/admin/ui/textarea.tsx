@@ -15,8 +15,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
       ref={ref}
       rows={rows}
       aria-invalid={error || undefined}
-      className={`w-full rounded-lg border bg-black/60 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 ${
-        error ? "border-red-500" : "border-zinc-700"
+      className={`w-full resize-none border bg-[color:var(--admin-surface)]/40 px-4 py-3 text-[0.92rem] leading-relaxed text-[color:var(--admin-text)] transition-colors duration-300 placeholder:text-[color:var(--admin-text-muted)]/60 focus:outline-none ${
+        error
+          ? "border-[color:var(--admin-danger)]"
+          : "border-[color:var(--admin-line-strong)] focus:border-[color:var(--admin-accent)]"
       } ${className}`}
       {...props}
     />

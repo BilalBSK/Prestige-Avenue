@@ -43,7 +43,7 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <input
         ref={inputRef}
         type="file"
@@ -56,9 +56,10 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
         }}
       />
       {value ? (
-        <div className="relative h-48 w-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
-          <Image src={value} alt="Preview" fill className="object-cover" unoptimized />
-          <div className="absolute bottom-2 right-2 flex gap-1">
+        <div className="group relative h-56 w-full overflow-hidden border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+          <Image src={value} alt="Aperçu" fill className="object-cover" unoptimized />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-4 right-4 flex gap-2">
             <Button
               type="button"
               variant="secondary"
@@ -83,9 +84,17 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex h-48 w-full items-center justify-center rounded-lg border border-dashed border-zinc-700 bg-zinc-950 text-sm text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+          className="group relative flex h-56 w-full flex-col items-center justify-center gap-2 border border-dashed border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40 transition-all duration-500 hover:border-[color:var(--admin-accent)] hover:bg-[color:var(--admin-bg-elev)]/60 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {uploading ? "Upload en cours..." : "Cliquer pour importer une image"}
+          <span
+            aria-hidden
+            className="admin-mono text-[0.58rem] uppercase tracking-[0.4em] text-[color:var(--admin-text-muted)] transition-colors duration-500 group-hover:text-[color:var(--admin-accent)]"
+          >
+            {uploading ? "Transfert en cours" : "Importer une image"}
+          </span>
+          <span className="admin-serif text-[0.9rem] italic text-[color:var(--admin-text-muted)]/70">
+            {uploading ? "·" : "JPEG · PNG · WebP · AVIF — max 5 Mo"}
+          </span>
         </button>
       )}
     </div>

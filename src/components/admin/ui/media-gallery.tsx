@@ -28,7 +28,15 @@ interface MediaGalleryProps {
   maxItems?: number;
 }
 
-function SortableItem({ url, onRemove }: { url: string; onRemove: () => void }) {
+function SortableItem({
+  url,
+  index,
+  onRemove,
+}: {
+  url: string;
+  index: number;
+  onRemove: () => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: url });
 
@@ -38,17 +46,23 @@ function SortableItem({ url, onRemove }: { url: string; onRemove: () => void }) 
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.5 : 1,
+        opacity: isDragging ? 0.45 : 1,
       }}
-      className="group relative h-32 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950"
+      className="group relative aspect-[4/3] overflow-hidden border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]"
     >
-      <div {...attributes} {...listeners} className="absolute inset-0 cursor-grab">
+      <div {...attributes} {...listeners} className="absolute inset-0 cursor-grab active:cursor-grabbing">
         <Image src={url} alt="" fill className="object-cover" unoptimized />
       </div>
+      <span
+        aria-hidden
+        className="admin-mono pointer-events-none absolute left-2 top-2 bg-black/70 px-1.5 py-0.5 text-[0.58rem] uppercase tracking-[0.28em] text-[color:var(--admin-accent)]"
+      >
+        {String(index + 1).padStart(2, "0")}
+      </span>
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-1 top-1 rounded bg-black/70 px-2 py-0.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+        className="admin-mono absolute right-2 top-2 border border-[color:var(--admin-danger)]/60 bg-black/70 px-2 py-0.5 text-[0.58rem] uppercase tracking-[0.28em] text-[color:var(--admin-danger-soft)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       >
         Retirer
       </button>
@@ -104,7 +118,7 @@ export function MediaGallery({ value, onChange, folder, maxItems = 12 }: MediaGa
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <input
         ref={inputRef}
         type="file"
@@ -118,11 +132,12 @@ export function MediaGallery({ value, onChange, folder, maxItems = 12 }: MediaGa
       />
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={value} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {value.map((url) => (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+            {value.map((url, i) => (
               <SortableItem
                 key={url}
                 url={url}
+                index={i}
                 onRemove={() => onChange(value.filter((u) => u !== url))}
               />
             ))}
@@ -131,20 +146,30 @@ export function MediaGallery({ value, onChange, folder, maxItems = 12 }: MediaGa
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={uploading}
-                className="flex h-32 items-center justify-center rounded-lg border border-dashed border-zinc-700 bg-zinc-950 text-xs text-zinc-400 hover:border-zinc-500"
+                className="admin-mono group flex aspect-[4/3] flex-col items-center justify-center gap-1 border border-dashed border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40 text-[0.58rem] uppercase tracking-[0.36em] text-[color:var(--admin-text-muted)] transition-all duration-500 hover:border-[color:var(--admin-accent)] hover:text-[color:var(--admin-accent)] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {uploading ? "Upload..." : "Ajouter"}
+                <span className="text-[1.25rem] leading-none tracking-normal">+</span>
+                <span>{uploading ? "Transfert" : "Ajouter"}</span>
               </button>
             )}
           </div>
         </SortableContext>
       </DndContext>
-      <p className="text-xs text-zinc-500">
-        {value.length}/{maxItems} images · Glissez-déposez pour réordonner
-      </p>
-      <Button type="button" variant="secondary" size="sm" onClick={() => onChange([])}>
-        Tout retirer
-      </Button>
+      <div className="flex items-center justify-between border-t border-[color:var(--admin-line)] pt-4">
+        <p className="admin-mono text-[0.62rem] uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]">
+          <span className="admin-tabular text-[color:var(--admin-text)]">
+            {String(value.length).padStart(2, "0")}
+          </span>
+          <span className="mx-2 text-[color:var(--admin-text-muted)]/50">/</span>
+          <span className="admin-tabular">{String(maxItems).padStart(2, "0")}</span>
+          <span className="ml-3 text-[color:var(--admin-text-muted)]/70">· glisser pour réordonner</span>
+        </p>
+        {value.length > 0 && (
+          <Button type="button" variant="ghost" size="sm" onClick={() => onChange([])}>
+            Tout retirer
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

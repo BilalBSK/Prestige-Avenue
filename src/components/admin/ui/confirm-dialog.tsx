@@ -55,27 +55,54 @@ export function ConfirmDialogHost() {
 
   if (!options) return null;
 
+  const isDanger = options.variant === "danger";
+
   return (
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-[2px]"
       onClick={() => close(false)}
     >
       <div
-        className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+        className="admin-fade-up relative w-full max-w-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] p-8"
+        style={{
+          boxShadow:
+            "0 30px 80px -20px rgba(0,0,0,0.7), 0 1px 0 0 rgba(245,241,234,0.04) inset",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-zinc-100">{options.title}</h2>
+        <span
+          aria-hidden
+          className={`absolute left-0 top-0 h-full w-[2px] ${
+            isDanger
+              ? "bg-[color:var(--admin-danger)]"
+              : "bg-[color:var(--admin-accent)]"
+          }`}
+        />
+        <p
+          className={`admin-mono text-[0.6rem] uppercase tracking-[0.32em] ${
+            isDanger
+              ? "text-[color:var(--admin-danger-soft)]"
+              : "text-[color:var(--admin-accent)]"
+          }`}
+        >
+          {isDanger ? "Action irréversible" : "Confirmation requise"}
+        </p>
+        <h2 className="admin-serif mt-3 text-[1.75rem] font-normal leading-[1.15] tracking-tight text-[color:var(--admin-text)]">
+          {options.title}
+        </h2>
         {options.description && (
-          <div className="mt-2 text-sm text-zinc-400">{options.description}</div>
+          <div className="mt-4 text-[0.92rem] leading-relaxed text-[color:var(--admin-text-muted)]">
+            {options.description}
+          </div>
         )}
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="mt-8 flex items-center justify-end gap-3">
           <Button variant="ghost" onClick={() => close(false)}>
             {options.cancelLabel ?? "Annuler"}
           </Button>
           <Button
-            variant={options.variant === "danger" ? "danger" : "primary"}
+            variant={isDanger ? "danger" : "primary"}
             onClick={() => close(true)}
           >
             {options.confirmLabel ?? "Confirmer"}

@@ -18,6 +18,19 @@ interface CarsListProps {
   cars: CarRow[];
 }
 
+const HEADERS = [
+  { label: "", width: "w-12" },
+  { label: "", width: "w-14" },
+  { label: "", width: "w-20" },
+  { label: "Véhicule", align: "text-left" },
+  { label: "Catégorie", align: "text-left" },
+  { label: "État", align: "text-left" },
+  { label: "Tarif", align: "text-right" },
+  { label: "Week-end", align: "text-right" },
+  { label: "Vitrine", align: "text-center" },
+  { label: "Actions", align: "text-right" },
+] as const;
+
 export function CarsList({ cars }: CarsListProps) {
   const [items, setItems] = useState(cars);
   const [, startTransition] = useTransition();
@@ -46,8 +59,16 @@ export function CarsList({ cars }: CarsListProps) {
 
   if (!items.length) {
     return (
-      <div className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
-        Aucune voiture ne correspond à ces filtres.
+      <div className="admin-fade-up flex min-h-[280px] flex-col items-center justify-center border border-dashed border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40 px-10 text-center">
+        <p className="admin-mono text-[0.6rem] uppercase tracking-[0.36em] text-[color:var(--admin-accent)]">
+          Collection vide
+        </p>
+        <p className="admin-serif mt-3 text-[1.5rem] italic leading-tight tracking-tight text-[color:var(--admin-text)]">
+          Aucun véhicule ne correspond
+        </p>
+        <p className="mt-2 text-[0.85rem] text-[color:var(--admin-text-muted)]">
+          Ajustez vos filtres ou constituez une nouvelle pièce au catalogue.
+        </p>
       </div>
     );
   }
@@ -55,24 +76,30 @@ export function CarsList({ cars }: CarsListProps) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-        <div className="overflow-x-auto rounded-xl border border-zinc-800">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-950 text-left text-xs uppercase tracking-wide text-zinc-500">
-              <tr>
-                <th className="w-10 px-2 py-3"></th>
-                <th className="w-16 px-2 py-3"></th>
-                <th className="px-3 py-3">Véhicule</th>
-                <th className="px-3 py-3">Catégorie</th>
-                <th className="px-3 py-3">Statut</th>
-                <th className="px-3 py-3 text-right">Prix/jour</th>
-                <th className="px-3 py-3 text-right">Week-end</th>
-                <th className="px-3 py-3 text-center">Featured</th>
-                <th className="px-3 py-3 text-right">Actions</th>
+        <div className="admin-fade-up overflow-x-auto border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40">
+          <table className="w-full min-w-[980px] border-collapse">
+            <thead>
+              <tr className="border-b border-[color:var(--admin-line-strong)]">
+                {HEADERS.map((h, i) => (
+                  <th
+                    key={i}
+                    className={`admin-mono px-4 py-4 text-[0.58rem] font-normal uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]/70 ${
+                      "align" in h ? h.align : ""
+                    } ${"width" in h ? h.width : ""}`}
+                  >
+                    {h.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {items.map((car) => (
-                <CarsListRow key={car.id} car={car} bookingCount={car.bookingCount} />
+              {items.map((car, i) => (
+                <CarsListRow
+                  key={car.id}
+                  car={car}
+                  index={i}
+                  bookingCount={car.bookingCount}
+                />
               ))}
             </tbody>
           </table>

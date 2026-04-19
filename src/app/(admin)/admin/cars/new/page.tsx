@@ -1,4 +1,5 @@
 import { CarForm } from "@/components/admin/cars/car-form";
+import { PageHeader } from "@/components/admin/ui/page-header";
 import { type CarInput } from "@/server/admin/cars.schema";
 import { CarCategory, CarStatus, FuelType, Transmission } from "@prisma/client";
 
@@ -36,14 +37,19 @@ const DEFAULT_CAR: CarInput = {
 
 export default function NewCarPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Nouveau véhicule</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Renseignez les informations. Les champs marqués d&apos;un astérisque sont obligatoires.
-        </p>
-      </div>
+    <>
+      <PageHeader
+        eyebrow="Catalogue — Nouvelle fiche"
+        title={
+          <>
+            Un nouveau <span className="italic text-[color:var(--admin-text-muted)]">chapitre</span>
+            <br />
+            pour votre flotte.
+          </>
+        }
+        lede="Chaque détail compte. Composez la fiche comme on écrit une page éditoriale."
+      />
       <CarForm mode="create" initial={DEFAULT_CAR} uploadFolder="new" />
-    </div>
+    </>
   );
 }
