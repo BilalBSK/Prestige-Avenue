@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Car, CarStatus } from "@prisma/client";
+import { CarCategory, CarStatus } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -15,8 +15,23 @@ const STATUS_STYLE: Record<CarStatus, { label: string; dot: string }> = {
   DISABLED: { label: "Désactivée", dot: "bg-red-500" },
 };
 
+export interface CarRow {
+  id: string;
+  brand: string;
+  model: string;
+  trim: string | null;
+  slug: string;
+  category: CarCategory;
+  status: CarStatus;
+  mainImage: string;
+  pricePerDay: number;
+  weekendPackagePrice: number | null;
+  isFeatured: boolean;
+  bookingCount: number;
+}
+
 interface CarsListRowProps {
-  car: Car;
+  car: CarRow;
   bookingCount: number;
 }
 
@@ -71,10 +86,10 @@ export function CarsListRow({ car, bookingCount }: CarsListRowProps) {
         </span>
       </td>
       <td className="px-3 py-3 text-right tabular-nums text-zinc-200">
-        {Number(car.pricePerDay).toFixed(2)} €
+        {car.pricePerDay.toFixed(2)} €
       </td>
       <td className="px-3 py-3 text-right tabular-nums text-zinc-200">
-        {car.weekendPackagePrice ? `${Number(car.weekendPackagePrice).toFixed(0)} €` : "—"}
+        {car.weekendPackagePrice !== null ? `${car.weekendPackagePrice.toFixed(0)} €` : "—"}
       </td>
       <td className="px-3 py-3 text-center">
         <ToggleFeaturedSwitch carId={car.id} initial={car.isFeatured} />

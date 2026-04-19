@@ -11,12 +11,11 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { toast } from "@/components/admin/ui/toast";
 import { reorderCars } from "@/server/admin/cars.actions";
-import { Car } from "@prisma/client";
 import { useState, useTransition } from "react";
-import { CarsListRow } from "./cars-list-row";
+import { CarsListRow, type CarRow } from "./cars-list-row";
 
 interface CarsListProps {
-  cars: (Car & { _bookingCount: number })[];
+  cars: CarRow[];
 }
 
 export function CarsList({ cars }: CarsListProps) {
@@ -73,7 +72,7 @@ export function CarsList({ cars }: CarsListProps) {
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
               {items.map((car) => (
-                <CarsListRow key={car.id} car={car} bookingCount={car._bookingCount} />
+                <CarsListRow key={car.id} car={car} bookingCount={car.bookingCount} />
               ))}
             </SortableContext>
           </DndContext>

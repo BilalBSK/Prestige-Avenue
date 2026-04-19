@@ -38,9 +38,19 @@ export default async function AdminCarsPage({
     include: { _count: { select: { bookings: true } } },
   });
 
-  const withBookingCount = cars.map((c) => ({
-    ...c,
-    _bookingCount: c._count.bookings,
+  const rows = cars.map((c) => ({
+    id: c.id,
+    brand: c.brand,
+    model: c.model,
+    trim: c.trim,
+    slug: c.slug,
+    category: c.category,
+    status: c.status,
+    mainImage: c.mainImage,
+    pricePerDay: Number(c.pricePerDay),
+    weekendPackagePrice: c.weekendPackagePrice !== null ? Number(c.weekendPackagePrice) : null,
+    isFeatured: c.isFeatured,
+    bookingCount: c._count.bookings,
   }));
 
   return (
@@ -57,7 +67,7 @@ export default async function AdminCarsPage({
         </Link>
       </div>
       <CarsFilters />
-      <CarsList cars={withBookingCount} />
+      <CarsList cars={rows} />
     </div>
   );
 }
