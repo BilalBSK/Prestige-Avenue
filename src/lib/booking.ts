@@ -1,13 +1,6 @@
 import { Car } from "@prisma/client";
-import {
-  addDays,
-  addMonths,
-  eachDayOfInterval,
-  getISODay,
-  isFriday,
-  isMonday,
-  startOfDay,
-} from "date-fns";
+import { addDays, addMonths, eachDayOfInterval } from "date-fns";
+import { getCalendarDayOfWeekISO, parseCalendarDate } from "./calendar-date";
 
 export interface NormalizedBookingDates {
   startDate: Date;
@@ -18,8 +11,8 @@ export function normalizeBookingDates(
   startDateInput: string | Date,
   endDateInput: string | Date,
 ): NormalizedBookingDates {
-  const startDate = startOfDay(new Date(startDateInput));
-  const endDate = startOfDay(new Date(endDateInput));
+  const startDate = parseCalendarDate(startDateInput);
+  const endDate = parseCalendarDate(endDateInput);
 
   if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
     throw new Error("Invalid booking dates.");
@@ -53,11 +46,11 @@ export function calculateTotalPrice(
 
   if (
     rentalDays === 3 &&
-    isFriday(startDate) &&
-    isMonday(endDate) &&
+    getCalendarDayOfWeekISO(startDate) === 5 &&
+    getCalendarDayOfWeekISO(endDate) === 1 &&
     car.weekendPackagePrice
   ) {
-    return Number(Number(car.weekendPackagePrice).toFixed(2));
+    return Number(car.weekendPackagePrice);
   }
 
   return Number((rentalDays * Number(car.pricePerDay)).toFixed(2));
@@ -70,7 +63,7 @@ export interface BookingPriceBreakdown {
 }
 
 export function validateBusinessBookingRules(startDate: Date, endDate: Date, now = new Date()): void {
-  const today = startOfDay(now);
+  const today = parseCalendarDate(now);
   const rentalDays = calculateRentalDays(startDate, endDate);
   const maxRentalDay = addMonths(today, 2);
   const lastChargedDay = addDays(endDate, -1);
@@ -80,7 +73,7 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
   }
 
   if (rentalDays === 1) {
-    const startDay = getISODay(startDate);
+    const startDay = getCalendarDayOfWeekISO(startDate);
     const minOneDayStart = addDays(today, 7);
     const maxOneDayStart = addDays(today, 14);
 
@@ -98,10 +91,13 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
   }
 
   const days = eachDayOfInterval({ start: startDate, end: lastChargedDay });
-  const hasWeekendDay = days.some((day) => getISODay(day) >= 5);
+  const hasWeekendDay = days.some((day) => getCalendarDayOfWeekISO(day) >= 5);
 
   if (hasWeekendDay) {
-    const isFullWeekendOnly = isFriday(startDate) && isMonday(endDate) && rentalDays === 3;
+    const isFullWeekendOnly =
+      rentalDays === 3 &&
+      getCalendarDayOfWeekISO(startDate) === 5 &&
+      getCalendarDayOfWeekISO(endDate) === 1;
     if (!isFullWeekendOnly) {
       throw new Error(
         "Toute reservation incluant vendredi, samedi ou dimanche doit etre faite du vendredi au lundi.",

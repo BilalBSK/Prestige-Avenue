@@ -3,14 +3,16 @@ import { createCheckoutSessionForBooking } from "@/services/booking.service";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+const dateInput = z.union([z.iso.datetime(), z.iso.date()]);
+
 const checkoutSchema = z.object({
   carId: z.string().min(1),
   firstName: z.string().min(2),
   lastName: z.string().min(2),
   email: z.email(),
   phone: z.string().min(8),
-  startDate: z.iso.datetime(),
-  endDate: z.iso.datetime(),
+  startDate: dateInput,
+  endDate: dateInput,
   submissionToken: z.string().min(10),
 });
 

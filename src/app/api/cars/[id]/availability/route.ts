@@ -2,9 +2,11 @@ import { checkAvailability } from "@/services/booking.service";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+const dateInput = z.union([z.iso.datetime(), z.iso.date()]);
+
 const availabilitySchema = z.object({
-  startDate: z.iso.datetime(),
-  endDate: z.iso.datetime(),
+  startDate: dateInput,
+  endDate: dateInput,
 });
 
 interface Params {

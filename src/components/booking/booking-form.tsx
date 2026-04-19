@@ -1,6 +1,7 @@
 "use client";
 
 import { useCsrfToken } from "@/hooks/use-csrf-token";
+import { getCalendarDayOfWeekISO, parseCalendarDate } from "@/lib/calendar-date";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDays, addMonths, format } from "date-fns";
 import { useMemo, useState } from "react";
@@ -42,8 +43,8 @@ function calculateEstimate(
     return 0;
   }
 
-  const startDate = new Date(startDateValue);
-  const endDate = new Date(endDateValue);
+  const startDate = parseCalendarDate(startDateValue);
+  const endDate = parseCalendarDate(endDateValue);
 
   if (
     Number.isNaN(startDate.getTime()) ||
@@ -57,14 +58,13 @@ function calculateEstimate(
     (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  const isWeekendPackage =
+  if (
     days === 3 &&
-    startDate.getDay() === 5 &&
-    endDate.getDay() === 1 &&
-    weekendPackagePrice !== null;
-
-  if (isWeekendPackage) {
-    return Number(weekendPackagePrice!.toFixed(2));
+    getCalendarDayOfWeekISO(startDate) === 5 &&
+    getCalendarDayOfWeekISO(endDate) === 1 &&
+    weekendPackagePrice !== null
+  ) {
+    return Number(weekendPackagePrice.toFixed(2));
   }
 
   return Number((days * pricePerDay).toFixed(2));
@@ -117,8 +117,8 @@ export function BookingForm({
 
     const response = await fetch(
       `/api/cars/${carId}/availability?startDate=${encodeURIComponent(
-        new Date(start).toISOString(),
-      )}&endDate=${encodeURIComponent(new Date(end).toISOString())}`,
+        start,
+      )}&endDate=${encodeURIComponent(end)}`,
       { cache: "no-store" },
     );
     const data = (await response.json()) as { isAvailable: boolean; reason?: string };
@@ -149,8 +149,8 @@ export function BookingForm({
         lastName: values.lastName,
         email: values.email,
         phone: values.phone,
-        startDate: new Date(values.startDate).toISOString(),
-        endDate: new Date(values.endDate).toISOString(),
+        startDate: values.startDate,
+        endDate: values.endDate,
         submissionToken: crypto.randomUUID(),
       }),
     });
