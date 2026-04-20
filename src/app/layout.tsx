@@ -28,7 +28,6 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   display: "swap",
   axes: ["SOFT", "opsz"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
 const dmSans = DM_Sans({
