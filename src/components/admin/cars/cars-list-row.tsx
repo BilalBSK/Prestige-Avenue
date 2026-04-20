@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { CarCategory, CarStatus } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import { buttonVariants } from "../ui/button";
+import { buttonVariants } from "../ui/button-variants";
 import { DeleteCarButton } from "./delete-car-button";
 import { ToggleFeaturedSwitch } from "./toggle-featured-switch";
 

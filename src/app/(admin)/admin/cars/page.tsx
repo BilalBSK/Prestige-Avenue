@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/admin/ui/button";
+import { buttonVariants } from "@/components/admin/ui/button-variants";
 import { CarsFilters } from "@/components/admin/cars/cars-filters";
 import { CarsList } from "@/components/admin/cars/cars-list";
 import { PageHeader, PageMetaItem } from "@/components/admin/ui/page-header";
