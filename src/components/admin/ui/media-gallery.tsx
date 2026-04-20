@@ -54,7 +54,7 @@ function SortableItem({
       className="group relative aspect-[4/3] overflow-hidden border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]"
     >
       <div {...attributes} {...listeners} className="absolute inset-0 cursor-grab active:cursor-grabbing">
-        <Image src={url} alt="" fill className="object-cover" unoptimized />
+        <Image src={url} alt="" fill sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw" className="object-cover" />
       </div>
       <span
         aria-hidden

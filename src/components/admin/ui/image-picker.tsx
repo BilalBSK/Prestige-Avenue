@@ -60,7 +60,7 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
       />
       {value ? (
         <div className="group relative h-56 w-full overflow-hidden border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
-          <Image src={value} alt="Aperçu" fill className="object-cover" unoptimized />
+          <Image src={value} alt="Aperçu" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute bottom-4 right-4 flex gap-2">
             <Button

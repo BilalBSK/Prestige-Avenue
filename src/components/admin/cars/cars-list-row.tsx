@@ -81,8 +81,8 @@ export function CarsListRow({ car, index, bookingCount }: CarsListRowProps) {
               src={car.mainImage}
               alt=""
               fill
+              sizes="64px"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              unoptimized
             />
           )}
         </div>
