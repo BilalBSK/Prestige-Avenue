@@ -3,8 +3,11 @@
 import { upload } from "@vercel/blob/client";
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { ALLOWED_IMAGE_MIMES, MAX_IMAGE_SIZE_BYTES } from "@/lib/blob";
 import { Button } from "./button";
 import { toast } from "./toast";
+
+const ALLOWED_MIMES: readonly string[] = ALLOWED_IMAGE_MIMES;
 
 interface ImagePickerProps {
   value: string;
@@ -17,11 +20,11 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
   const [uploading, setUploading] = useState(false);
 
   async function handleFile(file: File) {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Seules les images sont acceptées.");
+    if (!ALLOWED_MIMES.includes(file.type)) {
+      toast.error("Format non supporté (JPEG, PNG, WebP, AVIF).");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
       toast.error("Fichier trop volumineux (max 5 Mo).");
       return;
     }

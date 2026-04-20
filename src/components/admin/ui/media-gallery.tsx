@@ -18,8 +18,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { upload } from "@vercel/blob/client";
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { ALLOWED_IMAGE_MIMES, MAX_IMAGE_SIZE_BYTES } from "@/lib/blob";
 import { Button } from "./button";
 import { toast } from "./toast";
+
+const ALLOWED_MIMES: readonly string[] = ALLOWED_IMAGE_MIMES;
 
 interface MediaGalleryProps {
   value: string[];
@@ -86,8 +89,12 @@ export function MediaGallery({ value, onChange, folder, maxItems = 12 }: MediaGa
     try {
       const urls: string[] = [];
       for (const file of toUpload) {
-        if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
-          toast.error(`Fichier ignoré : ${file.name}`);
+        if (!ALLOWED_MIMES.includes(file.type)) {
+          toast.error(`${file.name} : format non supporté (JPEG, PNG, WebP, AVIF).`);
+          continue;
+        }
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
+          toast.error(`${file.name} : trop volumineux (max 5 Mo).`);
           continue;
         }
         const blob = await upload(`${folder}/${file.name}`, file, {
