@@ -212,15 +212,6 @@ a {
     @apply inline-flex items-center justify-center rounded-xl border border-zinc-700/90 bg-zinc-900/30 px-5 py-2.5 text-sm font-medium text-zinc-100 transition hover:border-zinc-500 hover:bg-zinc-900/70;
   }
 
-  .lux-title {
-    @apply text-4xl font-semibold leading-tight text-white md:text-6xl;
-    font-family: var(--font-display), serif;
-  }
-
-  .lux-subtle {
-    @apply text-zinc-400;
-  }
-
   /* ============================================
      Reveal-on-scroll utilities
      Initial state hidden, .is-visible flips to visible.
