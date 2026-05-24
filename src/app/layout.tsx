@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
+import { SmoothScroll } from "@/components/layout/smooth-scroll";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,6 +71,7 @@ export default async function RootLayout({
           children
         ) : (
           <>
+            <SmoothScroll />
             <ScrollProgress />
             <div className="flex min-h-screen flex-col">
               <SiteHeader />
