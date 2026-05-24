@@ -285,6 +285,11 @@ a {
   .reveal-line.is-visible {
     transform: scaleX(1);
   }
+
+  /* CTA ticker arrow */
+  .group:hover .cta-arrow-track {
+    transform: translateY(-18px);
+  }
 }
 
 /* ============================================
