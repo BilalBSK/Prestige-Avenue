@@ -135,7 +135,7 @@ export function HeroVideo() {
     <div className="absolute inset-0 overflow-hidden">
       <video
         ref={firstVideoRef}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "intro" ? "opacity-78" : "opacity-0"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "intro" ? "opacity-55" : "opacity-0"}`}
         autoPlay
         muted
         playsInline
@@ -146,7 +146,7 @@ export function HeroVideo() {
       </video>
       <video
         ref={backgroundVideoRef}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "a" ? "opacity-78" : "opacity-0"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "a" ? "opacity-55" : "opacity-0"}`}
         muted
         playsInline
         preload="auto"
@@ -156,7 +156,7 @@ export function HeroVideo() {
       </video>
       <video
         ref={background2VideoRef}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "b" ? "opacity-78" : "opacity-0"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "b" ? "opacity-55" : "opacity-0"}`}
         muted
         playsInline
         preload="auto"
@@ -166,7 +166,7 @@ export function HeroVideo() {
       </video>
       <video
         ref={background3VideoRef}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "c" ? "opacity-78" : "opacity-0"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "c" ? "opacity-55" : "opacity-0"}`}
         muted
         playsInline
         preload="auto"

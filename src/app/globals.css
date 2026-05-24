@@ -290,6 +290,53 @@ a {
   .group:hover .cta-arrow-track {
     transform: translateY(-18px);
   }
+
+  /* Hero entry sequence */
+  .hero-word-inner {
+    transform: translateY(110%);
+    animation: hero-word-up 1100ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform;
+  }
+  .hero-word-2 { animation-delay: 180ms; }
+  @keyframes hero-word-up {
+    to { transform: translateY(0); }
+  }
+
+  .hero-lede1 {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(16px);
+    animation: hero-fade-blur 1000ms cubic-bezier(0.19, 1, 0.22, 1) 900ms forwards;
+  }
+  @keyframes hero-fade-blur {
+    to { opacity: 1; filter: blur(0); transform: translateY(0); }
+  }
+
+  .hero-lede2 {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: hero-fade-up 800ms cubic-bezier(0.19, 1, 0.22, 1) 1100ms forwards;
+  }
+  .hero-cta-1 {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: hero-fade-up 700ms cubic-bezier(0.19, 1, 0.22, 1) 1300ms forwards;
+  }
+  .hero-cta-2 {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: hero-fade-up 700ms cubic-bezier(0.19, 1, 0.22, 1) 1380ms forwards;
+  }
+  .hero-marker {
+    opacity: 0;
+    animation: hero-fade-in 800ms ease-out 1600ms forwards;
+  }
+  @keyframes hero-fade-up {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes hero-fade-in {
+    to { opacity: 1; }
+  }
 }
 
 /* ============================================
@@ -315,5 +362,17 @@ a {
     filter: none !important;
     clip-path: none !important;
     transition: none !important;
+  }
+
+  .hero-word-inner,
+  .hero-lede1,
+  .hero-lede2,
+  .hero-cta-1,
+  .hero-cta-2,
+  .hero-marker {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
   }
 }
