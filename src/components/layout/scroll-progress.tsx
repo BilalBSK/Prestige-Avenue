@@ -26,9 +26,9 @@ export function ScrollProgress() {
   }, []);
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] bg-transparent">
+    <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px bg-transparent">
       <div
-        className="h-full bg-gradient-to-r from-white/10 via-white to-white/10 transition-[width] duration-150"
+        className="h-full bg-[var(--ink-ivory)] transition-[width] duration-150 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>
