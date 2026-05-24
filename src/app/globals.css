@@ -1,13 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #f5f5f5;
-  --muted: #a1a1aa;
-  --panel: #0b0b0d;
-  --line: #222327;
-  --line-soft: #2e2f35;
-  --accent: #f7f7f7;
+  --ink-onyx: #050505;
+  --ink-surface: #0a0a0c;
+  --ink-elevated: #101013;
+  --ink-line: #18181b;
+  --ink-line-soft: #27272a;
+  --ink-dim: #3f3f46;
+  --ink-muted: #52525b;
+  --ink-soft: #71717a;
+  --ink-text-soft: #a1a1aa;
+  --ink-text: #e4e4e7;
+  --ink-ivory: #fafafa;
+
+  /* Compatibilité — gardés pour ne pas casser l'admin et autres */
+  --background: var(--ink-onyx);
+  --foreground: var(--ink-ivory);
+  --muted: var(--ink-text-soft);
+  --panel: var(--ink-surface);
+  --line: var(--ink-line);
+  --line-soft: var(--ink-line-soft);
+  --accent: var(--ink-ivory);
 }
 
 @theme inline {
@@ -18,6 +31,17 @@
   --color-line: var(--line);
   --color-line-soft: var(--line-soft);
   --color-accent: var(--accent);
+  --color-ink-onyx: var(--ink-onyx);
+  --color-ink-surface: var(--ink-surface);
+  --color-ink-elevated: var(--ink-elevated);
+  --color-ink-line: var(--ink-line);
+  --color-ink-line-soft: var(--ink-line-soft);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-text-soft: var(--ink-text-soft);
+  --color-ink-text: var(--ink-text);
+  --color-ink-ivory: var(--ink-ivory);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-bodoni-moda);
@@ -27,158 +51,100 @@
 }
 
 /* ============================================
-   Admin Theme — Editorial luxe (cuir / laiton / nuit)
+   Admin Theme — Modern professional dashboard
+   Neutral graphite, dense, functional. Accent used sparingly on CTAs/focus.
    ============================================ */
 .admin-theme {
-  --admin-bg: #0b0a08;
-  --admin-bg-elev: #111110;
-  --admin-surface: #161412;
-  --admin-surface-2: #1c1a17;
-  --admin-line: #27231e;
-  --admin-line-soft: #1f1c18;
-  --admin-line-strong: #342e26;
-  --admin-text: #f5f1ea;
-  --admin-text-soft: #b9b1a4;
-  --admin-text-muted: #7d756a;
-  --admin-accent: #c9a875;
-  --admin-accent-soft: #d9bd92;
-  --admin-accent-dim: rgba(201, 168, 117, 0.15);
-  --admin-danger: #b4635c;
-  --admin-danger-soft: #d4847e;
-  --admin-success: #7fa578;
-  --admin-warn: #d4a553;
+  --admin-bg: #09090b;
+  --admin-bg-elev: #0d0d10;
+  --admin-surface: #111114;
+  --admin-surface-2: #16161a;
+  --admin-surface-hover: #1a1a1f;
+  --admin-line: #1f1f23;
+  --admin-line-soft: #18181c;
+  --admin-line-strong: #2a2a30;
+  --admin-text: #f4f4f5;
+  --admin-text-soft: #a1a1aa;
+  --admin-text-muted: #71717a;
+  --admin-accent: #e4b363;
+  --admin-accent-soft: #efc888;
+  --admin-accent-dim: rgba(228, 179, 99, 0.12);
+  --admin-danger: #ef4444;
+  --admin-danger-soft: #f87171;
+  --admin-danger-dim: rgba(239, 68, 68, 0.12);
+  --admin-success: #22c55e;
+  --admin-success-dim: rgba(34, 197, 94, 0.12);
+  --admin-warn: #f59e0b;
+  --admin-warn-dim: rgba(245, 158, 11, 0.12);
+  --admin-info: #3b82f6;
+  --admin-info-dim: rgba(59, 130, 246, 0.12);
 
   background: var(--admin-bg);
   color: var(--admin-text);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
-  letter-spacing: 0;
-}
-
-.admin-theme .admin-serif {
-  font-family: var(--font-fraunces), ui-serif, Georgia, serif;
-  font-optical-sizing: auto;
-  letter-spacing: -0.015em;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv11", "ss01";
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .admin-theme .admin-mono {
-  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-  font-feature-settings: "tnum" 1;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-feature-settings: "tnum" 1, "zero" 1;
 }
 
-/* Subtle film-grain overlay */
-.admin-grain {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
-}
-
-/* Warm vignette */
-.admin-vignette::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse at 20% -10%, rgba(201, 168, 117, 0.06), transparent 55%),
-    radial-gradient(ellipse at 90% 110%, rgba(180, 99, 92, 0.04), transparent 50%),
-    linear-gradient(180deg, rgba(11, 10, 8, 0) 0%, rgba(0, 0, 0, 0.4) 100%);
-}
-
-/* Admin reveals */
-@keyframes admin-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes admin-accent-sweep {
-  0% {
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-  100% {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-}
-
-.admin-theme .admin-fade-up {
-  opacity: 0;
-  animation: admin-fade-up 800ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-.admin-theme .admin-fade-up-d1 {
-  animation-delay: 80ms;
-}
-.admin-theme .admin-fade-up-d2 {
-  animation-delay: 160ms;
-}
-.admin-theme .admin-fade-up-d3 {
-  animation-delay: 240ms;
-}
-.admin-theme .admin-fade-up-d4 {
-  animation-delay: 320ms;
-}
-
-/* Row accent-bar on hover */
-.admin-row {
-  position: relative;
-  transition: background-color 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.admin-row::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 10%;
-  bottom: 10%;
-  width: 2px;
-  background: var(--admin-accent);
-  transform: scaleY(0);
-  transform-origin: center;
-  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.admin-row:hover {
-  background-color: rgba(201, 168, 117, 0.04);
-}
-
-.admin-row:hover::before {
-  transform: scaleY(1);
-}
-
-/* Elegant focus */
-.admin-theme *:focus-visible {
-  outline: 1px solid var(--admin-accent);
-  outline-offset: 2px;
-}
-
-/* Hairline divider with center fade */
-.admin-divider {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--admin-line-strong) 20%,
-    var(--admin-line-strong) 80%,
-    transparent
-  );
-}
-
-/* Numerical ticker emphasis */
-.admin-tabular {
+.admin-theme .admin-tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* Subtle fade-in for page reveals */
+@keyframes admin-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-theme .admin-fade-in {
+  animation: admin-fade-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Row hover — subtle fill, no decoration */
+.admin-row {
+  transition: background-color 120ms ease;
+}
+.admin-row:hover {
+  background-color: var(--admin-surface-2);
+}
+
+/* Focus ring — keyboard only, soft accent */
+.admin-theme *:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+.admin-divider {
+  height: 1px;
+  background: var(--admin-line);
+}
+
+/* Status pills */
+.admin-theme .admin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+.admin-theme .admin-pill-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: currentColor;
 }
 
 html {
