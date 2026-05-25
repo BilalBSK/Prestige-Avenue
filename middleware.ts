@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 function withCsrfCookie(request: NextRequest, response: NextResponse) {
   if (!request.cookies.get(CSRF_COOKIE_NAME)?.value) {
     response.cookies.set(CSRF_COOKIE_NAME, generateCsrfToken(), {
-      sameSite: "strict",
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
       httpOnly: false,

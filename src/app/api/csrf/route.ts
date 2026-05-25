@@ -10,7 +10,7 @@ export async function GET() {
   const response = NextResponse.json({ csrfToken: token });
   if (!existing) {
     response.cookies.set(CSRF_COOKIE_NAME, token, {
-      sameSite: "strict",
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
       httpOnly: false,

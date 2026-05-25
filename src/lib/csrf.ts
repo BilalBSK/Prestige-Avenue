@@ -18,7 +18,7 @@ export async function getOrCreateCsrfToken(): Promise<string> {
 
   const token = generateCsrfToken();
   cookieStore.set(CSRF_COOKIE_NAME, token, {
-    sameSite: "strict",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     httpOnly: false,
