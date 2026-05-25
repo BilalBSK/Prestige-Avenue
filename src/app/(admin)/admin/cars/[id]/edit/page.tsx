@@ -50,20 +50,17 @@ export default async function EditCarPage({ params }: { params: Promise<{ id: st
   return (
     <>
       <PageHeader
-        eyebrow="Catalogue — Édition"
-        title={
-          <>
-            {car.brand}{" "}
-            <span className="italic text-[color:var(--admin-text-muted)]">{car.model}</span>
-          </>
+        eyebrow="Catalogue · Édition"
+        title={`${car.brand} ${car.model}`}
+        lede={
+          car.trim
+            ? `Finition ${car.trim}. Les modifications sont publiées immédiatement.`
+            : "Les modifications sont publiées immédiatement."
         }
-        lede={car.trim ? `Finition ${car.trim}. Mise à jour publiée immédiatement sur le site.` : "Mise à jour publiée immédiatement sur le site public."}
         meta={
           <>
-            <PageMetaItem label="Réf." value={`/${car.slug}`} />
-            <span className="text-[color:var(--admin-text-muted)]/40">·</span>
+            <PageMetaItem label="Slug" value={`/${car.slug}`} />
             <PageMetaItem label="Année" value={car.year} />
-            <span className="text-[color:var(--admin-text-muted)]/40">·</span>
             <PageMetaItem label="Statut" value={car.status} />
           </>
         }

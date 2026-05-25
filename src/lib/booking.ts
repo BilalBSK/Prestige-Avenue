@@ -56,12 +56,6 @@ export function calculateTotalPrice(
   return Number((rentalDays * Number(car.pricePerDay)).toFixed(2));
 }
 
-export interface BookingPriceBreakdown {
-  totalPrice: number;
-  depositDueNow: number;
-  remainingBalance: number;
-}
-
 export function validateBusinessBookingRules(startDate: Date, endDate: Date, now = new Date()): void {
   const today = parseCalendarDate(now);
   const rentalDays = calculateRentalDays(startDate, endDate);
@@ -69,7 +63,7 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
   const lastChargedDay = addDays(endDate, -1);
 
   if (lastChargedDay > maxRentalDay) {
-    throw new Error("Le calendrier est ouvert jusqu'a 2 mois maximum.");
+    throw new Error("Le calendrier est ouvert jusqu'à 2 mois maximum.");
   }
 
   if (rentalDays === 1) {
@@ -78,12 +72,12 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
     const maxOneDayStart = addDays(today, 14);
 
     if (startDay < 1 || startDay > 4) {
-      throw new Error("Les reservations 1 jour sont possibles uniquement du lundi au jeudi.");
+      throw new Error("Les réservations 1 jour sont possibles uniquement du lundi au jeudi.");
     }
 
     if (startDate < minOneDayStart || startDate > maxOneDayStart) {
       throw new Error(
-        "Une reservation d'une journee est possible seulement entre 1 et 2 semaines avant la date choisie.",
+        "Une réservation d'une journée est possible seulement entre 1 et 2 semaines avant la date choisie.",
       );
     }
 
@@ -100,20 +94,10 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
       getCalendarDayOfWeekISO(endDate) === 1;
     if (!isFullWeekendOnly) {
       throw new Error(
-        "Toute reservation incluant vendredi, samedi ou dimanche doit etre faite du vendredi au lundi.",
+        "Toute réservation incluant vendredi, samedi ou dimanche doit être faite du vendredi au lundi.",
       );
     }
   }
-}
-
-export function getBookingPriceBreakdown(totalPrice: number): BookingPriceBreakdown {
-  const depositDueNow = Number((totalPrice * 0.4).toFixed(2));
-  const remainingBalance = Number((totalPrice - depositDueNow).toFixed(2));
-  return {
-    totalPrice: Number(totalPrice.toFixed(2)),
-    depositDueNow,
-    remainingBalance,
-  };
 }
 
 export function rangesOverlap(

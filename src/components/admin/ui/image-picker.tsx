@@ -1,9 +1,10 @@
 "use client";
 
-import { upload } from "@vercel/blob/client";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { ALLOWED_IMAGE_MIMES, MAX_IMAGE_SIZE_BYTES } from "@/lib/blob";
+import { uploadImageToR2 } from "@/lib/upload-client";
+import { useCsrfToken } from "@/hooks/use-csrf-token";
 import { Button } from "./button";
 import { toast } from "./toast";
 
@@ -18,6 +19,7 @@ interface ImagePickerProps {
 export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const csrfToken = useCsrfToken();
 
   async function handleFile(file: File) {
     if (!ALLOWED_MIMES.includes(file.type)) {
@@ -28,14 +30,15 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
       toast.error("Fichier trop volumineux (max 5 Mo).");
       return;
     }
+    if (!csrfToken) {
+      toast.error("Session non prête, réessayez dans un instant.");
+      return;
+    }
 
     setUploading(true);
     try {
-      const blob = await upload(`${folder}/${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/admin/upload",
-      });
-      onChange(blob.url);
+      const publicUrl = await uploadImageToR2({ file, folder, csrfToken });
+      onChange(publicUrl);
       toast.success("Image importée.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur d'upload.";
@@ -46,7 +49,7 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <input
         ref={inputRef}
         type="file"
@@ -59,10 +62,10 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
         }}
       />
       {value ? (
-        <div className="group relative h-56 w-full overflow-hidden border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+        <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)]">
           <Image src={value} alt="Aperçu" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute bottom-4 right-4 flex gap-2">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
             <Button
               type="button"
               variant="secondary"
@@ -87,17 +90,21 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="group relative flex h-56 w-full flex-col items-center justify-center gap-2 border border-dashed border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40 transition-all duration-500 hover:border-[color:var(--admin-accent)] hover:bg-[color:var(--admin-bg-elev)]/60 disabled:cursor-not-allowed disabled:opacity-40"
+          className="group flex h-48 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)] transition-colors hover:border-[color:var(--admin-accent)]/60 hover:bg-[color:var(--admin-surface-2)] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <span
-            aria-hidden
-            className="admin-mono text-[0.58rem] uppercase tracking-[0.4em] text-[color:var(--admin-text-muted)] transition-colors duration-500 group-hover:text-[color:var(--admin-accent)]"
-          >
-            {uploading ? "Transfert en cours" : "Importer une image"}
-          </span>
-          <span className="admin-serif text-[0.9rem] italic text-[color:var(--admin-text-muted)]/70">
-            {uploading ? "·" : "JPEG · PNG · WebP · AVIF — max 5 Mo"}
-          </span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[color:var(--admin-surface-2)] text-[color:var(--admin-text-muted)] transition-colors group-hover:bg-[color:var(--admin-accent-dim)] group-hover:text-[color:var(--admin-accent)]">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 3V15M3 9H15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <p className="text-[0.8125rem] font-medium text-[color:var(--admin-text)]">
+              {uploading ? "Transfert en cours…" : "Importer une image"}
+            </p>
+            <p className="mt-0.5 text-[0.75rem] text-[color:var(--admin-text-muted)]">
+              JPEG, PNG, WebP, AVIF — max 5 Mo
+            </p>
+          </div>
         </button>
       )}
     </div>

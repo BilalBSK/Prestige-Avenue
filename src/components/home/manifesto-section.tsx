@@ -3,7 +3,7 @@ import { WordHighlight } from "./word-highlight";
 
 export function ManifestoSection() {
   const text =
-    "Une flotte choisie une à une. Des vehicules selectionnes pour leur technologie, leur confort et leur prestance.";
+    "Une flotte choisie une à une. Des véhicules sélectionnés pour leur technologie, leur confort et leur prestance.";
 
   return (
     <section className="manifesto py-32 md:py-40">

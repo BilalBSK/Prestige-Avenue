@@ -10,28 +10,28 @@ interface PageHeaderProps {
 
 export function PageHeader({ eyebrow, title, lede, meta, actions }: PageHeaderProps) {
   return (
-    <header className="admin-fade-up relative mb-10 grid gap-8 border-b border-[color:var(--admin-line)] pb-10 md:grid-cols-[1fr_auto] md:items-end">
-      <div>
+    <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="min-w-0 flex-1">
         {eyebrow && (
-          <p className="admin-mono text-[0.62rem] uppercase tracking-[0.42em] text-[color:var(--admin-accent)]">
+          <p className="mb-1.5 text-[0.75rem] font-medium text-[color:var(--admin-text-muted)]">
             {eyebrow}
           </p>
         )}
-        <h1 className="admin-serif mt-5 text-[2.75rem] font-normal leading-[1.02] tracking-[-0.01em] text-[color:var(--admin-text)] md:text-[3.25rem]">
+        <h1 className="truncate text-[1.375rem] font-semibold tracking-tight text-[color:var(--admin-text)]">
           {title}
         </h1>
         {lede && (
-          <p className="admin-serif mt-5 max-w-2xl text-[1.05rem] italic leading-relaxed text-[color:var(--admin-text-muted)]">
+          <p className="mt-1 text-[0.875rem] text-[color:var(--admin-text-soft)]">
             {lede}
           </p>
         )}
         {meta && (
-          <div className="admin-mono mt-6 flex flex-wrap items-center gap-4 text-[0.6rem] uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]">
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.75rem] text-[color:var(--admin-text-muted)]">
             {meta}
           </div>
         )}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </header>
   );
 }
@@ -44,9 +44,9 @@ export function PageMetaItem({
   value: ReactNode;
 }) {
   return (
-    <span className="inline-flex items-baseline gap-2">
-      <span className="text-[color:var(--admin-text-muted)]/60">{label}</span>
-      <span className="admin-tabular text-[color:var(--admin-text)]">{value}</span>
+    <span className="inline-flex items-center gap-1.5">
+      <span className="text-[color:var(--admin-text-muted)]">{label}</span>
+      <span className="admin-tabular text-[color:var(--admin-text-soft)]">{value}</span>
     </span>
   );
 }

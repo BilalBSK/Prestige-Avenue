@@ -3,6 +3,8 @@
 import { useCsrfToken } from "@/hooks/use-csrf-token";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface CarOption {
   id: string;
@@ -18,10 +20,12 @@ export function BlockDateForm({ cars }: BlockDateFormProps) {
   const csrfToken = useCsrfToken();
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
+  const [pending, setPending] = useState(false);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage("");
+    setPending(true);
     const formData = new FormData(event.currentTarget);
     const payload = {
       carId: String(formData.get("carId") ?? ""),
@@ -40,6 +44,7 @@ export function BlockDateForm({ cars }: BlockDateFormProps) {
     });
 
     const data = (await response.json()) as { error?: string };
+    setPending(false);
     if (!response.ok) {
       setErrorMessage(data.error ?? "Blocage impossible.");
       return;
@@ -50,46 +55,35 @@ export function BlockDateForm({ cars }: BlockDateFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-4 md:grid-cols-4">
-      <select
-        name="carId"
-        className="rounded-md border border-zinc-700 bg-black px-3 py-2 text-zinc-100"
-        required
-      >
-        <option value="">Choisir une voiture</option>
-        {cars.map((car) => (
-          <option key={car.id} value={car.id}>
-            {car.brand} {car.model}
-          </option>
-        ))}
-      </select>
-      <input
-        type="date"
-        name="startDate"
-        className="rounded-md border border-zinc-700 bg-black px-3 py-2 text-zinc-100"
-        required
-      />
-      <input
-        type="date"
-        name="endDate"
-        className="rounded-md border border-zinc-700 bg-black px-3 py-2 text-zinc-100"
-        required
-      />
-      <input
-        type="text"
-        name="reason"
-        placeholder="Raison"
-        className="rounded-md border border-zinc-700 bg-black px-3 py-2 text-zinc-100"
-        required
-      />
-      {errorMessage && <p className="text-sm text-red-400 md:col-span-4">{errorMessage}</p>}
-      <button
-        type="submit"
-        disabled={!csrfToken}
-        className="rounded-md bg-amber-500 px-4 py-2 font-medium text-black transition hover:bg-amber-400 disabled:opacity-60 md:col-span-4"
-      >
-        Bloquer la periode
-      </button>
+    <form
+      onSubmit={onSubmit}
+      className="rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] p-4"
+    >
+      <div className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr_1.3fr_auto]">
+        <select
+          name="carId"
+          className="h-9 w-full appearance-none rounded-md border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)] px-3 text-[0.8125rem] text-[color:var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--admin-accent)]/40"
+          required
+        >
+          <option value="">Véhicule…</option>
+          {cars.map((car) => (
+            <option key={car.id} value={car.id}>
+              {car.brand} {car.model}
+            </option>
+          ))}
+        </select>
+        <Input type="date" name="startDate" required />
+        <Input type="date" name="endDate" required />
+        <Input type="text" name="reason" placeholder="Raison (maintenance, usage interne…)" required />
+        <Button type="submit" size="md" disabled={!csrfToken} loading={pending}>
+          Bloquer
+        </Button>
+      </div>
+      {errorMessage && (
+        <p className="mt-3 text-[0.8125rem] text-[color:var(--admin-danger-soft)]">
+          {errorMessage}
+        </p>
+      )}
     </form>
   );
 }

@@ -15,7 +15,7 @@ export async function registerUser(input: RegisterInput) {
   });
 
   if (existingUser) {
-    throw new Error("Cet email est deja utilise.");
+    throw new Error("Cet email est déjà utilisé.");
   }
 
   const passwordHash = await bcrypt.hash(input.password, 12);

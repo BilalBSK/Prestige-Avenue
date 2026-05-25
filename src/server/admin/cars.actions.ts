@@ -2,8 +2,9 @@
 
 import { requireAdminSessionOrRedirect } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { CARS_BRANDS_TAG, CARS_FEATURED_TAG, CARS_LIST_TAG } from "@/services/car.service";
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { carFormSchema, type CarInput } from "./cars.schema";
 
 function toPrismaData(input: CarInput) {
@@ -42,9 +43,10 @@ function toPrismaData(input: CarInput) {
 }
 
 function revalidateCarSurfaces() {
+  revalidateTag(CARS_LIST_TAG);
+  revalidateTag(CARS_BRANDS_TAG);
+  revalidateTag(CARS_FEATURED_TAG);
   revalidatePath("/admin/cars");
-  revalidatePath("/cars");
-  revalidatePath("/");
 }
 
 export async function createCar(input: CarInput): Promise<{ id: string }> {
@@ -70,7 +72,6 @@ export async function updateCar(id: string, input: CarInput): Promise<void> {
   try {
     await prisma.car.update({ where: { id }, data: toPrismaData(parsed) });
     revalidateCarSurfaces();
-    revalidatePath(`/cars/${id}`);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       throw new Error("Ce slug est déjà utilisé.");

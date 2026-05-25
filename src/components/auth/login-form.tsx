@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/admin/ui/button";
+import { Field } from "@/components/admin/ui/field";
+import { Input } from "@/components/admin/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,6 +26,11 @@ export function LoginForm() {
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
   });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = form;
 
   async function onSubmit(values: LoginValues) {
     setErrorMessage("");
@@ -41,22 +49,26 @@ export function LoginForm() {
   }
 
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className="lux-panel space-y-4 p-6"
-    >
-      <div>
-        <label className="mb-1 block text-sm text-zinc-300">Email</label>
-        <input type="email" {...form.register("email")} className="lux-input" />
-      </div>
-      <div>
-        <label className="mb-1 block text-sm text-zinc-300">Mot de passe</label>
-        <input type="password" {...form.register("password")} className="lux-input" />
-      </div>
-      {errorMessage && <p className="text-sm text-red-400">{errorMessage}</p>}
-      <button type="submit" className="lux-btn-primary w-full">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <Field label="Email" required error={errors.email?.message}>
+        <Input type="email" autoComplete="email" {...register("email")} error={!!errors.email} />
+      </Field>
+      <Field label="Mot de passe" required error={errors.password?.message}>
+        <Input
+          type="password"
+          autoComplete="current-password"
+          {...register("password")}
+          error={!!errors.password}
+        />
+      </Field>
+      {errorMessage && (
+        <p className="rounded-md border border-[color:var(--admin-danger)]/30 bg-[color:var(--admin-danger-dim)] px-3 py-2 text-[0.8125rem] text-[color:var(--admin-danger-soft)]">
+          {errorMessage}
+        </p>
+      )}
+      <Button type="submit" size="lg" loading={isSubmitting} className="w-full">
         Se connecter
-      </button>
+      </Button>
     </form>
   );
 }

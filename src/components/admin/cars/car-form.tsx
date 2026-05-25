@@ -34,41 +34,25 @@ interface CarFormProps {
 }
 
 interface FormSectionProps {
-  index: string;
-  eyebrow: string;
   title: string;
   description?: string;
   children: ReactNode;
-  delay?: 1 | 2 | 3 | 4;
 }
 
-function FormSection({ index, eyebrow, title, description, children, delay }: FormSectionProps) {
-  const delayClass = delay ? `admin-fade-up-d${delay}` : "";
+function FormSection({ title, description, children }: FormSectionProps) {
   return (
-    <section
-      className={`admin-fade-up ${delayClass} border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40`}
-    >
-      <header className="grid gap-6 border-b border-[color:var(--admin-line)] px-8 py-6 md:grid-cols-[auto_1fr]">
-        <div className="flex items-baseline gap-4">
-          <span className="admin-mono admin-tabular text-[0.7rem] uppercase tracking-[0.32em] text-[color:var(--admin-accent)]">
-            {index}
-          </span>
-          <span className="admin-mono text-[0.58rem] uppercase tracking-[0.36em] text-[color:var(--admin-text-muted)]">
-            {eyebrow}
-          </span>
-        </div>
-        <div>
-          <h2 className="admin-serif text-[1.35rem] font-normal leading-tight tracking-tight text-[color:var(--admin-text)]">
-            {title}
-          </h2>
-          {description && (
-            <p className="mt-1 text-[0.85rem] leading-relaxed text-[color:var(--admin-text-muted)]">
-              {description}
-            </p>
-          )}
-        </div>
+    <section className="rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+      <header className="border-b border-[color:var(--admin-line)] px-5 py-4">
+        <h2 className="text-[0.9375rem] font-semibold text-[color:var(--admin-text)]">
+          {title}
+        </h2>
+        {description && (
+          <p className="mt-0.5 text-[0.8125rem] text-[color:var(--admin-text-soft)]">
+            {description}
+          </p>
+        )}
       </header>
-      <div className="px-8 py-8">{children}</div>
+      <div className="p-5">{children}</div>
     </section>
   );
 }
@@ -109,15 +93,12 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-32">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pb-24">
       <FormSection
-        index="01"
-        eyebrow="Identification"
-        title="Identité du véhicule"
-        description="Informations de base affichées dans le catalogue et les réservations."
-        delay={1}
+        title="Identification"
+        description="Informations affichées dans le catalogue et les réservations."
       >
-        <div className="grid gap-x-8 gap-y-7 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <Field label="Marque" required error={errors.brand?.message}>
             <Input {...register("brand")} error={!!errors.brand} />
           </Field>
@@ -141,17 +122,18 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
             error={errors.slug?.message}
             hint="lettres minuscules, chiffres, tirets"
           >
-            <div className="flex items-end gap-3">
+            <div className="flex items-center gap-2">
               <div className="flex-1">
                 <Input {...register("slug")} error={!!errors.slug} />
               </div>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="md"
                 onClick={() => setValue("slug", buildCarSlug(brand, model, trim))}
-                className="admin-mono shrink-0 py-2 text-[0.6rem] uppercase tracking-[0.28em] text-[color:var(--admin-accent)] transition-opacity duration-200 hover:opacity-70"
               >
                 Générer
-              </button>
+              </Button>
             </div>
           </Field>
           <Field label="Catégorie" required error={errors.category?.message}>
@@ -168,13 +150,10 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
       </FormSection>
 
       <FormSection
-        index="02"
-        eyebrow="Spécifications"
-        title="Moteur & configuration"
+        title="Spécifications"
         description="Données techniques visibles sur la fiche produit."
-        delay={2}
       >
-        <div className="grid gap-x-8 gap-y-7 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           <Field label="Puissance" required error={errors.power?.message}>
             <NumberInput
               {...register("power", { valueAsNumber: true })}
@@ -216,13 +195,10 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
       </FormSection>
 
       <FormSection
-        index="03"
-        eyebrow="Tarification"
-        title="Grille tarifaire"
+        title="Tarification"
         description="Tarifs affichés au client et forfait week-end optionnel."
-        delay={3}
       >
-        <div className="grid gap-x-8 gap-y-7 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           <Field label="Prix / jour" required error={errors.pricePerDay?.message}>
             <NumberInput
               {...register("pricePerDay", { valueAsNumber: true })}
@@ -309,13 +285,10 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
       </FormSection>
 
       <FormSection
-        index="04"
-        eyebrow="Conditions"
         title="Éligibilité conducteur"
         description="Critères minimums pour louer ce véhicule."
-        delay={4}
       >
-        <div className="grid gap-x-8 gap-y-7 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <Field label="Âge minimum" required error={errors.minDriverAge?.message}>
             <NumberInput
               {...register("minDriverAge", { valueAsNumber: true })}
@@ -334,14 +307,12 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
       </FormSection>
 
       <FormSection
-        index="05"
-        eyebrow="Présentation"
-        title="Récit & équipements"
-        description="Ce que le client lit avant de réserver."
+        title="Présentation"
+        description="Contenu lu par le client avant réservation."
       >
-        <div className="space-y-7">
+        <div className="space-y-4">
           <Field label="Description" required error={errors.description?.message}>
-            <Textarea {...register("description")} error={!!errors.description} rows={6} />
+            <Textarea {...register("description")} error={!!errors.description} rows={5} />
           </Field>
           <Field label="Points forts" hint="8 maximum · Entrée pour valider">
             <Controller
@@ -364,9 +335,14 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
         </div>
       </FormSection>
 
-      <FormSection index="06" eyebrow="Médias" title="Photographies & vidéo">
-        <div className="space-y-8">
-          <Field label="Image principale" required error={errors.mainImage?.message}>
+      <FormSection title="Médias" description="Photographies et vidéo de présentation.">
+        <div className="space-y-4">
+          <Field
+            label="Image principale"
+            required
+            error={errors.mainImage?.message}
+            hint="Affichée en couverture du véhicule. Vous pouvez aussi la choisir depuis la galerie ci-dessous."
+          >
             <Controller
               control={control}
               name="mainImage"
@@ -375,13 +351,25 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
               )}
             />
           </Field>
-          <Field label="Galerie" hint="12 maximum · glisser pour réordonner">
+          <Field
+            label="Galerie"
+            hint="12 maximum · glisser pour réordonner · survolez une image pour la définir comme principale"
+          >
             <Controller
               control={control}
               name="galleryImages"
-              render={({ field }) => (
-                <MediaGallery value={field.value} onChange={field.onChange} folder={uploadFolder} />
-              )}
+              render={({ field }) => {
+                const mainImage = watch("mainImage");
+                return (
+                  <MediaGallery
+                    value={field.value}
+                    onChange={field.onChange}
+                    folder={uploadFolder}
+                    mainImage={mainImage}
+                    onSetMain={(url) => setValue("mainImage", url, { shouldDirty: true, shouldValidate: true })}
+                  />
+                );
+              }}
             />
           </Field>
           <Field label="URL vidéo" error={errors.videoUrl?.message}>
@@ -402,8 +390,8 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
         </div>
       </FormSection>
 
-      <FormSection index="07" eyebrow="Publication" title="Visibilité publique">
-        <div className="grid gap-x-8 gap-y-7 md:grid-cols-3">
+      <FormSection title="Publication" description="Visibilité du véhicule sur le site public.">
+        <div className="grid gap-4 md:grid-cols-3">
           <Field label="Statut" required error={errors.status?.message}>
             <Select
               {...register("status")}
@@ -416,7 +404,7 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
               control={control}
               name="isFeatured"
               render={({ field }) => (
-                <div className="flex h-11 items-center">
+                <div className="flex h-9 items-center">
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -440,21 +428,14 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
         </div>
       </FormSection>
 
-      <div className="admin-divider" />
-
-      <div className="sticky bottom-0 z-10 -mx-6 border-t border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg)]/90 px-6 py-5 backdrop-blur-md md:-mx-10 md:px-10 lg:-mx-14 lg:px-14">
-        <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between gap-4">
-          <p className="admin-mono text-[0.6rem] uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]">
-            {mode === "create" ? "Nouveau véhicule · brouillon" : "Fiche modifiable"}
-          </p>
-          <div className="flex gap-3">
-            <Button type="button" variant="ghost" onClick={() => router.back()}>
-              Annuler
-            </Button>
-            <Button type="submit" loading={isSubmitting}>
-              {mode === "create" ? "Créer le véhicule" : "Enregistrer"}
-            </Button>
-          </div>
+      <div className="sticky bottom-0 z-10 -mx-6 border-t border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg)]/95 px-6 py-3 backdrop-blur lg:-mx-8 lg:px-8">
+        <div className="mx-auto flex w-full max-w-[1400px] items-center justify-end gap-2">
+          <Button type="button" variant="secondary" size="lg" onClick={() => router.back()}>
+            Annuler
+          </Button>
+          <Button type="submit" size="lg" loading={isSubmitting}>
+            {mode === "create" ? "Créer le véhicule" : "Enregistrer"}
+          </Button>
         </div>
       </div>
     </form>

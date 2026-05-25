@@ -61,48 +61,52 @@ export function ConfirmDialogHost() {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={() => close(false)}
     >
       <div
-        className="admin-fade-up relative w-full max-w-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] p-8"
-        style={{
-          boxShadow:
-            "0 30px 80px -20px rgba(0,0,0,0.7), 0 1px 0 0 rgba(245,241,234,0.04) inset",
-        }}
+        className="admin-fade-in relative w-full max-w-md overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.7)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <span
-          aria-hidden
-          className={`absolute left-0 top-0 h-full w-[2px] ${
-            isDanger
-              ? "bg-[color:var(--admin-danger)]"
-              : "bg-[color:var(--admin-accent)]"
-          }`}
-        />
-        <p
-          className={`admin-mono text-[0.6rem] uppercase tracking-[0.32em] ${
-            isDanger
-              ? "text-[color:var(--admin-danger-soft)]"
-              : "text-[color:var(--admin-accent)]"
-          }`}
-        >
-          {isDanger ? "Action irréversible" : "Confirmation requise"}
-        </p>
-        <h2 className="admin-serif mt-3 text-[1.75rem] font-normal leading-[1.15] tracking-tight text-[color:var(--admin-text)]">
-          {options.title}
-        </h2>
-        {options.description && (
-          <div className="mt-4 text-[0.92rem] leading-relaxed text-[color:var(--admin-text-muted)]">
-            {options.description}
+        <div className="p-5">
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                isDanger
+                  ? "bg-[color:var(--admin-danger-dim)] text-[color:var(--admin-danger)]"
+                  : "bg-[color:var(--admin-accent-dim)] text-[color:var(--admin-accent)]"
+              }`}
+            >
+              {isDanger ? (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M9 7V10M9 13V13.01M9 2L1 15H17L9 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M9 8.5V12.5M9 6V6.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-[0.9375rem] font-semibold text-[color:var(--admin-text)]">
+                {options.title}
+              </h2>
+              {options.description && (
+                <div className="mt-1 text-[0.8125rem] leading-relaxed text-[color:var(--admin-text-soft)]">
+                  {options.description}
+                </div>
+              )}
+            </div>
           </div>
-        )}
-        <div className="mt-8 flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={() => close(false)}>
+        </div>
+        <div className="flex items-center justify-end gap-2 border-t border-[color:var(--admin-line)] bg-[color:var(--admin-surface)] px-5 py-3">
+          <Button variant="secondary" size="md" onClick={() => close(false)}>
             {options.cancelLabel ?? "Annuler"}
           </Button>
           <Button
             variant={isDanger ? "danger" : "primary"}
+            size="md"
             onClick={() => close(true)}
           >
             {options.confirmLabel ?? "Confirmer"}

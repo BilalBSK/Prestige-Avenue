@@ -9,16 +9,35 @@ import { buttonVariants } from "../ui/button-variants";
 import { DeleteCarButton } from "./delete-car-button";
 import { ToggleFeaturedSwitch } from "./toggle-featured-switch";
 
-const STATUS_STYLE: Record<CarStatus, { label: string; tone: "accent" | "warn" | "danger" }> = {
-  AVAILABLE: { label: "Disponible", tone: "accent" },
-  MAINTENANCE: { label: "Maintenance", tone: "warn" },
-  DISABLED: { label: "Désactivée", tone: "danger" },
+const STATUS_STYLE: Record<
+  CarStatus,
+  { label: string; className: string }
+> = {
+  AVAILABLE: {
+    label: "Disponible",
+    className:
+      "border-[color:var(--admin-success-dim)] bg-[color:var(--admin-success-dim)] text-[color:var(--admin-success)]",
+  },
+  MAINTENANCE: {
+    label: "Maintenance",
+    className:
+      "border-[color:var(--admin-warn-dim)] bg-[color:var(--admin-warn-dim)] text-[color:var(--admin-warn)]",
+  },
+  DISABLED: {
+    label: "Désactivée",
+    className:
+      "border-[color:var(--admin-danger-dim)] bg-[color:var(--admin-danger-dim)] text-[color:var(--admin-danger-soft)]",
+  },
 };
 
-const TONE_CLASSES: Record<"accent" | "warn" | "danger", string> = {
-  accent: "bg-[color:var(--admin-accent)]",
-  warn: "bg-[#caa25a]",
-  danger: "bg-[color:var(--admin-danger)]",
+const CATEGORY_LABEL: Record<CarCategory, string> = {
+  CITADINE: "Citadine",
+  COMPACTE: "Compacte",
+  BERLINE: "Berline",
+  SUV: "SUV",
+  COUPE: "Coupé",
+  CABRIOLET: "Cabriolet",
+  SPORTIVE: "Sportive",
 };
 
 export interface CarRow {
@@ -42,11 +61,11 @@ interface CarsListRowProps {
   bookingCount: number;
 }
 
-export function CarsListRow({ car, index, bookingCount }: CarsListRowProps) {
+export function CarsListRow({ car, bookingCount }: CarsListRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: car.id });
 
-  const statusStyle = STATUS_STYLE[car.status];
+  const status = STATUS_STYLE[car.status];
 
   return (
     <tr
@@ -56,92 +75,82 @@ export function CarsListRow({ car, index, bookingCount }: CarsListRowProps) {
         transition,
         opacity: isDragging ? 0.55 : 1,
       }}
-      className="admin-row group relative border-b border-[color:var(--admin-line)] transition-colors duration-300"
+      className="admin-row border-b border-[color:var(--admin-line)] last:border-0"
     >
-      <td className="w-12 px-3 py-5">
+      <td className="w-8 px-3 py-2.5">
         <button
           type="button"
           {...attributes}
           {...listeners}
-          className="admin-mono flex h-6 w-6 cursor-grab items-center justify-center text-[color:var(--admin-text-muted)]/60 transition-colors duration-300 hover:text-[color:var(--admin-accent)] active:cursor-grabbing"
+          className="flex h-6 w-6 cursor-grab items-center justify-center rounded-md text-[color:var(--admin-text-muted)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text-soft)] active:cursor-grabbing"
           aria-label="Réordonner"
         >
-          ⋮⋮
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="5" cy="3" r="1" fill="currentColor" />
+            <circle cx="9" cy="3" r="1" fill="currentColor" />
+            <circle cx="5" cy="7" r="1" fill="currentColor" />
+            <circle cx="9" cy="7" r="1" fill="currentColor" />
+            <circle cx="5" cy="11" r="1" fill="currentColor" />
+            <circle cx="9" cy="11" r="1" fill="currentColor" />
+          </svg>
         </button>
       </td>
-      <td className="w-14 px-3 py-5">
-        <span className="admin-mono admin-tabular text-[0.65rem] tracking-[0.28em] text-[color:var(--admin-text-muted)]">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-      </td>
-      <td className="w-20 px-3 py-5">
-        <div className="relative aspect-[4/3] w-16 overflow-hidden border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+      <td className="w-12 px-2 py-2.5">
+        <div className="relative aspect-[4/3] w-11 overflow-hidden rounded-md border border-[color:var(--admin-line)] bg-[color:var(--admin-surface)]">
           {car.mainImage && (
             <Image
               src={car.mainImage}
               alt=""
               fill
-              sizes="64px"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              sizes="44px"
+              className="object-cover"
             />
           )}
         </div>
       </td>
-      <td className="px-4 py-5">
-        <div className="admin-serif text-[1.05rem] leading-tight tracking-tight text-[color:var(--admin-text)]">
-          {car.brand}{" "}
-          <span className="text-[color:var(--admin-text-muted)]">{car.model}</span>
+      <td className="px-3 py-2.5">
+        <div className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
+          {car.brand} <span className="font-normal text-[color:var(--admin-text-soft)]">{car.model}</span>
         </div>
-        {car.trim && (
-          <div className="mt-0.5 text-[0.78rem] italic text-[color:var(--admin-text-muted)]/80">
-            {car.trim}
-          </div>
-        )}
-        <div className="admin-mono mt-1.5 text-[0.6rem] uppercase tracking-[0.28em] text-[color:var(--admin-text-muted)]/60">
-          /{car.slug}
+        <div className="mt-0.5 flex items-center gap-1.5 text-[0.75rem] text-[color:var(--admin-text-muted)]">
+          {car.trim && <span className="truncate">{car.trim}</span>}
+          {car.trim && <span className="text-[color:var(--admin-text-muted)]/50">·</span>}
+          <span className="admin-mono">/{car.slug}</span>
         </div>
       </td>
-      <td className="px-4 py-5">
-        <span className="admin-mono text-[0.65rem] uppercase tracking-[0.3em] text-[color:var(--admin-text-muted)]">
-          {car.category}
+      <td className="px-3 py-2.5">
+        <span className="text-[0.8125rem] text-[color:var(--admin-text-soft)]">
+          {CATEGORY_LABEL[car.category]}
         </span>
       </td>
-      <td className="px-4 py-5">
-        <span className="inline-flex items-center gap-2.5">
-          <span className={`h-1 w-1 rounded-full ${TONE_CLASSES[statusStyle.tone]}`} />
-          <span className="text-[0.82rem] tracking-wide text-[color:var(--admin-text)]">
-            {statusStyle.label}
-          </span>
+      <td className="px-3 py-2.5">
+        <span className={`admin-pill border ${status.className}`}>
+          <span className="admin-pill-dot" />
+          {status.label}
         </span>
       </td>
-      <td className="px-4 py-5 text-right">
-        <div className="admin-mono admin-tabular text-[0.95rem] text-[color:var(--admin-text)]">
+      <td className="px-3 py-2.5 text-right">
+        <div className="admin-tabular text-[0.875rem] text-[color:var(--admin-text)]">
           {Math.round(car.pricePerDay)}
-          <span className="ml-1 text-[0.62rem] uppercase tracking-[0.2em] text-[color:var(--admin-text-muted)]">
-            €/j
-          </span>
+          <span className="ml-0.5 text-[0.75rem] text-[color:var(--admin-text-muted)]">€</span>
         </div>
       </td>
-      <td className="px-4 py-5 text-right">
+      <td className="px-3 py-2.5 text-right">
         {car.weekendPackagePrice !== null ? (
-          <div className="admin-mono admin-tabular text-[0.95rem] text-[color:var(--admin-text)]">
+          <div className="admin-tabular text-[0.875rem] text-[color:var(--admin-text)]">
             {Math.round(car.weekendPackagePrice)}
-            <span className="ml-1 text-[0.62rem] uppercase tracking-[0.2em] text-[color:var(--admin-text-muted)]">
-              €
-            </span>
+            <span className="ml-0.5 text-[0.75rem] text-[color:var(--admin-text-muted)]">€</span>
           </div>
         ) : (
-          <span className="admin-mono text-[0.7rem] text-[color:var(--admin-text-muted)]/50">
-            —
-          </span>
+          <span className="text-[0.8125rem] text-[color:var(--admin-text-muted)]">—</span>
         )}
       </td>
-      <td className="px-4 py-5">
+      <td className="px-3 py-2.5">
         <div className="flex justify-center">
           <ToggleFeaturedSwitch carId={car.id} initial={car.isFeatured} />
         </div>
       </td>
-      <td className="px-4 py-5">
+      <td className="w-20 px-3 py-2.5">
         <div className="flex items-center justify-end gap-1">
           <Link
             href={`/admin/cars/${car.id}/edit`}

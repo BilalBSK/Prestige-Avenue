@@ -1,12 +1,10 @@
 import {
   calculateTotalPrice,
-  getBookingPriceBreakdown,
   normalizeBookingDates,
   validateBusinessBookingRules,
 } from "@/lib/booking";
 import { prisma } from "@/lib/prisma";
-import { getStripeServerClient } from "@/lib/stripe";
-import { BookingStatus, PaymentStatus, Prisma } from "@prisma/client";
+import { BookingStatus, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 
@@ -16,15 +14,19 @@ interface AvailabilityInput {
   endDate: string | Date;
 }
 
-interface CreateCheckoutInput extends AvailabilityInput {
+interface CreateBookingRequestInput extends AvailabilityInput {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  customerMessage?: string;
   submissionToken: string;
-  successUrl: string;
-  cancelUrl: string;
 }
+
+const BLOCKING_STATUSES: BookingStatus[] = [
+  BookingStatus.CONFIRMED,
+  BookingStatus.IN_PROGRESS,
+];
 
 export async function checkAvailability(input: AvailabilityInput) {
   const { startDate, endDate } = normalizeBookingDates(input.startDate, input.endDate);
@@ -36,7 +38,7 @@ export async function checkAvailability(input: AvailabilityInput) {
       reason:
         error instanceof Error
           ? error.message
-          : "La periode ne respecte pas les regles de reservation.",
+          : "La période ne respecte pas les règles de réservation.",
     };
   }
 
@@ -46,18 +48,18 @@ export async function checkAvailability(input: AvailabilityInput) {
   });
 
   if (!car) {
-    return { isAvailable: false, reason: "Vehicule introuvable." };
+    return { isAvailable: false, reason: "Véhicule introuvable." };
   }
 
   if (car.status !== "AVAILABLE") {
-    return { isAvailable: false, reason: "Vehicule indisponible." };
+    return { isAvailable: false, reason: "Véhicule indisponible." };
   }
 
   const [existingBookings, blockedDates] = await Promise.all([
     prisma.booking.count({
       where: {
         carId: input.carId,
-        status: "CONFIRMED",
+        status: { in: BLOCKING_STATUSES },
         startDate: { lt: endDate },
         endDate: { gt: startDate },
       },
@@ -74,22 +76,31 @@ export async function checkAvailability(input: AvailabilityInput) {
   if (existingBookings > 0 || blockedDates > 0) {
     return {
       isAvailable: false,
-      reason: "Periode deja reservee ou bloquee.",
+      reason: "Période déjà réservée ou bloquée.",
     };
   }
 
   return { isAvailable: true };
 }
 
-export async function createCheckoutSessionForBooking(input: CreateCheckoutInput) {
-  const stripe = getStripeServerClient();
+export async function createBookingRequest(input: CreateBookingRequestInput) {
   const { startDate, endDate } = normalizeBookingDates(input.startDate, input.endDate);
   validateBusinessBookingRules(startDate, endDate);
   const normalizedEmail = input.email.trim().toLowerCase();
   const fullName = `${input.firstName.trim()} ${input.lastName.trim()}`.replace(/\s+/g, " ").trim();
   const sanitizedPhone = input.phone.trim();
+  const sanitizedMessage = input.customerMessage?.trim().slice(0, 500) || null;
 
   return prisma.$transaction(async (tx) => {
+    const existingSubmission = await tx.booking.findUnique({
+      where: { submissionToken: input.submissionToken },
+      select: { id: true },
+    });
+
+    if (existingSubmission) {
+      return { bookingId: existingSubmission.id };
+    }
+
     const existingUser = await tx.user.findUnique({
       where: { email: normalizedEmail },
       select: { id: true, name: true, phone: true, role: true },
@@ -134,23 +145,22 @@ export async function createCheckoutSessionForBooking(input: CreateCheckoutInput
         status: true,
         pricePerDay: true,
         weekendPackagePrice: true,
-        depositAmount: true,
       },
     });
 
     if (!car) {
-      throw new Error("Vehicule introuvable.");
+      throw new Error("Véhicule introuvable.");
     }
 
     if (car.status !== "AVAILABLE") {
-      throw new Error("Vehicule indisponible.");
+      throw new Error("Véhicule indisponible.");
     }
 
     const [bookingOverlap, blockedOverlap] = await Promise.all([
       tx.booking.count({
         where: {
           carId: input.carId,
-          status: BookingStatus.CONFIRMED,
+          status: { in: BLOCKING_STATUSES },
           startDate: { lt: endDate },
           endDate: { gt: startDate },
         },
@@ -165,29 +175,11 @@ export async function createCheckoutSessionForBooking(input: CreateCheckoutInput
     ]);
 
     if (bookingOverlap > 0 || blockedOverlap > 0) {
-      throw new Error("Periode indisponible.");
-    }
-
-    const existingSubmission = await tx.booking.findUnique({
-      where: { submissionToken: input.submissionToken },
-      select: { id: true, stripeSessionId: true },
-    });
-
-    if (existingSubmission?.stripeSessionId) {
-      const existingSession = await stripe.checkout.sessions.retrieve(
-        existingSubmission.stripeSessionId,
-      );
-      if (existingSession.url) {
-        return { checkoutUrl: existingSession.url, bookingId: existingSubmission.id };
-      }
+      throw new Error("Période indisponible.");
     }
 
     const totalPriceNumber = calculateTotalPrice(car, startDate, endDate);
-    const priceBreakdown = getBookingPriceBreakdown(totalPriceNumber);
-    const totalPrice = new Prisma.Decimal(priceBreakdown.totalPrice);
-    const depositDueNow = new Prisma.Decimal(priceBreakdown.depositDueNow);
-    const remainingBalance = new Prisma.Decimal(priceBreakdown.remainingBalance);
-    const unitAmount = Math.round(priceBreakdown.depositDueNow * 100);
+    const totalPrice = new Prisma.Decimal(totalPriceNumber);
 
     const booking = await tx.booking.create({
       data: {
@@ -196,47 +188,83 @@ export async function createCheckoutSessionForBooking(input: CreateCheckoutInput
         startDate,
         endDate,
         totalPrice,
-        depositDueNow,
-        remainingBalance,
-        status: BookingStatus.PENDING,
-        paymentStatus: PaymentStatus.UNPAID,
+        status: BookingStatus.PENDING_REVIEW,
+        customerMessage: sanitizedMessage,
         submissionToken: input.submissionToken,
       },
     });
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      success_url: input.successUrl,
-      cancel_url: input.cancelUrl,
-      metadata: {
-        bookingId: booking.id,
-        customerEmail: normalizedEmail,
-        customerName: fullName,
-      },
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "eur",
-            unit_amount: unitAmount,
-            product_data: {
-              name: `${car.brand} ${car.model}`,
-              description: `Acompte 40% pour la location du ${startDate.toISOString().slice(0, 10)} au ${endDate.toISOString().slice(0, 10)}`,
-            },
-          },
+    return { bookingId: booking.id };
+  });
+}
+
+export async function getBookingById(bookingId: string) {
+  return prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      car: {
+        select: {
+          brand: true,
+          model: true,
+          mainImage: true,
         },
-      ],
+      },
+      user: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+    },
+  });
+}
+
+const ALLOWED_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
+  PENDING_REVIEW: [BookingStatus.CONFIRMED, BookingStatus.DECLINED],
+  CONFIRMED: [BookingStatus.IN_PROGRESS, BookingStatus.CANCELLED],
+  IN_PROGRESS: [BookingStatus.COMPLETED, BookingStatus.CANCELLED],
+  COMPLETED: [],
+  CANCELLED: [],
+  DECLINED: [],
+};
+
+export async function transitionBooking(
+  bookingId: string,
+  nextStatus: BookingStatus,
+  declineReason?: string,
+) {
+  return prisma.$transaction(async (tx) => {
+    const booking = await tx.booking.findUnique({
+      where: { id: bookingId },
+      select: { id: true, status: true },
     });
 
-    await tx.booking.update({
-      where: { id: booking.id },
-      data: { stripeSessionId: session.id },
-    });
-
-    if (!session.url) {
-      throw new Error("Stripe checkout URL missing.");
+    if (!booking) {
+      throw new Error("Réservation introuvable.");
     }
 
-    return { checkoutUrl: session.url, bookingId: booking.id };
+    const allowed = ALLOWED_TRANSITIONS[booking.status];
+    if (!allowed.includes(nextStatus)) {
+      throw new Error(
+        `Transition impossible: ${booking.status} → ${nextStatus}.`,
+      );
+    }
+
+    if (nextStatus === BookingStatus.DECLINED && !declineReason?.trim()) {
+      throw new Error("Un motif de refus est requis.");
+    }
+
+    const updated = await tx.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: nextStatus,
+        ...(nextStatus === BookingStatus.DECLINED
+          ? { declineReason: declineReason?.trim().slice(0, 500) ?? null }
+          : {}),
+      },
+    });
+
+    return updated;
   });
 }

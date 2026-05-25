@@ -15,9 +15,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
       ref={ref}
       rows={rows}
       aria-invalid={error || undefined}
-      className={`w-full resize-none border bg-[color:var(--admin-surface)]/40 px-4 py-3 text-[0.92rem] leading-relaxed text-[color:var(--admin-text)] transition-colors duration-300 placeholder:text-[color:var(--admin-text-muted)]/60 focus:outline-none ${
+      className={`w-full resize-none rounded-md border bg-[color:var(--admin-surface)] px-3 py-2 text-[0.8125rem] leading-relaxed text-[color:var(--admin-text)] transition-colors placeholder:text-[color:var(--admin-text-muted)] focus:outline-none focus:ring-2 focus:ring-[color:var(--admin-accent)]/40 disabled:cursor-not-allowed disabled:opacity-50 ${
         error
-          ? "border-[color:var(--admin-danger)]"
+          ? "border-[color:var(--admin-danger)]/70 focus:border-[color:var(--admin-danger)] focus:ring-[color:var(--admin-danger)]/30"
           : "border-[color:var(--admin-line-strong)] focus:border-[color:var(--admin-accent)]"
       } ${className}`}
       {...props}

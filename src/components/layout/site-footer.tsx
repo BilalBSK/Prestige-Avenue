@@ -9,7 +9,7 @@ export function SiteFooter() {
       <div className="lux-container">
         <SiteFooterLogo />
         <div className="mt-16 flex flex-col items-center justify-between gap-3 border-t border-[var(--ink-line)] pt-8 font-[family:var(--font-dm-sans)] text-[12px] text-[var(--ink-soft)] md:flex-row md:gap-0">
-          <span>© {year} Prestige Avenue. Tous droits reserves.</span>
+          <span>© {year} Prestige Avenue. Tous droits réservés.</span>
           <nav className="flex gap-7">
             <Link
               href="/cars"
@@ -18,10 +18,10 @@ export function SiteFooter() {
               Catalogue
             </Link>
             <Link
-              href="/admin/login"
+              href="/contact"
               className="transition-colors duration-200 hover:text-[var(--ink-ivory)]"
             >
-              Accès admin
+              Contact
             </Link>
           </nav>
         </div>

@@ -4,6 +4,7 @@ import { confirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { toast } from "@/components/admin/ui/toast";
 import { deleteCar } from "@/server/admin/cars.actions";
 import { useTransition } from "react";
+import { Button } from "../ui/button";
 
 interface DeleteCarButtonProps {
   carId: string;
@@ -37,13 +38,14 @@ export function DeleteCarButton({ carId, carLabel, hasBookings }: DeleteCarButto
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="danger-ghost"
+      size="sm"
       onClick={onClick}
-      disabled={pending}
-      className="admin-mono px-3 py-2 text-[0.62rem] uppercase tracking-[0.28em] text-[color:var(--admin-text-muted)] transition-colors duration-300 hover:text-[color:var(--admin-danger-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+      loading={pending}
     >
-      {pending ? "···" : "Supprimer"}
-    </button>
+      Supprimer
+    </Button>
   );
 }

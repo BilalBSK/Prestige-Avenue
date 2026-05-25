@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json({ blockedDates });
   } catch {
-    return NextResponse.json({ error: "Acces refuse." }, { status: 403 });
+    return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
   }
 }
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const parsed = blockedDateSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Donnees invalides.", details: parsed.error.flatten() },
+        { error: "Données invalides.", details: parsed.error.flatten() },
         { status: 400 },
       );
     }

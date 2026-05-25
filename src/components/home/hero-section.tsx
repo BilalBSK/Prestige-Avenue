@@ -31,10 +31,10 @@ export function HeroSection() {
           </h1>
 
           <p className="hero-lede1 mt-7 max-w-[600px] font-[family:var(--font-fraunces)] text-[22px] font-light leading-[1.45] text-[var(--ink-text)]">
-            Reservez aujourd&apos;hui le vehicule qui vous ressemble, le prestige devient accessible.
+            Réservez aujourd&apos;hui le véhicule qui vous ressemble, le prestige devient accessible.
           </p>
           <p className="hero-lede2 mt-3 max-w-[540px] font-[family:var(--font-dm-sans)] text-[14px] leading-[1.55] text-[var(--ink-text-soft)]">
-            Vehicules controles, assurance incluse et assistance dediee. Profitez de la route, on s&apos;occupe du reste.
+            Véhicules contrôlés, assurance incluse et assistance dédiée. Profitez de la route, on s&apos;occupe du reste.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">

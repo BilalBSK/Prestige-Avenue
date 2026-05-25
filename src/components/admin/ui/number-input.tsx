@@ -18,17 +18,17 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         type="number"
         inputMode="decimal"
         aria-invalid={error || undefined}
-        className={`admin-mono h-11 w-full border-0 border-b bg-transparent px-0 ${
-          unit ? "pr-14" : "pr-0"
-        } text-[0.92rem] text-[color:var(--admin-text)] transition-colors duration-300 placeholder:text-[color:var(--admin-text-muted)]/50 focus:outline-none ${
+        className={`admin-tabular h-9 w-full rounded-md border bg-[color:var(--admin-surface)] px-3 ${
+          unit ? "pr-11" : "pr-3"
+        } text-[0.8125rem] text-[color:var(--admin-text)] transition-colors placeholder:text-[color:var(--admin-text-muted)] focus:outline-none focus:ring-2 focus:ring-[color:var(--admin-accent)]/40 disabled:cursor-not-allowed disabled:opacity-50 ${
           error
-            ? "border-[color:var(--admin-danger)]"
+            ? "border-[color:var(--admin-danger)]/70 focus:border-[color:var(--admin-danger)] focus:ring-[color:var(--admin-danger)]/30"
             : "border-[color:var(--admin-line-strong)] focus:border-[color:var(--admin-accent)]"
         } ${className}`}
         {...props}
       />
       {unit && (
-        <span className="admin-mono pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[0.7rem] uppercase tracking-widest text-[color:var(--admin-text-muted)]">
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[0.75rem] text-[color:var(--admin-text-muted)]">
           {unit}
         </span>
       )}

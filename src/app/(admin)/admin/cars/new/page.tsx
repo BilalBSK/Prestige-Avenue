@@ -39,15 +39,9 @@ export default function NewCarPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Catalogue — Nouvelle fiche"
-        title={
-          <>
-            Un nouveau <span className="italic text-[color:var(--admin-text-muted)]">chapitre</span>
-            <br />
-            pour votre flotte.
-          </>
-        }
-        lede="Chaque détail compte. Composez la fiche comme on écrit une page éditoriale."
+        eyebrow="Catalogue · Nouveau véhicule"
+        title="Ajouter un véhicule"
+        lede="Renseignez les informations du véhicule pour le publier au catalogue."
       />
       <CarForm mode="create" initial={DEFAULT_CAR} uploadFolder="new" />
     </>

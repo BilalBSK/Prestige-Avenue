@@ -12,7 +12,7 @@ import { z } from "zod";
 const registerSchema = z.object({
   name: z.string().min(2, "Nom requis"),
   email: z.email("Email invalide"),
-  phone: z.string().min(8, "Telephone invalide").optional().or(z.literal("")),
+  phone: z.string().min(8, "Téléphone invalide").optional().or(z.literal("")),
   password: z.string().min(8, "Mot de passe trop court"),
 });
 
@@ -83,7 +83,7 @@ export function RegisterForm() {
         <input type="email" {...form.register("email")} className="lux-input" />
       </div>
       <div>
-        <label className="mb-1 block text-sm text-zinc-300">Telephone</label>
+        <label className="mb-1 block text-sm text-zinc-300">Téléphone</label>
         <input type="tel" {...form.register("phone")} className="lux-input" />
       </div>
       <div>
@@ -96,10 +96,10 @@ export function RegisterForm() {
         disabled={!csrfToken}
         className="lux-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Creer mon compte
+        Créer mon compte
       </button>
       <p className="text-sm text-zinc-400">
-        Deja inscrit ?{" "}
+        Déjà inscrit ?{" "}
         <Link href="/login" className="text-zinc-200 underline decoration-zinc-600 underline-offset-4">
           Connexion
         </Link>

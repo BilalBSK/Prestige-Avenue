@@ -2,6 +2,8 @@
 
 import { useCsrfToken } from "@/hooks/use-csrf-token";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button } from "./ui/button";
 
 interface BlockedDateDeleteButtonProps {
   blockedDateId: string;
@@ -10,25 +12,30 @@ interface BlockedDateDeleteButtonProps {
 export function BlockedDateDeleteButton({ blockedDateId }: BlockedDateDeleteButtonProps) {
   const csrfToken = useCsrfToken();
   const router = useRouter();
+  const [pending, setPending] = useState(false);
 
   async function removeBlockedDate() {
+    setPending(true);
     await fetch(`/api/admin/blocked-dates/${blockedDateId}`, {
       method: "DELETE",
       headers: {
         "x-csrf-token": csrfToken,
       },
     });
+    setPending(false);
     router.refresh();
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="danger-ghost"
+      size="sm"
       disabled={!csrfToken}
+      loading={pending}
       onClick={() => void removeBlockedDate()}
-      className="rounded border border-red-500/50 px-3 py-1 text-xs text-red-300"
     >
       Supprimer
-    </button>
+    </Button>
   );
 }

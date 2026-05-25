@@ -1,12 +1,19 @@
 import { validateCsrf } from "@/lib/csrf";
 import { requireAdminSession } from "@/lib/permissions";
-import { prisma } from "@/lib/prisma";
+import { transitionBooking } from "@/services/booking.service";
+import { BookingStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-const updateBookingSchema = z.object({
-  status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]).optional(),
-  paymentStatus: z.enum(["UNPAID", "PAID", "REFUNDED", "FAILED"]).optional(),
+const transitionSchema = z.object({
+  status: z.enum([
+    BookingStatus.CONFIRMED,
+    BookingStatus.IN_PROGRESS,
+    BookingStatus.COMPLETED,
+    BookingStatus.CANCELLED,
+    BookingStatus.DECLINED,
+  ]),
+  declineReason: z.string().min(1).max(500).optional(),
 });
 
 interface Params {
@@ -21,19 +28,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     const body = await request.json();
-    const parsed = updateBookingSchema.safeParse(body);
+    const parsed = transitionSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Donnees invalides." }, { status: 400 });
+      return NextResponse.json({ error: "Données invalides." }, { status: 400 });
     }
 
     const { id } = await params;
-    const booking = await prisma.booking.update({
-      where: { id },
-      data: parsed.data,
-    });
+    const booking = await transitionBooking(
+      id,
+      parsed.data.status,
+      parsed.data.declineReason,
+    );
     return NextResponse.json({ booking });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Mise a jour impossible.";
+    const message = error instanceof Error ? error.message : "Mise à jour impossible.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

@@ -53,6 +53,10 @@ export function HeroVideo() {
       const nextVideo = getVideoByLayer(nextLayer);
 
       isTransitioningRef.current = true;
+      if (nextVideo.preload !== "auto") {
+        nextVideo.preload = "auto";
+        nextVideo.load();
+      }
       nextVideo.currentTime = 0;
       await tryPlay(nextVideo);
       setActiveLayer(nextLayer);
@@ -149,7 +153,7 @@ export function HeroVideo() {
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "a" ? "opacity-55" : "opacity-0"}`}
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         onError={() => setPlaybackError(true)}
       >
         <source src="/video/background.mp4" type="video/mp4" />
@@ -159,7 +163,7 @@ export function HeroVideo() {
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "b" ? "opacity-55" : "opacity-0"}`}
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         onError={() => setPlaybackError(true)}
       >
         <source src="/video/background2.mp4" type="video/mp4" />
@@ -169,7 +173,7 @@ export function HeroVideo() {
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "c" ? "opacity-55" : "opacity-0"}`}
         muted
         playsInline
-        preload="auto"
+        preload="none"
         onError={() => setPlaybackError(true)}
       >
         <source src="/video/background3.mp4" type="video/mp4" />

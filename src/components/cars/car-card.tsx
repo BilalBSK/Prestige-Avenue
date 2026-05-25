@@ -7,10 +7,18 @@ interface CarCardProps {
   car: Car;
 }
 
+const priceFormatter = new Intl.NumberFormat("fr-FR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 function CarCardComponent({ car }: CarCardProps) {
-  const modelParts = car.model.split(" ");
-  const modelHead = modelParts[0] ?? car.model;
-  const modelRest = modelParts.slice(1).join(" ");
+  const trim = car.trim?.trim() || null;
+  const price = priceFormatter.format(Number(car.pricePerDay));
+  const pricePerKm =
+    car.pricePerKm !== null && car.pricePerKm !== undefined
+      ? priceFormatter.format(Number(car.pricePerKm))
+      : null;
 
   return (
     <Link
@@ -20,7 +28,7 @@ function CarCardComponent({ car }: CarCardProps) {
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--ink-elevated)]">
         <Image
           src={car.mainImage}
-          alt={`${car.brand} ${car.model}`}
+          alt={`${car.brand} ${car.model}${trim ? ` ${trim}` : ""}`}
           fill
           className="car-card-image object-cover transition-transform duration-[700ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-[1.04]"
           sizes="(max-width: 768px) 100vw, 33vw"
@@ -32,16 +40,10 @@ function CarCardComponent({ car }: CarCardProps) {
 
       <div className="px-[22px] pb-[26px] pt-[22px]">
         <h3 className="font-[family:var(--font-fraunces)] text-[28px] font-light leading-none tracking-[-0.015em] text-[var(--ink-ivory)] transition-transform duration-[350ms] ease-out group-hover:translate-x-[2px]">
-          {car.brand}
-          {modelRest ? (
-            <>
-              {" "}
-              <em className="font-normal italic">{modelHead}</em>
-            </>
-          ) : null}
+          {car.brand} <em className="font-normal italic">{car.model}</em>
         </h3>
-        <p className="mt-[6px] font-[family:var(--font-dm-sans)] text-[13px] text-[var(--ink-text-soft)]">
-          {modelRest ? `${modelRest} · ` : ""}
+        <p className="mt-[8px] font-[family:var(--font-dm-sans)] text-[12px] uppercase tracking-[0.18em] text-[var(--ink-text-soft)]">
+          {trim ? `${trim} · ` : ""}
           {car.power} ch
         </p>
 
@@ -51,11 +53,16 @@ function CarCardComponent({ car }: CarCardProps) {
               À partir de
             </p>
             <p className="mt-1 font-[family:var(--font-fraunces)] text-[30px] font-light leading-none tracking-[-0.015em] text-[var(--ink-ivory)]">
-              {Number(car.pricePerDay).toFixed(0)}
+              {price}
               <span className="ml-1 font-[family:var(--font-dm-sans)] text-[12px] font-normal text-[var(--ink-soft)]">
                 €/jour
               </span>
             </p>
+            {pricePerKm && (
+              <p className="mt-2 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.18em] text-[var(--ink-text-soft)]">
+                + {pricePerKm} €/km
+              </p>
+            )}
           </div>
           <span
             aria-hidden

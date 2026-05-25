@@ -19,14 +19,6 @@ const FEATURED_OPTIONS = [
   { value: "no", label: "Hors vitrine" },
 ];
 
-function FilterLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <label className="admin-mono mb-2 block text-[0.58rem] uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]">
-      {children}
-    </label>
-  );
-}
-
 export function CarsFilters() {
   const router = useRouter();
   const params = useSearchParams();
@@ -42,25 +34,34 @@ export function CarsFilters() {
   );
 
   return (
-    <div className="admin-fade-up admin-fade-up-d1 grid gap-6 border border-[color:var(--admin-line)] bg-[color:var(--admin-bg-elev)]/30 px-6 py-5 md:grid-cols-[1fr_14rem_14rem]">
-      <div>
-        <FilterLabel>Recherche</FilterLabel>
+    <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center">
+      <div className="relative flex-1">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+          aria-hidden
+          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[color:var(--admin-text-muted)]"
+        >
+          <circle cx="6" cy="6" r="4.25" stroke="currentColor" strokeWidth="1.25" />
+          <path d="M9.5 9.5L12 12" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+        </svg>
         <Input
           defaultValue={params.get("q") ?? ""}
-          placeholder="Marque, modèle, finition, slug…"
+          placeholder="Rechercher par marque, modèle, slug…"
+          className="pl-8"
           onChange={(e) => update("q", e.target.value)}
         />
       </div>
-      <div>
-        <FilterLabel>Statut</FilterLabel>
+      <div className="w-full md:w-48">
         <Select
           options={STATUS_OPTIONS}
           defaultValue={params.get("status") ?? ""}
           onChange={(e) => update("status", e.target.value)}
         />
       </div>
-      <div>
-        <FilterLabel>Mise en avant</FilterLabel>
+      <div className="w-full md:w-44">
         <Select
           options={FEATURED_OPTIONS}
           defaultValue={params.get("featured") ?? ""}

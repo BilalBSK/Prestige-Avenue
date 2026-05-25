@@ -19,16 +19,15 @@ interface CarsListProps {
 }
 
 const HEADERS = [
+  { label: "", width: "w-8" },
   { label: "", width: "w-12" },
-  { label: "", width: "w-14" },
-  { label: "", width: "w-20" },
   { label: "Véhicule", align: "text-left" },
   { label: "Catégorie", align: "text-left" },
   { label: "État", align: "text-left" },
   { label: "Tarif", align: "text-right" },
   { label: "Week-end", align: "text-right" },
   { label: "Vitrine", align: "text-center" },
-  { label: "Actions", align: "text-right" },
+  { label: "", width: "w-20" },
 ] as const;
 
 export function CarsList({ cars }: CarsListProps) {
@@ -59,15 +58,17 @@ export function CarsList({ cars }: CarsListProps) {
 
   if (!items.length) {
     return (
-      <div className="admin-fade-up flex min-h-[280px] flex-col items-center justify-center border border-dashed border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40 px-10 text-center">
-        <p className="admin-mono text-[0.6rem] uppercase tracking-[0.36em] text-[color:var(--admin-accent)]">
-          Collection vide
+      <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] px-6 text-center">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--admin-surface-2)] text-[color:var(--admin-text-muted)]">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 14H3v-3l2-5h10l2 5v3h-2M7 14a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0zM13 14a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <p className="mt-3 text-[0.9375rem] font-medium text-[color:var(--admin-text)]">
+          Aucun véhicule
         </p>
-        <p className="admin-serif mt-3 text-[1.5rem] italic leading-tight tracking-tight text-[color:var(--admin-text)]">
-          Aucun véhicule ne correspond
-        </p>
-        <p className="mt-2 text-[0.85rem] text-[color:var(--admin-text-muted)]">
-          Ajustez vos filtres ou constituez une nouvelle pièce au catalogue.
+        <p className="mt-1 text-[0.8125rem] text-[color:var(--admin-text-muted)]">
+          Ajustez vos filtres ou ajoutez un nouveau véhicule à la flotte.
         </p>
       </div>
     );
@@ -76,33 +77,35 @@ export function CarsList({ cars }: CarsListProps) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-        <div className="admin-fade-up overflow-x-auto border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]/40">
-          <table className="w-full min-w-[980px] border-collapse">
-            <thead>
-              <tr className="border-b border-[color:var(--admin-line-strong)]">
-                {HEADERS.map((h, i) => (
-                  <th
-                    key={i}
-                    className={`admin-mono px-4 py-4 text-[0.58rem] font-normal uppercase tracking-[0.32em] text-[color:var(--admin-text-muted)]/70 ${
-                      "align" in h ? h.align : ""
-                    } ${"width" in h ? h.width : ""}`}
-                  >
-                    {h.label}
-                  </th>
+        <div className="overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[920px] border-collapse">
+              <thead>
+                <tr className="border-b border-[color:var(--admin-line)] bg-[color:var(--admin-surface)]">
+                  {HEADERS.map((h, i) => (
+                    <th
+                      key={i}
+                      className={`px-3 py-2.5 text-[0.75rem] font-medium text-[color:var(--admin-text-muted)] ${
+                        "align" in h ? h.align : ""
+                      } ${"width" in h ? h.width : ""}`}
+                    >
+                      {h.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((car, i) => (
+                  <CarsListRow
+                    key={car.id}
+                    car={car}
+                    index={i}
+                    bookingCount={car.bookingCount}
+                  />
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((car, i) => (
-                <CarsListRow
-                  key={car.id}
-                  car={car}
-                  index={i}
-                  bookingCount={car.bookingCount}
-                />
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </SortableContext>
     </DndContext>

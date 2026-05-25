@@ -1,36 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export function ScrollProgress() {
-  const [progress, setProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement | null>(null);
+  const tickingRef = useRef(false);
 
   useEffect(() => {
-    const updateProgress = () => {
+    const update = () => {
+      tickingRef.current = false;
+      const node = barRef.current;
+      if (!node) return;
       const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (documentHeight <= 0) {
-        setProgress(0);
-        return;
-      }
-      const nextProgress = Math.min(100, Math.max(0, (window.scrollY / documentHeight) * 100));
-      setProgress(nextProgress);
+      const progress =
+        documentHeight <= 0
+          ? 0
+          : Math.min(100, Math.max(0, (window.scrollY / documentHeight) * 100));
+      node.style.width = `${progress}%`;
     };
 
-    updateProgress();
-    window.addEventListener("scroll", updateProgress, { passive: true });
-    window.addEventListener("resize", updateProgress);
+    const onScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
-      window.removeEventListener("scroll", updateProgress);
-      window.removeEventListener("resize", updateProgress);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, []);
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px bg-transparent">
-      <div
-        className="h-full bg-[var(--ink-ivory)] transition-[width] duration-150 ease-out"
-        style={{ width: `${progress}%` }}
-      />
+      <div ref={barRef} className="h-full bg-[var(--ink-ivory)]" style={{ width: "0%" }} />
     </div>
   );
 }

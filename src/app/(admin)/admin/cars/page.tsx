@@ -61,22 +61,14 @@ export default async function AdminCarsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Catalogue — Gestion de la flotte"
-        title={
-          <>
-            La flotte,
-            <br />
-            <span className="italic text-[color:var(--admin-text-muted)]">en majesté.</span>
-          </>
-        }
-        lede="Orchestrez l'ordre, la visibilité et la tarification de chaque véhicule confié à votre soin."
+        eyebrow="Catalogue"
+        title="Flotte"
+        lede="Gérez l'ordre, la visibilité et la tarification de chaque véhicule."
         meta={
           <>
-            <PageMetaItem label="Affichés" value={String(rows.length).padStart(2, "0")} />
-            <span className="text-[color:var(--admin-text-muted)]/40">·</span>
-            <PageMetaItem label="Flotte" value={String(totalCars).padStart(2, "0")} />
-            <span className="text-[color:var(--admin-text-muted)]/40">·</span>
-            <PageMetaItem label="Vitrine" value={String(featuredCount).padStart(2, "0")} />
+            <PageMetaItem label="Affichés" value={rows.length} />
+            <PageMetaItem label="Total" value={totalCars} />
+            <PageMetaItem label="Vitrine" value={featuredCount} />
           </>
         }
         actions={
@@ -89,9 +81,7 @@ export default async function AdminCarsPage({
         }
       />
       <CarsFilters />
-      <div className="mt-8">
-        <CarsList cars={rows} />
-      </div>
+      <CarsList cars={rows} />
     </>
   );
 }

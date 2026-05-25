@@ -16,7 +16,7 @@ export function FleetSection({ cars }: FleetSectionProps) {
           <div>
             <SectionCounter index={3} className="mb-5" />
             <h2 className="font-[family:var(--font-fraunces)] text-[clamp(40px,5vw,56px)] font-light leading-none tracking-[-0.025em] text-[var(--ink-ivory)]">
-              La flotte, <em className="italic font-normal">en silence.</em>
+              La flotte, <em className="italic font-normal">pièce par pièce.</em>
             </h2>
           </div>
           <Link

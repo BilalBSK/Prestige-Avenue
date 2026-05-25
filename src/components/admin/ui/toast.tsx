@@ -51,11 +51,30 @@ export const toast = {
 
 const ToastContext = createContext<ToastStore>(store);
 
-const LABELS: Record<ToastType, string> = {
-  success: "Succès",
-  error: "Erreur",
-  info: "Information",
-};
+function ToastIcon({ type }: { type: ToastType }) {
+  if (type === "success") {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-[color:var(--admin-success)]">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.25" />
+        <path d="M5 8.2L7 10.2L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (type === "error") {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-[color:var(--admin-danger)]">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.25" />
+        <path d="M8 4.5V8.5M8 11V11.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-[color:var(--admin-info)]">
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M8 7.5V11.5M8 5V5.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -65,37 +84,27 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={store}>
       {children}
-      <div className="pointer-events-none fixed bottom-6 right-6 z-50 flex w-[22rem] flex-col gap-3">
+      <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-[22rem] flex-col gap-2">
         {toasts.map((t) => (
           <div
             key={t.id}
             role="status"
-            className={`admin-toast pointer-events-auto border-l-2 bg-[color:var(--admin-bg-elev)]/95 px-5 py-4 backdrop-blur-sm ${
-              t.type === "success"
-                ? "border-l-[color:var(--admin-accent)]"
-                : t.type === "error"
-                  ? "border-l-[color:var(--admin-danger)]"
-                  : "border-l-[color:var(--admin-text-muted)]"
-            }`}
-            style={{
-              boxShadow:
-                "0 14px 40px -10px rgba(0,0,0,0.55), 0 1px 0 0 rgba(245,241,234,0.04) inset",
-            }}
+            className="admin-fade-in pointer-events-auto flex items-start gap-2.5 rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] px-3.5 py-3 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.5)]"
           >
-            <p
-              className={`admin-mono text-[0.58rem] uppercase tracking-[0.32em] ${
-                t.type === "success"
-                  ? "text-[color:var(--admin-accent)]"
-                  : t.type === "error"
-                    ? "text-[color:var(--admin-danger-soft)]"
-                    : "text-[color:var(--admin-text-muted)]"
-              }`}
-            >
-              {LABELS[t.type]}
-            </p>
-            <p className="mt-1.5 text-[0.86rem] leading-relaxed text-[color:var(--admin-text)]">
+            <ToastIcon type={t.type} />
+            <p className="flex-1 text-[0.8125rem] leading-relaxed text-[color:var(--admin-text)]">
               {t.message}
             </p>
+            <button
+              type="button"
+              onClick={() => store.dismiss(t.id)}
+              aria-label="Fermer"
+              className="shrink-0 text-[color:var(--admin-text-muted)] transition-colors hover:text-[color:var(--admin-text)]"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
           </div>
         ))}
       </div>

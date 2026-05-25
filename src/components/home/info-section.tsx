@@ -13,7 +13,7 @@ export function InfoSection() {
 
         <InfoReveal>
           <InfoCard title={<>À <em className="italic font-normal">savoir</em></>}>
-            Retrouvez ici les informations essentielles concernant la location. Notre equipe reste disponible pour toute question complementaire.
+            Retrouvez ici les informations essentielles concernant la location. Notre équipe reste disponible pour toute question complémentaire.
           </InfoCard>
           <InfoCard title={<><em className="italic font-normal">Où</em> ?</>}>
             72 Rue de Lessard
@@ -26,7 +26,7 @@ export function InfoSection() {
                 <span className="text-[var(--ink-muted)]">— </span>Permis de conduire valide
               </li>
               <li className="border-t border-[var(--ink-line)] py-[7px]">
-                <span className="text-[var(--ink-muted)]">— </span>Piece d&apos;identite valide
+                <span className="text-[var(--ink-muted)]">— </span>Pièce d&apos;identité valide
               </li>
               <li className="border-t border-[var(--ink-line)] py-[7px]">
                 <span className="text-[var(--ink-muted)]">— </span>Justificatif de domicile -3 mois
@@ -34,7 +34,7 @@ export function InfoSection() {
             </ul>
           </InfoCard>
           <InfoCard title={<><em className="italic font-normal">Réservation</em></>}>
-            Pour toutes reservations un acompte vous sera demande (40% du total).
+            Aucun paiement en ligne. Vous soumettez une demande, nous validons sous 24 h ouvrées, le règlement intervient à la remise des clés.
           </InfoCard>
         </InfoReveal>
       </div>

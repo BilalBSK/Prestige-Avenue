@@ -5,17 +5,17 @@ const STEPS = [
   {
     num: "01",
     name: "Choisir",
-    desc: "Parcourez la flotte. Chaque vehicule est decrit, photographie, controle.",
+    desc: "Parcourez la flotte. Chaque véhicule est décrit, photographié, contrôlé.",
   },
   {
     num: "02",
-    name: "Reserver",
-    desc: "40% d'acompte securise, paiement en ligne. Le solde reste libre jusqu'a la prise.",
+    name: "Réserver",
+    desc: "Soumettez votre demande en moins d'une minute. Notre équipe la valide sous 24 h ouvrées.",
   },
   {
     num: "03",
     name: "Prendre la route",
-    desc: "Remise des cles a Rouen. Assurance, assistance, et tout le reste — inclus.",
+    desc: "Règlement à la remise des clés à Rouen. Assurance, assistance, et tout le reste — inclus.",
   },
 ];
 

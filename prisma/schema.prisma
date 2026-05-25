@@ -19,17 +19,12 @@ enum CarStatus {
 }
 
 enum BookingStatus {
-  PENDING
+  PENDING_REVIEW
   CONFIRMED
-  CANCELLED
+  IN_PROGRESS
   COMPLETED
-}
-
-enum PaymentStatus {
-  UNPAID
-  PAID
-  REFUNDED
-  FAILED
+  CANCELLED
+  DECLINED
 }
 
 enum CarCategory {
@@ -118,25 +113,24 @@ model Car {
 }
 
 model Booking {
-  id              String        @id @default(cuid())
-  userId          String
-  carId           String
-  startDate       DateTime
-  endDate         DateTime
-  totalPrice      Decimal       @db.Decimal(10, 2)
-  depositDueNow   Decimal       @db.Decimal(10, 2)
-  remainingBalance Decimal      @db.Decimal(10, 2)
-  status          BookingStatus @default(PENDING)
-  paymentStatus   PaymentStatus @default(UNPAID)
-  stripeSessionId String?       @unique
-  submissionToken String?       @unique
-  createdAt       DateTime      @default(now())
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  car             Car           @relation(fields: [carId], references: [id], onDelete: Restrict)
+  id               String        @id @default(cuid())
+  userId           String
+  carId            String
+  startDate        DateTime
+  endDate          DateTime
+  totalPrice       Decimal       @db.Decimal(10, 2)
+  status           BookingStatus @default(PENDING_REVIEW)
+  customerMessage  String?
+  declineReason    String?
+  submissionToken  String?       @unique
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car              Car           @relation(fields: [carId], references: [id], onDelete: Restrict)
 
   @@index([carId, startDate, endDate])
   @@index([userId, createdAt])
-  @@index([status, paymentStatus])
+  @@index([status, createdAt])
 }
 
 model BlockedDate {
