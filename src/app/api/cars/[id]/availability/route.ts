@@ -14,24 +14,38 @@ interface Params {
 }
 
 export async function GET(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const searchParams = request.nextUrl.searchParams;
-  const parsed = availabilitySchema.safeParse({
-    startDate: searchParams.get("startDate"),
-    endDate: searchParams.get("endDate"),
-  });
+  try {
+    const { id } = await params;
+    const searchParams = request.nextUrl.searchParams;
+    const parsed = availabilitySchema.safeParse({
+      startDate: searchParams.get("startDate"),
+      endDate: searchParams.get("endDate"),
+    });
 
-  if (!parsed.success) {
+    if (!parsed.success) {
+      return NextResponse.json(
+        { isAvailable: false, reason: "Dates invalides." },
+        { status: 200 },
+      );
+    }
+
+    const result = await checkAvailability({
+      carId: id,
+      startDate: parsed.data.startDate,
+      endDate: parsed.data.endDate,
+    });
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("[availability] failed:", error);
     return NextResponse.json(
-      { isAvailable: false, reason: "Dates invalides." },
-      { status: 400 },
+      {
+        isAvailable: false,
+        reason:
+          error instanceof Error
+            ? error.message
+            : "Vérification temporairement indisponible. Réessayez.",
+      },
+      { status: 200 },
     );
   }
-
-  const result = await checkAvailability({
-    carId: id,
-    startDate: parsed.data.startDate,
-    endDate: parsed.data.endDate,
-  });
-  return NextResponse.json(result);
 }
