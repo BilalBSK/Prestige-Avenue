@@ -3,14 +3,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 function withCsrfCookie(request: NextRequest, response: NextResponse) {
-  if (!request.cookies.get(CSRF_COOKIE_NAME)?.value) {
-    response.cookies.set(CSRF_COOKIE_NAME, generateCsrfToken(), {
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      httpOnly: false,
-    });
-  }
+  const existingToken = request.cookies.get(CSRF_COOKIE_NAME)?.value;
+  const token = existingToken ?? generateCsrfToken();
+  response.cookies.set(CSRF_COOKIE_NAME, token, {
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    httpOnly: false,
+  });
   return response;
 }
 
