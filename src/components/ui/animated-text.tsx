@@ -101,11 +101,9 @@ export function AnimatedText({
 export function AnimatedUnderlineText({
   text,
   className = "",
-  delay = 0,
 }: {
   text: string;
   className?: string;
-  delay?: number;
 }) {
   return (
     <span className={`text-underline-reveal ${className}`}>
