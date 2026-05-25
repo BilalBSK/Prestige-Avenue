@@ -11,7 +11,7 @@ const r2PublicHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
-  distDir: ".next-app",
+  ...(process.env.VERCEL ? {} : { distDir: ".next-app" }),
   outputFileTracingRoot: process.cwd(),
   images: {
     formats: ["image/avif", "image/webp"],
