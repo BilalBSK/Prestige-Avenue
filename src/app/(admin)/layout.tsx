@@ -5,6 +5,9 @@ import { ToastProvider } from "@/components/admin/ui/toast";
 import { requireAdminSessionOrRedirect } from "@/lib/admin-auth";
 import { ReactNode } from "react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await requireAdminSessionOrRedirect();
 
