@@ -59,7 +59,36 @@ export default async function AdminBlockedDatesPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="divide-y divide-[color:var(--admin-line)] md:hidden">
+            {blockedDates.map((blockedDate) => {
+              const nights = nightCount(blockedDate.startDate, blockedDate.endDate);
+              return (
+                <div key={blockedDate.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
+                      {blockedDate.car.brand} {blockedDate.car.model}
+                    </div>
+                    <BlockedDateDeleteButton blockedDateId={blockedDate.id} />
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.8125rem] text-[color:var(--admin-text-soft)]">
+                    <span className="admin-tabular">{formatDate(blockedDate.startDate)}</span>
+                    <span className="text-[color:var(--admin-text-muted)]">→</span>
+                    <span className="admin-tabular">{formatDate(blockedDate.endDate)}</span>
+                    <span className="admin-tabular text-[color:var(--admin-text-muted)]">
+                      · {nights} {nights > 1 ? "nuits" : "nuit"}
+                    </span>
+                  </div>
+                  {blockedDate.reason && (
+                    <p className="mt-1.5 text-[0.8125rem] text-[color:var(--admin-text-soft)]">
+                      {blockedDate.reason}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-[color:var(--admin-line-strong)]">
@@ -115,6 +144,7 @@ export default async function AdminBlockedDatesPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </>

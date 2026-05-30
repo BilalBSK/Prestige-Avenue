@@ -7,10 +7,13 @@ interface WordHighlightProps {
   /** Word index (0-based) where italic emphasis starts. Marks all words from this index to end. */
   italicFromIndex?: number;
   className?: string;
+  /** Rendered element. Defaults to "p"; pass a heading tag to preserve semantics. */
+  as?: "p" | "h2" | "h3";
 }
 
-export function WordHighlight({ text, italicFromIndex, className = "" }: WordHighlightProps) {
-  const containerRef = useRef<HTMLParagraphElement | null>(null);
+export function WordHighlight({ text, italicFromIndex, className = "", as = "p" }: WordHighlightProps) {
+  const Tag = as;
+  const containerRef = useRef<HTMLElement | null>(null);
   const [progress, setProgress] = useState(0);
 
   const words = useMemo(() => text.split(/(\s+)/), [text]);
@@ -59,8 +62,8 @@ export function WordHighlight({ text, italicFromIndex, className = "" }: WordHig
   let wordCounter = -1;
 
   return (
-    <p
-      ref={containerRef}
+    <Tag
+      ref={containerRef as React.Ref<HTMLHeadingElement & HTMLParagraphElement>}
       className={`font-[family:var(--font-fraunces)] font-light leading-[1.18] tracking-[-0.02em] ${className}`}
     >
       {words.map((token, i) => {
@@ -82,6 +85,6 @@ export function WordHighlight({ text, italicFromIndex, className = "" }: WordHig
           </span>
         );
       })}
-    </p>
+    </Tag>
   );
 }

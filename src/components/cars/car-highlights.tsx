@@ -13,7 +13,7 @@ export function CarHighlights({ highlights }: CarHighlightsProps) {
   return (
     <section className="lux-container py-24 md:py-32">
       <div className="mb-10 max-w-[680px]">
-        <p className="mb-4 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em] text-[var(--ink-muted)]">
+        <p className="lux-eyebrow mb-4 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em]">
           — Sélection
         </p>
         <h3 className="font-[family:var(--font-fraunces)] text-[clamp(28px,3.5vw,44px)] font-light leading-[1.05] tracking-[-0.02em] text-[var(--ink-ivory)]">

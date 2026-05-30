@@ -177,7 +177,63 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
             </span>
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-[color:var(--admin-warn)]/30 bg-[color:var(--admin-warn-dim)]/40">
+          <div className="space-y-3 md:hidden">
+            {pendingReview.map((booking) => (
+              <article
+                key={booking.id}
+                className="rounded-lg border border-[color:var(--admin-warn)]/30 bg-[color:var(--admin-warn-dim)]/40 p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
+                      {booking.user.name}
+                    </div>
+                    <div className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
+                      {booking.user.email}
+                    </div>
+                    {booking.user.phone && (
+                      <div className="admin-tabular text-[0.75rem] text-[color:var(--admin-text-muted)]">
+                        {booking.user.phone}
+                      </div>
+                    )}
+                  </div>
+                  <div className="admin-tabular text-right text-[0.875rem] font-medium text-[color:var(--admin-text)]">
+                    {formatEUR(Number(booking.totalPrice))}
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-3 border-t border-[color:var(--admin-line)] pt-3">
+                  <div>
+                    <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Véhicule</div>
+                    <div className="text-[0.8125rem] text-[color:var(--admin-text)]">
+                      {booking.car.brand} {booking.car.model}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Période</div>
+                    <div className="admin-tabular text-[0.8125rem] text-[color:var(--admin-text)]">
+                      {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
+                    </div>
+                  </div>
+                </div>
+
+                {booking.customerMessage && (
+                  <p className="mt-3 border-t border-[color:var(--admin-line)] pt-3 text-[0.8125rem] italic text-[color:var(--admin-text-soft)]">
+                    « {booking.customerMessage} »
+                  </p>
+                )}
+
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[color:var(--admin-line)] pt-3">
+                  <span className="admin-mono text-[0.6875rem] text-[color:var(--admin-text-muted)]">
+                    #{booking.id.slice(-8).toUpperCase()}
+                  </span>
+                  <BookingActions bookingId={booking.id} status={booking.status} />
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-hidden rounded-lg border border-[color:var(--admin-warn)]/30 bg-[color:var(--admin-warn-dim)]/40 md:block">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left">
                 <thead>
@@ -284,7 +340,67 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
         </section>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+      {otherBookings.length > 0 && (
+        <div className="space-y-3 md:hidden">
+          {otherBookings.map((booking) => (
+            <article
+              key={booking.id}
+              className="rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
+                    {booking.user.name}
+                  </div>
+                  <div className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
+                    {booking.user.email}
+                  </div>
+                </div>
+                <span className={`admin-pill shrink-0 ${STATUS_STYLE[booking.status]}`}>
+                  {STATUS_LABEL[booking.status]}
+                </span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-[color:var(--admin-line)] pt-3">
+                <div>
+                  <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Véhicule</div>
+                  <div className="text-[0.8125rem] text-[color:var(--admin-text)]">
+                    {booking.car.brand} {booking.car.model}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Montant</div>
+                  <div className="admin-tabular text-[0.8125rem] font-medium text-[color:var(--admin-text)]">
+                    {formatEUR(Number(booking.totalPrice))}
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Période</div>
+                  <div className="admin-tabular text-[0.8125rem] text-[color:var(--admin-text)]">
+                    {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
+                  </div>
+                </div>
+              </div>
+
+              {booking.status === BookingStatus.DECLINED && booking.declineReason && (
+                <p className="mt-3 border-t border-[color:var(--admin-line)] pt-3 text-[0.75rem] italic text-[color:var(--admin-text-muted)]">
+                  {booking.declineReason}
+                </p>
+              )}
+
+              <div className="mt-3 flex justify-end border-t border-[color:var(--admin-line)] pt-3">
+                <BookingActions bookingId={booking.id} status={booking.status} />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      <div
+        className={`overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] ${
+          otherBookings.length > 0 ? "hidden md:block" : ""
+        }`}
+      >
         {otherBookings.length === 0 && (statusFilter || pendingReview.length === 0) ? (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--admin-surface)]">

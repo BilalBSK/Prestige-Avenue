@@ -9,15 +9,15 @@ export const metadata: Metadata = {
     "Contactez l'équipe Prestige Avenue. Adresse, téléphone, email et horaires d'ouverture.",
 };
 
-const ADDRESS_LINE_1 = "72 Rue de Lessard";
-const ADDRESS_LINE_2 = "76100 Rouen";
+const ADDRESS_LINE_1 = "191 route des Docks";
+const ADDRESS_LINE_2 = "76120 Le Grand-Quevilly";
 const PHONES = ["06 21 18 94 82", "07 68 27 93 88"];
 const EMAIL = "prestigeavenuee@gmail.com";
 const HOURS = "Lundi → Samedi · 9h — 19h";
-const CITY = "Rouen";
+const CITY = "Le Grand-Quevilly";
 
 const MAPS_EMBED_SRC =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2594.8133274479756!2d1.089591840903581!3d49.43134309198297!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e0de700503fa9f%3A0x965b275cbbb186db!2s72%20Rue%20de%20Lessard%2C%2076100%20Rouen!5e0!3m2!1sfr!2sfr!4v1779665989455!5m2!1sfr!2sfr";
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2596.3549034876683!2d1.0186195768703075!3d49.402193762283346!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e0e0f87b237587%3A0x5c4bdadfb8e9908a!2s191%20Rte%20des%20Docks%2C%2076120%20Le%20Grand-Quevilly!5e0!3m2!1sen!2sfr!4v1780104234524!5m2!1sen!2sfr";
 
 export default function ContactPage() {
   return (

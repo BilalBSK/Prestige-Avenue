@@ -10,7 +10,7 @@ export function SectionCounter({ index, total = 7, className = "" }: SectionCoun
 
   return (
     <span
-      className={`inline-block font-[family:var(--font-dm-sans)] text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--ink-muted)] ${className}`}
+      className={`inline-block font-[family:var(--font-dm-sans)] text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--ink-soft)] ${className}`}
     >
       — {padded} / {totalPadded}
     </span>

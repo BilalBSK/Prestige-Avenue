@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Fraunces, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -37,6 +37,12 @@ export const metadata: Metadata = {
   title: "Prestige Avenue — Location de véhicules de prestige à Rouen",
   description:
     "Location de voitures de luxe à Rouen. Soumettez votre demande en ligne, validation sous 24 h, règlement à la remise des clés.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

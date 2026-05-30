@@ -5,6 +5,7 @@ import { memo } from "react";
 
 interface CarCardProps {
   car: Car;
+  gleamPrice?: boolean;
 }
 
 const priceFormatter = new Intl.NumberFormat("fr-FR", {
@@ -12,7 +13,7 @@ const priceFormatter = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 2,
 });
 
-function CarCardComponent({ car }: CarCardProps) {
+function CarCardComponent({ car, gleamPrice = false }: CarCardProps) {
   const trim = car.trim?.trim() || null;
   const price = priceFormatter.format(Number(car.pricePerDay));
   const pricePerKm =
@@ -49,7 +50,11 @@ function CarCardComponent({ car }: CarCardProps) {
 
         <div className="mt-7 flex items-end justify-between border-t border-[var(--ink-line)] pt-[18px]">
           <div>
-            <p className="font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.06em] text-[var(--ink-soft)]">
+            <p
+              className={`font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.06em] ${
+                gleamPrice ? "lux-eyebrow" : "text-[var(--ink-soft)]"
+              }`}
+            >
               À partir de
             </p>
             <p className="mt-1 font-[family:var(--font-fraunces)] text-[30px] font-light leading-none tracking-[-0.015em] text-[var(--ink-ivory)]">

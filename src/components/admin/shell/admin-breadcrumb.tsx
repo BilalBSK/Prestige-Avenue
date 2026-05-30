@@ -30,9 +30,12 @@ export function AdminBreadcrumb() {
   });
 
   return (
-    <nav aria-label="Fil d'Ariane" className="flex items-center gap-2">
+    <nav
+      aria-label="Fil d'Ariane"
+      className="flex min-w-0 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       {crumbs.map((crumb, i) => (
-        <span key={crumb.href} className="flex items-center gap-2">
+        <span key={crumb.href} className="flex flex-shrink-0 items-center gap-2">
           {i > 0 && (
             <svg
               aria-hidden

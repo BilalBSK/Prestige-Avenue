@@ -43,7 +43,7 @@ function SpecCell({ label, value, unit, variant }: SpecCellProps) {
 
   return (
     <div className="group relative flex flex-col items-start py-10 md:py-14 md:pl-10 first:md:pl-0 md:[&:not(:first-child)]:border-l md:border-[var(--ink-line)]">
-      <p className="font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em] text-[var(--ink-muted)] transition-colors duration-300 group-hover:text-[var(--ink-text-soft)]">
+      <p className="lux-eyebrow font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em]">
         {label}
       </p>
       <p

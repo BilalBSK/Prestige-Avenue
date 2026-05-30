@@ -1,13 +1,17 @@
 @import "tailwindcss";
 
 :root {
+  /* Tell the UA to render native form controls (date pickers, scrollbars,
+     calendar indicators) in dark mode — fixes black-on-black icons. */
+  color-scheme: dark;
+
   --ink-onyx: #050505;
   --ink-surface: #0a0a0c;
   --ink-elevated: #101013;
   --ink-line: #18181b;
   --ink-line-soft: #27272a;
   --ink-dim: #3f3f46;
-  --ink-muted: #52525b;
+  --ink-muted: #6b6b74;
   --ink-soft: #71717a;
   --ink-text-soft: #a1a1aa;
   --ink-text: #e4e4e7;
@@ -209,6 +213,38 @@ a {
   }
 
   /* ============================================
+     Eyebrow / micro-label — readable base tone with a slow
+     light-sweep gleaming through the glyphs. Replaces the too-dark
+     --ink-muted used on small uppercase labels.
+     ============================================ */
+
+  .lux-eyebrow {
+    background-image: linear-gradient(
+      100deg,
+      var(--ink-soft) 0%,
+      var(--ink-soft) 42%,
+      var(--ink-ivory) 50%,
+      var(--ink-soft) 58%,
+      var(--ink-soft) 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: lux-eyebrow-gleam 5s linear infinite;
+  }
+
+  @keyframes lux-eyebrow-gleam {
+    from {
+      background-position: 220% 0;
+    }
+    to {
+      background-position: -120% 0;
+    }
+  }
+
+  /* ============================================
      Reveal-on-scroll utilities
      Initial state hidden, .is-visible flips to visible.
      ============================================ */
@@ -276,6 +312,23 @@ a {
   /* CTA ticker arrow */
   .group:hover .cta-arrow-track {
     transform: translateY(-18px);
+  }
+
+  /* Info card cursor-following spotlight */
+  .info-card-spot {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, 0%),
+      rgba(250, 250, 250, 0.07),
+      transparent 60%
+    );
+    transition: opacity 450ms ease-out;
+  }
+  .info-card:hover .info-card-spot {
+    opacity: 1;
   }
 
   /* Contact page */

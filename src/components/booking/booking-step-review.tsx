@@ -37,7 +37,7 @@ export function BookingStepReview({
 }: BookingStepReviewProps) {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-1 space-y-8 overflow-y-auto overscroll-contain px-8 pb-8 pt-8">
+      <div className="flex-1 space-y-8 overflow-y-auto overscroll-contain px-5 pb-8 pt-8 sm:px-8">
         <div>
           <p className="mb-4 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em] text-[var(--ink-muted)]">
             <span className="mr-3 inline-block h-px w-6 bg-[var(--ink-dim)] align-middle" />
@@ -101,7 +101,7 @@ export function BookingStepReview({
         )}
       </div>
 
-      <div className="grid grid-cols-[auto_1fr] gap-3 border-t border-[var(--ink-line)] bg-[var(--ink-onyx)] px-8 py-5">
+      <div className="grid grid-cols-[auto_1fr] gap-3 border-t border-[var(--ink-line)] bg-[var(--ink-onyx)] px-5 py-5 sm:px-8">
         <button
           type="button"
           onClick={onBack}

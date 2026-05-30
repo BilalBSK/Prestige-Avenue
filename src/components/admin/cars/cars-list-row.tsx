@@ -168,3 +168,69 @@ export function CarsListRow({ car, bookingCount }: CarsListRowProps) {
     </tr>
   );
 }
+
+export function CarsListCard({ car, bookingCount }: { car: CarRow; bookingCount: number }) {
+  const status = STATUS_STYLE[car.status];
+
+  return (
+    <article className="rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] p-3">
+      <div className="flex items-start gap-3">
+        <div className="relative aspect-[4/3] w-16 shrink-0 overflow-hidden rounded-md border border-[color:var(--admin-line)] bg-[color:var(--admin-surface)]">
+          {car.mainImage && (
+            <Image src={car.mainImage} alt="" fill sizes="64px" className="object-cover" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
+            {car.brand} <span className="font-normal text-[color:var(--admin-text-soft)]">{car.model}</span>
+          </div>
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.75rem] text-[color:var(--admin-text-muted)]">
+            <span>{CATEGORY_LABEL[car.category]}</span>
+            {car.trim && <span className="text-[color:var(--admin-text-muted)]/50">·</span>}
+            {car.trim && <span className="truncate">{car.trim}</span>}
+          </div>
+        </div>
+        <span className={`admin-pill border shrink-0 ${status.className}`}>
+          <span className="admin-pill-dot" />
+          {status.label}
+        </span>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-[color:var(--admin-line)] pt-3">
+        <div className="flex items-center gap-4">
+          <div>
+            <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Tarif</div>
+            <div className="admin-tabular text-[0.875rem] text-[color:var(--admin-text)]">
+              {Math.round(car.pricePerDay)}€
+            </div>
+          </div>
+          <div>
+            <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Week-end</div>
+            <div className="admin-tabular text-[0.875rem] text-[color:var(--admin-text)]">
+              {car.weekendPackagePrice !== null ? `${Math.round(car.weekendPackagePrice)}€` : "—"}
+            </div>
+          </div>
+          <div>
+            <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Vitrine</div>
+            <div className="mt-0.5">
+              <ToggleFeaturedSwitch carId={car.id} initial={car.isFeatured} />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Link
+            href={`/admin/cars/${car.id}/edit`}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            Éditer
+          </Link>
+          <DeleteCarButton
+            carId={car.id}
+            carLabel={`${car.brand} ${car.model}`}
+            hasBookings={bookingCount > 0}
+          />
+        </div>
+      </div>
+    </article>
+  );
+}

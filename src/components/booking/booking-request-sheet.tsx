@@ -133,7 +133,7 @@ export function BookingRequestSheet({
 
   return (
     <Sheet open={open} onClose={handleClose} ariaLabel="Réservation">
-      <header className="flex-shrink-0 border-b border-[var(--ink-line)] px-8 pb-7 pt-8">
+      <header className="flex-shrink-0 border-b border-[var(--ink-line)] px-5 pb-7 pt-8 sm:px-8">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em] text-[var(--ink-muted)]">

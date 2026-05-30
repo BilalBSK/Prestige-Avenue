@@ -29,7 +29,7 @@ export function FleetSection({ cars }: FleetSectionProps) {
 
         <FleetReveal>
           {cars.map((car) => (
-            <CarCard key={car.id} car={car} />
+            <CarCard key={car.id} car={car} gleamPrice />
           ))}
         </FleetReveal>
       </div>

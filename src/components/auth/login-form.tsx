@@ -20,7 +20,11 @@ type LoginValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const callbackUrlParam = searchParams.get("callbackUrl");
+  const callbackUrl =
+    callbackUrlParam && callbackUrlParam.startsWith("/admin")
+      ? callbackUrlParam
+      : "/admin/dashboard";
   const [errorMessage, setErrorMessage] = useState("");
 
   const form = useForm<LoginValues>({

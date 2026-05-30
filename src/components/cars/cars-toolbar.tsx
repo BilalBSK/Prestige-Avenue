@@ -78,7 +78,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
 
   return (
     <div className="sticky top-16 z-30 border-y border-[var(--ink-line)] bg-[rgba(5,5,5,0.88)] backdrop-blur-md">
-      <div className="lux-container flex h-16 items-center justify-between gap-4">
+      <div className="lux-container flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-3 md:h-16 md:flex-nowrap md:py-0">
         {/* Sort dropdown — left */}
         <Popover
           open={openPopover === "sort"}
@@ -115,7 +115,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
         </Popover>
 
         {/* Filter pills — center */}
-        <div className="flex items-center gap-2">
+        <div className="order-last flex w-full flex-wrap items-center gap-2 md:order-none md:w-auto md:flex-nowrap">
           <FilterPill
             label={priceLabel}
             active={filters.minPrice !== PRICE_MIN || filters.maxPrice !== PRICE_MAX}
@@ -225,7 +225,7 @@ function FilterPill({ label, active, open, onToggle, popoverContent, popoverOpen
           {label}
         </button>
       }
-      className="w-[320px] border border-[var(--ink-line)] bg-[var(--ink-elevated)] p-5 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.85)]"
+      className="w-[min(320px,calc(100vw-2rem))] border border-[var(--ink-line)] bg-[var(--ink-elevated)] p-5 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.85)]"
     >
       {popoverContent}
     </Popover>

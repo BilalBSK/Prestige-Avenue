@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div className="flex min-w-0 flex-1 flex-col">
           <AdminTopbar userName={session.user?.name} userEmail={session.user?.email} />
           <main className="flex-1 overflow-x-auto">
-            <div className="mx-auto w-full max-w-[1400px] px-6 py-6 lg:px-8 lg:py-8">
+            <div className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
               {children}
             </div>
           </main>

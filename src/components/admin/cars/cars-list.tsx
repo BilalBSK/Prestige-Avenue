@@ -12,7 +12,7 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-ki
 import { toast } from "@/components/admin/ui/toast";
 import { reorderCars } from "@/server/admin/cars.actions";
 import { useState, useTransition } from "react";
-import { CarsListRow, type CarRow } from "./cars-list-row";
+import { CarsListCard, CarsListRow, type CarRow } from "./cars-list-row";
 
 interface CarsListProps {
   cars: CarRow[];
@@ -77,7 +77,7 @@ export function CarsList({ cars }: CarsListProps) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-        <div className="overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+        <div className="hidden overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] lg:block">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[920px] border-collapse">
               <thead>
@@ -106,6 +106,12 @@ export function CarsList({ cars }: CarsListProps) {
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 lg:hidden">
+          {items.map((car) => (
+            <CarsListCard key={car.id} car={car} bookingCount={car.bookingCount} />
+          ))}
         </div>
       </SortableContext>
     </DndContext>

@@ -56,7 +56,7 @@ interface NavItem {
   icon: ComponentType<IconProps>;
 }
 
-const NAV: NavItem[] = [
+export const ADMIN_NAV: NavItem[] = [
   { href: "/admin/dashboard", label: "Tableau de bord", icon: IconDashboard },
   { href: "/admin/cars", label: "Flotte", icon: IconCars },
   { href: "/admin/bookings", label: "Réservations", icon: IconBookings },
@@ -64,50 +64,60 @@ const NAV: NavItem[] = [
   { href: "/admin/blocked-dates", label: "Indisponibilités", icon: IconBlocked },
 ];
 
-export function AdminSidebar() {
+export function AdminBrand() {
+  return (
+    <Link
+      href="/admin/dashboard"
+      className="flex items-center gap-2.5 text-[color:var(--admin-text)]"
+    >
+      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[color:var(--admin-accent)] text-[0.78rem] font-semibold text-black">
+        PA
+      </span>
+      <span className="text-[0.9rem] font-semibold tracking-tight">Prestige</span>
+    </Link>
+  );
+}
+
+export function AdminNavList({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
+    <nav className="flex flex-1 flex-col gap-0.5 px-3 py-4">
+      {ADMIN_NAV.map((item) => {
+        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            className={`group flex items-center gap-3 rounded-md px-3 py-2 text-[0.8125rem] font-medium transition-colors ${
+              active
+                ? "bg-[color:var(--admin-surface-2)] text-[color:var(--admin-text)]"
+                : "text-[color:var(--admin-text-soft)] hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)]"
+            }`}
+          >
+            <Icon
+              className={`h-4 w-4 shrink-0 transition-colors ${
+                active ? "text-[color:var(--admin-accent)]" : "text-[color:var(--admin-text-muted)] group-hover:text-[color:var(--admin-text-soft)]"
+              }`}
+              aria-hidden
+            />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function AdminSidebar() {
+  return (
     <aside className="hidden w-60 shrink-0 border-r border-[color:var(--admin-line)] bg-[color:var(--admin-bg-elev)] lg:flex lg:flex-col">
       <div className="flex h-14 items-center border-b border-[color:var(--admin-line)] px-5">
-        <Link
-          href="/admin/dashboard"
-          className="flex items-center gap-2.5 text-[color:var(--admin-text)]"
-        >
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[color:var(--admin-accent)] text-[0.78rem] font-semibold text-black">
-            PA
-          </span>
-          <span className="text-[0.9rem] font-semibold tracking-tight">
-            Prestige
-          </span>
-        </Link>
+        <AdminBrand />
       </div>
-
-      <nav className="flex flex-1 flex-col gap-0.5 px-3 py-4">
-        {NAV.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`group flex items-center gap-3 rounded-md px-3 py-2 text-[0.8125rem] font-medium transition-colors ${
-                active
-                  ? "bg-[color:var(--admin-surface-2)] text-[color:var(--admin-text)]"
-                  : "text-[color:var(--admin-text-soft)] hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)]"
-              }`}
-            >
-              <Icon
-                className={`h-4 w-4 shrink-0 transition-colors ${
-                  active ? "text-[color:var(--admin-accent)]" : "text-[color:var(--admin-text-muted)] group-hover:text-[color:var(--admin-text-soft)]"
-                }`}
-                aria-hidden
-              />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      <AdminNavList />
     </aside>
   );
 }

@@ -19,7 +19,7 @@ export function CarFeatures({ features }: CarFeaturesProps) {
     <section className="border-y border-[var(--ink-line)] bg-[var(--ink-surface)] py-24 md:py-32">
       <div className="lux-container">
         <div className="mb-12 max-w-[820px] md:mb-16">
-          <p className="mb-4 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em] text-[var(--ink-muted)]">
+          <p className="lux-eyebrow mb-4 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em]">
             — Détails techniques
           </p>
           <h3 className="font-[family:var(--font-fraunces)] text-[clamp(32px,4vw,52px)] font-light leading-[1] tracking-[-0.025em] text-[var(--ink-ivory)]">
@@ -36,7 +36,7 @@ export function CarFeatures({ features }: CarFeaturesProps) {
                 <h4 className="font-[family:var(--font-fraunces)] text-[22px] font-light leading-[1.2] tracking-[-0.01em] text-[var(--ink-ivory)]">
                   {feature.title}
                 </h4>
-                <span className="font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em] text-[var(--ink-muted)]">
+                <span className="font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.28em] text-[var(--ink-soft)]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
