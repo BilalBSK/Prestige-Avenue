@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AdminBrand, AdminNavList } from "./admin-sidebar";
+import { AdminViewSiteFooter } from "./admin-view-site";
 
 export function AdminMobileNav() {
   const [open, setOpen] = useState(false);
@@ -70,6 +71,7 @@ export function AdminMobileNav() {
           </button>
         </div>
         <AdminNavList onNavigate={() => setOpen(false)} />
+        <AdminViewSiteFooter onNavigate={() => setOpen(false)} />
       </aside>
     </div>
   );

@@ -1,6 +1,7 @@
 import { AdminBreadcrumb } from "./admin-breadcrumb";
 import { AdminMobileNav } from "./admin-mobile-nav";
 import { AdminUserMenu } from "./admin-user-menu";
+import { AdminViewSiteButton } from "./admin-view-site";
 
 interface AdminTopbarProps {
   userName: string | null | undefined;
@@ -14,7 +15,9 @@ export function AdminTopbar({ userName, userEmail }: AdminTopbarProps) {
         <AdminMobileNav />
         <AdminBreadcrumb />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <AdminViewSiteButton />
+        <span aria-hidden className="h-5 w-px bg-[color:var(--admin-line)]" />
         <AdminUserMenu name={userName} email={userEmail} />
       </div>
     </header>

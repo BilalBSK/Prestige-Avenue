@@ -98,12 +98,7 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
                 aria-hidden
                 className="hidden h-3 w-px bg-[var(--ink-line-soft)] md:block"
               />
-              <Link
-                href="/admin/dashboard"
-                className="font-[family:var(--font-fraunces)] text-[13px] italic normal-case tracking-[0.02em] text-[var(--ink-text-soft)] transition-colors duration-300 hover:text-[var(--ink-ivory)]"
-              >
-                Admin
-              </Link>
+              <AdminIconLink />
             </>
           )}
         </nav>
@@ -255,6 +250,44 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
         </nav>
       </div>
     </header>
+  );
+}
+
+/**
+ * Admin entry point in the public header — a refined icon button (replacing the
+ * old "Admin" text link) with a hairline ring and a hover tooltip. The dashboard
+ * glyph mirrors the icon used inside the back-office for a coherent visual cue.
+ */
+function AdminIconLink() {
+  return (
+    <Link
+      href="/admin/dashboard"
+      aria-label="Espace admin"
+      className="group relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--ink-line)] text-[var(--ink-text-soft)] transition-[color,border-color,background-color] duration-300 hover:border-[var(--ink-line-soft)] hover:bg-[var(--ink-elevated)] hover:text-[var(--ink-ivory)]"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+        className="h-[17px] w-[17px]"
+      >
+        <rect x="3" y="3" width="7" height="9" rx="1" />
+        <rect x="14" y="3" width="7" height="5" rx="1" />
+        <rect x="14" y="12" width="7" height="9" rx="1" />
+        <rect x="3" y="16" width="7" height="5" rx="1" />
+      </svg>
+      {/* Tooltip — fades in below the button on hover/focus, never intercepts clicks. */}
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute top-full right-0 mt-2.5 translate-y-1 whitespace-nowrap rounded-md border border-[var(--ink-line-soft)] bg-[rgba(12,12,14,0.96)] px-2.5 py-1 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.18em] text-[var(--ink-text-soft)] opacity-0 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.9)] backdrop-blur-md transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+      >
+        Espace admin
+      </span>
+    </Link>
   );
 }
 
