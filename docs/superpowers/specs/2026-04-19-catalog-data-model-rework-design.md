@@ -355,5 +355,5 @@ Critères d'acceptation :
 - [ ] La page `/cars` affiche 3 cartes, dans le bon ordre, avec shortTagline et puissance
 - [ ] La page `/cars/[id]` de chaque voiture affiche description, highlights, features, caution, conditions de location
 - [ ] Une réservation Ven→Lun sur la Clio 6 calcule 320 € (forfait) et non 3 × 34,99 €
-- [ ] Une réservation Lun→Jeu (3 nuits) sur la Clio 6 calcule 3 × 34,99 € = 104,97 €
+- [ ] Une réservation Lun→Jeu sur la Clio 6 calcule 3 × 34,99 € = 104,97 €
 - [ ] Le form côté client et l'API serveur donnent le même `totalPrice`

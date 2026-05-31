@@ -171,7 +171,7 @@ export function BookingStepDates({
             </p>
           </div>
           <p className="mt-3 font-[family:var(--font-dm-sans)] text-[12px] leading-[1.6] text-[var(--ink-text-soft)]">
-            Aucun paiement en ligne. Le règlement intervient à la remise.
+            Aucun paiement en ligne.
           </p>
           <p className="mt-2 font-[family:var(--font-fraunces)] text-[13px] italic text-[var(--ink-muted)]">
             Tarif jour {pricePerDay.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
@@ -189,7 +189,7 @@ export function BookingStepDates({
             Conditions
           </p>
           <ul className="mt-3 space-y-1.5 font-[family:var(--font-dm-sans)] text-[12px] leading-[1.6] text-[var(--ink-text-soft)]">
-            <li>— Week-end : du vendredi au lundi (3 nuits).</li>
+            <li>— Week-end : du vendredi au lundi.</li>
             <li>— 1 jour : lundi à jeudi, 1 à 2 semaines à l&apos;avance.</li>
             <li>— Calendrier ouvert sur 2 mois.</li>
             {pricePerKm !== null && (

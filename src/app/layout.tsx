@@ -6,6 +6,11 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { SmoothScroll } from "@/components/layout/smooth-scroll";
 import { PublicChrome } from "@/components/layout/public-chrome";
+import { AppLoader } from "@/components/layout/app-loader";
+
+// Runs before first paint: flag the document as loading so the splash can
+// lock scroll and hold the hero entry animation, killing the content flash.
+const LOADER_BOOTSTRAP = `(function(){try{document.documentElement.classList.add('app-loading')}catch(e){}})();`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,10 +56,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: LOADER_BOOTSTRAP }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${dmSans.variable} min-h-screen bg-black text-zinc-100 antialiased`}
       >
+        <AppLoader />
         <PublicChrome
           decoration={
             <>
