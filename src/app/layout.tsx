@@ -8,9 +8,12 @@ import { SmoothScroll } from "@/components/layout/smooth-scroll";
 import { PublicChrome } from "@/components/layout/public-chrome";
 import { AppLoader } from "@/components/layout/app-loader";
 
-// Runs before first paint: flag the document as loading so the splash can
-// lock scroll and hold the hero entry animation, killing the content flash.
-const LOADER_BOOTSTRAP = `(function(){try{document.documentElement.classList.add('app-loading')}catch(e){}})();`;
+// Runs before first paint: (1) take scroll restoration off "auto" so a reload
+// never drops the visitor back onto their previous position (which landed them
+// on the footer), forcing every load to start at the top; (2) flag the document
+// as loading so the splash can lock scroll and hold the hero entry animation,
+// killing the content flash.
+const LOADER_BOOTSTRAP = `(function(){try{if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);document.documentElement.classList.add('app-loading');}catch(e){}})();`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

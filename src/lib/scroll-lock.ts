@@ -7,6 +7,21 @@ export function registerLenis(instance: Lenis | null) {
   lenisInstance = instance;
 }
 
+/**
+ * Jump to the very top of the page instantly, covering BOTH scroll engines:
+ * Lenis (desktop) keeps its own animated position, so a bare window.scrollTo
+ * leaves it out of sync — we reset Lenis directly when present, and always
+ * reset the native scroll for touch / reduced-motion. Used when the splash
+ * lifts so every load reveals the top, never a restored footer position.
+ */
+export function scrollToTopImmediate() {
+  if (typeof window === "undefined") return;
+  if (lenisInstance) {
+    lenisInstance.scrollTo(0, { immediate: true, force: true });
+  }
+  window.scrollTo(0, 0);
+}
+
 export function lockScroll() {
   lockCount += 1;
   if (lockCount === 1) {

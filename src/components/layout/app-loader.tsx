@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { scrollToTopImmediate } from "@/lib/scroll-lock";
 
 // Minimum time the splash stays up so the wave animation is actually seen,
 // even on instant loads. Capped by a safety timeout so slow/broken loads
@@ -28,9 +29,19 @@ export function AppLoader() {
     let fadeTimer = 0;
     let removeTimer = 0;
 
+    // Pin the page to the top WHILE the splash covers everything. The browser
+    // may restore a prior scroll position before React runs, and Lenis (desktop)
+    // initialises a frame or two late — so re-assert the top over a few frames.
+    // All of this happens behind the opaque loader, so it is never seen.
+    scrollToTopImmediate();
+    const f1 = window.setTimeout(scrollToTopImmediate, 60);
+    const f2 = window.setTimeout(scrollToTopImmediate, 180);
+
     const reveal = () => {
       const elapsed = performance.now() - start;
       fadeTimer = window.setTimeout(() => {
+        // Final assertion right before lifting, covering both scroll engines.
+        scrollToTopImmediate();
         setHidden(true);
         document.documentElement.classList.remove("app-loading");
         removeTimer = window.setTimeout(() => setRemoved(true), FADE_MS);
@@ -50,6 +61,8 @@ export function AppLoader() {
       window.clearTimeout(safety);
       window.clearTimeout(fadeTimer);
       window.clearTimeout(removeTimer);
+      window.clearTimeout(f1);
+      window.clearTimeout(f2);
     };
   }, []);
 

@@ -715,8 +715,9 @@ a {
   to { transform: rotate(360deg); }
 }
 
-/* freeze scroll + hold the hero entry animation while the loader is up,
-   so the hero reveal is synced to the moment the loader lifts */
+/* freeze scroll + hold every page's entry animation while the loader is up,
+   so each reveal is synced to the moment the loader lifts instead of playing
+   out unseen behind it (home hero, contact + partners heroes). */
 html.app-loading,
 html.app-loading body {
   overflow: hidden;
@@ -726,7 +727,11 @@ html.app-loading .hero-lede1,
 html.app-loading .hero-lede2,
 html.app-loading .hero-cta-1,
 html.app-loading .hero-cta-2,
-html.app-loading .hero-marker {
+html.app-loading .hero-marker,
+html.app-loading .contact-hero-eyebrow,
+html.app-loading .contact-hero-title,
+html.app-loading .contact-hero-lede,
+html.app-loading .contact-heading-rule {
   animation-play-state: paused !important;
 }
 

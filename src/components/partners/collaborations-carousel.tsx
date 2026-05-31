@@ -159,7 +159,7 @@ export function CollaborationsCarousel({ slides }: CollaborationsCarouselProps) 
           const isClone = index >= slides.length;
           return (
             <figure
-              key={`${slide.url}-${isClone ? "b" : "a"}`}
+              key={`${isClone ? "b" : "a"}-${index}-${slide.url}`}
               aria-hidden={isClone || undefined}
               className="group relative shrink-0 overflow-hidden rounded-[2px] bg-[var(--ink-elevated)]"
               style={{ width: cardWidth, height: rowHeight }}
