@@ -22,10 +22,21 @@ export interface CollaborationSlide extends CollaborationPhoto {
  */
 export const getCollaborationSlides = unstable_cache(
   async (): Promise<CollaborationSlide[]> => {
-    const collaborations = await prisma.collaboration.findMany({
-      where: { isPublished: true },
-      orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
-    });
+    let collaborations;
+    try {
+      collaborations = await prisma.collaboration.findMany({
+        where: { isPublished: true },
+        orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
+      });
+    } catch (error) {
+      // Never let a DB hiccup (e.g. the Collaboration migration not yet applied
+      // on a fresh environment) take down the whole /partenaires render. The
+      // carousel is non-essential decoration — degrade to "no slides" and log,
+      // so the rest of the page still serves. Mirrors the resilience added to
+      // the /availability route.
+      console.error("[collaboration.service] findMany failed, hiding carousel:", error);
+      return [];
+    }
 
     const slides: CollaborationSlide[] = [];
     for (const collab of collaborations) {

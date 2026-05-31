@@ -45,6 +45,23 @@ export function HeroVideo() {
       return background3Video;
     };
 
+    // Loop order: intro → a → b → c → a → … Knowing the successor lets us buffer
+    // it one step ahead so each crossfade starts from an already-decoded frame.
+    const nextOf = (layer: HeroLayer): Exclude<HeroLayer, "intro"> => {
+      if (layer === "intro" || layer === "c") return "a";
+      if (layer === "a") return "b";
+      return "c";
+    };
+
+    // Promote a layer to eager buffering. Guarded so the second pass through the
+    // loop (everything already "auto") never re-issues a redundant load().
+    const warmUp = (video: HTMLVideoElement) => {
+      if (video.preload !== "auto") {
+        video.preload = "auto";
+        video.load();
+      }
+    };
+
     const switchTo = async (nextLayer: Exclude<HeroLayer, "intro">) => {
       if (isTransitioningRef.current) return;
 
@@ -53,13 +70,12 @@ export function HeroVideo() {
       const nextVideo = getVideoByLayer(nextLayer);
 
       isTransitioningRef.current = true;
-      if (nextVideo.preload !== "auto") {
-        nextVideo.preload = "auto";
-        nextVideo.load();
-      }
+      warmUp(nextVideo); // usually a no-op — pre-warmed during the previous layer
       nextVideo.currentTime = 0;
       await tryPlay(nextVideo);
       setActiveLayer(nextLayer);
+      // Start buffering the layer after this one while the current clip plays out.
+      warmUp(getVideoByLayer(nextOf(nextLayer)));
 
       window.setTimeout(() => {
         if (currentVideo !== nextVideo) {
@@ -78,6 +94,9 @@ export function HeroVideo() {
     background2Video.pause();
     background3Video.pause();
     void tryPlay(firstVideo);
+    // Buffer the first background while the intro plays, so the opening
+    // crossfade is as smooth as every subsequent one.
+    warmUp(backgroundVideo);
 
     const onFirstEnded = () => {
       void switchTo("a");
@@ -173,7 +192,7 @@ export function HeroVideo() {
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${activeLayer === "c" ? "opacity-55" : "opacity-0"}`}
         muted
         playsInline
-        preload="none"
+        preload="metadata"
         onError={() => setPlaybackError(true)}
       >
         <source src="/video/background3.mp4" type="video/mp4" />
