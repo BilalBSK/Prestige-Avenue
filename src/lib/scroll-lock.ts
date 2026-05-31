@@ -24,3 +24,17 @@ export function unlockScroll() {
     lenisInstance?.start();
   }
 }
+
+/**
+ * Défile en douceur jusqu'à un élément, en laissant la place du header fixe.
+ * Utilise Lenis si présent (desktop), sinon le smooth scroll natif (touch /
+ * reduced-motion). Centralisé ici pour garder l'instance Lenis encapsulée.
+ */
+export function smoothScrollTo(target: HTMLElement, headerOffset = 96) {
+  if (lenisInstance) {
+    lenisInstance.scrollTo(target, { offset: -headerOffset });
+    return;
+  }
+  const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+  window.scrollTo({ top, behavior: "smooth" });
+}

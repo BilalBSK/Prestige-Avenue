@@ -6,7 +6,7 @@ export function ManifestoSection() {
     "Une flotte choisie une à une. Des véhicules sélectionnés pour leur technologie, leur confort et leur prestance.";
 
   return (
-    <section className="manifesto py-32 md:py-40">
+    <section id="manifeste" className="manifesto py-32 md:py-40">
       <div className="lux-container">
         <SectionCounter index={2} className="mb-9" />
         <WordHighlight

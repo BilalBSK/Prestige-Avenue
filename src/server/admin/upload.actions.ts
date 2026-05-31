@@ -32,7 +32,7 @@ export async function createPresignedUpload(input: UploadTokenInput): Promise<Pr
   const ext = getExtensionFromMime(parsed.mime);
   const uuid = crypto.randomUUID();
   const safeFolder = parsed.folder.replace(/[^a-z0-9-_]/gi, "");
-  const key = `cars/${safeFolder}/${uuid}.${ext}`;
+  const key = `${parsed.scope}/${safeFolder}/${uuid}.${ext}`;
 
   const cfg = getR2Config();
   const client = getR2Client();

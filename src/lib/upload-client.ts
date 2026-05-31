@@ -5,16 +5,20 @@ interface PresignResponse {
   expiresIn: number;
 }
 
+type UploadScope = "cars" | "collaborations";
+
 interface UploadParams {
   file: File;
   folder: string;
   csrfToken: string;
+  scope?: UploadScope;
 }
 
 async function requestPresignedUrl({
   file,
   folder,
   csrfToken,
+  scope,
 }: UploadParams): Promise<PresignResponse> {
   const response = await fetch("/api/admin/upload", {
     method: "POST",
@@ -27,6 +31,7 @@ async function requestPresignedUrl({
       mime: file.type,
       size: file.size,
       folder,
+      ...(scope ? { scope } : {}),
     }),
   });
 

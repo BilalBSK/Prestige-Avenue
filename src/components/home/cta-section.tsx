@@ -5,7 +5,7 @@ import { CtaReveal } from "./cta-reveal";
 
 export function CtaSection() {
   return (
-    <section className="cta-final py-40 text-center md:py-48">
+    <section id="reserver" className="cta-final py-40 text-center md:py-48">
       <div className="lux-container">
         <CtaReveal>
           <div className="mb-7 flex justify-center">

@@ -49,6 +49,15 @@ function IconBlocked(props: IconProps) {
     </svg>
   );
 }
+function IconCollaborations(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.5" />
+      <path d="m4 16 4-3 3.5 2.5L16 11l4 3.5" />
+    </svg>
+  );
+}
 
 interface NavItem {
   href: string;
@@ -59,6 +68,7 @@ interface NavItem {
 export const ADMIN_NAV: NavItem[] = [
   { href: "/admin/dashboard", label: "Tableau de bord", icon: IconDashboard },
   { href: "/admin/cars", label: "Flotte", icon: IconCars },
+  { href: "/admin/collaborations", label: "Collaborations", icon: IconCollaborations },
   { href: "/admin/bookings", label: "Réservations", icon: IconBookings },
   { href: "/admin/clients", label: "Clients", icon: IconClients },
   { href: "/admin/blocked-dates", label: "Indisponibilités", icon: IconBlocked },

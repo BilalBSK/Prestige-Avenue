@@ -55,6 +55,9 @@ export const uploadTokenInputSchema = z.object({
   mime: z.string().min(1),
   size: z.number().int().positive(),
   folder: z.string().min(1).max(80),
+  // Préfixe de plus haut niveau dans le bucket. Par défaut "cars" pour rester
+  // rétrocompatible ; "collaborations" pour les photos de partenaires.
+  scope: z.enum(["cars", "collaborations"]).default("cars"),
 });
 
 export type UploadTokenInput = z.infer<typeof uploadTokenInputSchema>;

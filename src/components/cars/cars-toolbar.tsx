@@ -84,6 +84,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
           open={openPopover === "sort"}
           onClose={() => setOpenPopover(null)}
           align="left"
+          title="Trier"
           trigger={
             <button
               type="button"
@@ -118,6 +119,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
         <div className="order-last flex w-full flex-wrap items-center gap-2 md:order-none md:w-auto md:flex-nowrap">
           <FilterPill
             label={priceLabel}
+            title="Prix par jour"
             active={filters.minPrice !== PRICE_MIN || filters.maxPrice !== PRICE_MAX}
             open={openPopover === "price"}
             onToggle={() => setOpenPopover(openPopover === "price" ? null : "price")}
@@ -132,6 +134,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
           />
           <FilterPill
             label={transmissionLabel}
+            title="Transmission"
             active={!!filters.transmission}
             open={openPopover === "transmission"}
             onToggle={() => setOpenPopover(openPopover === "transmission" ? null : "transmission")}
@@ -149,6 +152,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
           />
           <FilterPill
             label={fuelLabel}
+            title="Carburant"
             active={filters.fuelTypes.length > 0}
             open={openPopover === "fuel"}
             onToggle={() => setOpenPopover(openPopover === "fuel" ? null : "fuel")}
@@ -163,6 +167,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
           />
           <FilterPill
             label={brandsLabel}
+            title="Marques"
             active={filters.brands.length > 0}
             open={openPopover === "brands"}
             onToggle={() => setOpenPopover(openPopover === "brands" ? null : "brands")}
@@ -195,6 +200,7 @@ export function CarsToolbar({ initialFilters, brands }: CarsToolbarProps) {
 
 interface FilterPillProps {
   label: string;
+  title: string;
   active: boolean;
   open: boolean;
   onToggle: () => void;
@@ -203,12 +209,13 @@ interface FilterPillProps {
   popoverClose: () => void;
 }
 
-function FilterPill({ label, active, open, onToggle, popoverContent, popoverOpen, popoverClose }: FilterPillProps) {
+function FilterPill({ label, title, active, open, onToggle, popoverContent, popoverOpen, popoverClose }: FilterPillProps) {
   return (
     <Popover
       open={popoverOpen}
       onClose={popoverClose}
       align="center"
+      title={title}
       trigger={
         <button
           type="button"

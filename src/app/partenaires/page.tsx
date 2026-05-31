@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PartnersHero } from "@/components/partners/partners-hero";
+import { PartnersCollaborations } from "@/components/partners/partners-collaborations";
 import { PartnersTypes } from "@/components/partners/partners-types";
 import { PartnersProcess } from "@/components/partners/partners-process";
 import { PartnersCta } from "@/components/partners/partners-cta";
@@ -14,6 +15,7 @@ export default function PartnersPage() {
   return (
     <>
       <PartnersHero />
+      <PartnersCollaborations />
       <PartnersTypes />
       <PartnersProcess />
       <PartnersCta />

@@ -3,7 +3,7 @@ import { HeroVideo } from "@/components/hero/hero-video";
 
 export function HeroSection() {
   return (
-    <section className="relative isolate -mt-20 min-h-[100svh] overflow-hidden md:-mt-24">
+    <section id="accueil" className="relative isolate -mt-20 min-h-[100svh] overflow-hidden md:-mt-24">
       <HeroVideo />
 
       <div
@@ -53,13 +53,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <span
-          aria-hidden
-          className="hero-marker pointer-events-none absolute bottom-[80px] right-6 inline-flex items-center gap-[10px] font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.28em] text-[var(--ink-muted)] md:bottom-[100px] md:right-9"
-        >
-          <span className="inline-block h-px w-8 bg-[var(--ink-dim)]" />
-          2026
-        </span>
+
       </div>
     </section>
   );

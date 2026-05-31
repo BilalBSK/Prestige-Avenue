@@ -16,11 +16,6 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
-// Fine fractal-noise film grain — adds tactile atmosphere over the opaque base
-// so the full-screen menu reads as a designed surface, not a flat fill.
-const GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
-
 export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,15 +50,17 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-[height,background-color,backdrop-filter] duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        scrolled && !menuOpen
-          ? "h-16 bg-[rgba(5,5,5,0.78)] backdrop-blur-xl backdrop-saturate-150"
-          : "h-20 bg-transparent backdrop-blur-0 md:h-24"
+        scrolled ? "h-16" : "h-20 md:h-24"
+      } ${
+        scrolled || menuOpen
+          ? "bg-[rgba(5,5,5,0.85)] backdrop-blur-xl backdrop-saturate-150"
+          : "bg-transparent backdrop-blur-0"
       }`}
     >
       <div
         aria-hidden
         className={`pointer-events-none absolute inset-x-0 bottom-0 h-px transition-opacity duration-[450ms] ${
-          scrolled && !menuOpen ? "opacity-100" : "opacity-0"
+          scrolled || menuOpen ? "opacity-100" : "opacity-0"
         }`}
         style={{
           background:
@@ -79,7 +76,7 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
         >
           <span
             className={`block transition-all duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              scrolled && !menuOpen ? "text-[20px]" : "text-[22px] md:text-[26px]"
+              scrolled ? "text-[20px]" : "text-[22px] md:text-[26px]"
             }`}
           >
             Prestige <em className="font-normal italic">Avenue</em>
@@ -140,54 +137,45 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
         </button>
       </div>
 
-      {/* Full-screen mobile navigation — opaque takeover, single close control
-          (the header hamburger morphs into the X above at z-60). */}
-      <div
-        id="mobile-menu"
-        className={`fixed inset-0 z-50 md:hidden ${
-          menuOpen ? "pointer-events-auto" : "pointer-events-none"
-        }`}
-        aria-hidden={!menuOpen}
-      >
-        {/* Opaque base — fully covers the page so nothing bleeds through. */}
-        <div
-          className={`absolute inset-0 bg-[var(--ink-onyx)] transition-opacity duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            menuOpen ? "opacity-100" : "opacity-0"
+      {/* Mobile navigation — compact floating dropdown anchored under the icon.
+          Does NOT cover the page: a light scrim keeps the page visible behind. */}
+      <div className="md:hidden">
+        {/* Light scrim — page stays visible; tap anywhere to close. Mouse/touch
+            affordance only (keyboard closes with Escape), so never a tab stop. */}
+        <button
+          type="button"
+          aria-label="Fermer le menu"
+          tabIndex={-1}
+          onClick={() => setMenuOpen(false)}
+          className={`fixed inset-0 z-30 cursor-default bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ease-out ${
+            menuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+        />
+
+        {/* Dropdown panel — hangs from the bar, anchored right.
+            `inert` when closed removes its links from tab order + a11y tree. */}
+        <nav
+          id="mobile-menu"
+          aria-label="Navigation mobile"
+          inert={!menuOpen}
+          className={`absolute right-4 top-full z-40 mt-2.5 w-[min(20rem,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-2xl border border-[var(--ink-line-soft)] bg-[rgba(12,12,14,0.96)] shadow-[0_30px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl transition-[opacity,transform] duration-[260ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            menuOpen
+              ? "translate-y-0 scale-100 opacity-100"
+              : "pointer-events-none -translate-y-2 scale-[0.97] opacity-0"
           }`}
         >
-          {/* Ambient glow — top-right warmth for depth. */}
+          {/* Hairline highlight along the top edge for depth. */}
           <div
             aria-hidden
-            className={`pointer-events-none absolute -right-[20%] -top-[10%] h-[70vw] w-[70vw] rounded-full bg-[radial-gradient(circle,rgba(250,250,250,0.06),transparent_68%)] blur-3xl transition-opacity duration-[900ms] ${
-              menuOpen ? "opacity-100" : "opacity-0"
-            }`}
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--ink-line-soft)] to-transparent"
           />
-          {/* Film grain — tactile surface, not a flat fill. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.04] mix-blend-screen"
-            style={{ backgroundImage: GRAIN, backgroundSize: "160px 160px" }}
-          />
-        </div>
 
-        {/* Menu content — pinned below the header bar, vertically composed. */}
-        <nav
-          aria-label="Navigation mobile"
-          className="absolute inset-0 flex flex-col px-6 pt-24 pb-[max(2rem,env(safe-area-inset-bottom))]"
-        >
-          {/* Section label */}
-          <p
-            className={`flex items-center gap-3 font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.34em] text-[var(--ink-muted)] transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              menuOpen ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-            }`}
-            style={{ transitionDelay: menuOpen ? "160ms" : "0ms" }}
-          >
-            <span className="inline-block h-px w-7 bg-[var(--ink-dim)]" />
-            Navigation
-          </p>
+          <div className="p-2.5">
+            <p className="flex items-center gap-2.5 px-3 pb-2.5 pt-1.5 font-[family:var(--font-dm-sans)] text-[9px] uppercase tracking-[0.32em] text-[var(--ink-muted)]">
+              <span className="inline-block h-px w-5 bg-[var(--ink-dim)]" />
+              Navigation
+            </p>
 
-          {/* Primary links — large editorial type, indexed. */}
-          <div className="mt-auto flex flex-col">
             {NAV_LINKS.map((link, i) => {
               const active = pathname === link.href;
               return (
@@ -195,24 +183,33 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
                   key={link.href}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
-                  className={`group flex items-baseline gap-5 border-b border-[var(--ink-line)] py-6 transition-all duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    menuOpen ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+                  className={`group flex items-center gap-3.5 rounded-xl px-3 py-3 transition-colors duration-200 ${
+                    active
+                      ? "bg-[var(--ink-elevated)]"
+                      : "hover:bg-[var(--ink-elevated)]"
                   }`}
-                  style={{ transitionDelay: menuOpen ? `${240 + i * 90}ms` : "0ms" }}
                 >
-                  <span className="font-[family:var(--font-dm-sans)] text-[12px] tabular-nums text-[var(--ink-muted)] transition-colors duration-300 group-hover:text-[var(--ink-text-soft)]">
+                  <span
+                    className={`font-[family:var(--font-dm-sans)] text-[10px] tabular-nums transition-colors duration-200 ${
+                      active ? "text-[var(--ink-text-soft)]" : "text-[var(--ink-muted)] group-hover:text-[var(--ink-text-soft)]"
+                    }`}
+                  >
                     0{i + 1}
                   </span>
                   <span
-                    className={`relative font-[family:var(--font-fraunces)] text-[clamp(2.5rem,11vw,3.75rem)] font-light leading-[0.95] tracking-[-0.02em] transition-colors duration-300 ${
-                      active ? "text-[var(--ink-ivory)] italic" : "text-[var(--ink-text)] group-hover:text-[var(--ink-ivory)]"
+                    className={`font-[family:var(--font-fraunces)] text-[18px] font-light leading-none tracking-[-0.01em] transition-colors duration-200 ${
+                      active ? "italic text-[var(--ink-ivory)]" : "text-[var(--ink-text)] group-hover:text-[var(--ink-ivory)]"
                     }`}
                   >
                     {link.label}
                   </span>
                   <span
                     aria-hidden
-                    className="ml-auto translate-x-[-10px] self-center font-[family:var(--font-fraunces)] text-[22px] not-italic text-[var(--ink-text-soft)] opacity-0 transition-all duration-300 ease-out group-hover:translate-x-0 group-hover:opacity-100"
+                    className={`ml-auto text-[15px] transition-all duration-200 ease-out ${
+                      active
+                        ? "translate-x-0 text-[var(--ink-text-soft)] opacity-100"
+                        : "-translate-x-1.5 text-[var(--ink-muted)] opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+                    }`}
                   >
                     →
                   </span>
@@ -223,15 +220,12 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
             {isAdmin && (
               <Link
                 href="/admin/dashboard"
-                className={`group flex items-baseline gap-5 py-6 transition-all duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  menuOpen ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
-                }`}
-                style={{ transitionDelay: menuOpen ? `${240 + NAV_LINKS.length * 90}ms` : "0ms" }}
+                className="group mt-0.5 flex items-center gap-3.5 rounded-xl px-3 py-3 transition-colors duration-200 hover:bg-[var(--ink-elevated)]"
               >
-                <span className="font-[family:var(--font-dm-sans)] text-[12px] tabular-nums text-[var(--ink-muted)]">
+                <span className="font-[family:var(--font-dm-sans)] text-[10px] text-[var(--ink-muted)] group-hover:text-[var(--ink-text-soft)]">
                   ✦
                 </span>
-                <span className="font-[family:var(--font-fraunces)] text-[28px] font-light italic text-[var(--ink-text-soft)] transition-colors duration-300 group-hover:text-[var(--ink-ivory)]">
+                <span className="font-[family:var(--font-fraunces)] text-[16px] font-light italic text-[var(--ink-text-soft)] transition-colors duration-200 group-hover:text-[var(--ink-ivory)]">
                   Espace admin
                 </span>
               </Link>
@@ -239,16 +233,11 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
           </div>
 
           {/* Socials footer */}
-          <div
-            className={`mt-10 flex items-center justify-between border-t border-[var(--ink-line)] pt-6 transition-all duration-[700ms] ease-out ${
-              menuOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-            }`}
-            style={{ transitionDelay: menuOpen ? `${320 + NAV_LINKS.length * 90}ms` : "0ms" }}
-          >
-            <span className="font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.3em] text-[var(--ink-muted)]">
+          <div className="flex items-center justify-between border-t border-[var(--ink-line)] bg-[var(--ink-onyx)] px-5 py-3.5">
+            <span className="font-[family:var(--font-dm-sans)] text-[9px] uppercase tracking-[0.28em] text-[var(--ink-muted)]">
               Suivez-nous
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {SOCIALS.map(({ label, href, Icon }) => (
                 <a
                   key={label}
@@ -256,9 +245,9 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="flex h-10 w-10 items-center justify-center text-[var(--ink-text-soft)] transition-colors duration-300 hover:text-[var(--ink-ivory)]"
+                  className="flex h-8 w-8 items-center justify-center text-[var(--ink-text-soft)] transition-colors duration-200 hover:text-[var(--ink-ivory)]"
                 >
-                  <Icon className="h-[18px] w-[18px]" />
+                  <Icon className="h-[16px] w-[16px]" />
                 </a>
               ))}
             </div>

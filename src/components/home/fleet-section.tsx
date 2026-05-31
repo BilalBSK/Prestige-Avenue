@@ -10,7 +10,7 @@ interface FleetSectionProps {
 
 export function FleetSection({ cars }: FleetSectionProps) {
   return (
-    <section className="fleet py-32 md:py-40">
+    <section id="flotte" className="fleet py-32 md:py-40">
       <div className="lux-container">
         <header className="mb-12 flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between md:gap-10">
           <div>

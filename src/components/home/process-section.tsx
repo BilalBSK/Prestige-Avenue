@@ -21,7 +21,7 @@ const STEPS = [
 
 export function ProcessSection() {
   return (
-    <section className="process py-32 md:py-40">
+    <section id="processus" className="process py-32 md:py-40">
       <div className="lux-container">
         <SectionCounter index={4} className="mb-5" />
         <h2 className="mb-14 max-w-[680px] font-[family:var(--font-fraunces)] text-[clamp(40px,5vw,56px)] font-light leading-none tracking-[-0.025em] text-[var(--ink-ivory)]">

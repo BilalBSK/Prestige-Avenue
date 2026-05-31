@@ -144,3 +144,18 @@ model BlockedDate {
 
   @@index([carId, startDate, endDate])
 }
+
+model Collaboration {
+  id           String   @id @default(cuid())
+  partnerName  String
+  partnerUrl   String?
+  // [{ url, width, height }] — dimensions captured à l'upload pour un rendu
+  // sans saut de mise en page quelle que soit l'orientation de la photo.
+  photos       Json     @default("[]")
+  isPublished  Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isPublished, displayOrder])
+}
