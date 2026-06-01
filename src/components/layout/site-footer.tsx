@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteFooterLogo } from "./site-footer-logo";
+import { GoldRule } from "@/components/ui/gold-rule";
 import { SOCIALS } from "@/components/social/socials";
 
 export function SiteFooter() {
@@ -10,7 +11,11 @@ export function SiteFooter() {
       <div className="lux-container">
         <SiteFooterLogo />
 
-        <div className="mt-14 flex justify-center gap-3">
+        <div className="mt-10 flex justify-center">
+          <GoldRule className="w-24" />
+        </div>
+
+        <div className="mt-12 flex justify-center gap-3">
           {SOCIALS.map(({ label, handle, href, Icon }) => (
             <a
               key={label}

@@ -5,7 +5,7 @@ import { ClockIcon, MailIcon, PhoneIcon, PinIcon } from "./contact-icons";
 
 interface ContactCoordinatesProps {
   address: { line1: string; line2: string };
-  phones: string[];
+  phones: { number: string; role: string }[];
   email: string;
   hours: string;
 }
@@ -18,7 +18,10 @@ export function ContactCoordinates({
 }: ContactCoordinatesProps) {
   const ref = useRevealOnScroll<HTMLDivElement>({ threshold: 0.1 });
 
-  const phoneTel = (display: string) => `+33${display.replace(/\D/g, "").slice(1)}`;
+  const phoneTel = (display: string) =>
+    `+33${(display ?? "").replace(/\D/g, "").slice(1)}`;
+
+  const validPhones = phones.filter((phone) => phone?.number);
 
   return (
     <section className="bg-[var(--ink-surface)] pb-2 pt-14 md:pb-3 md:pt-20">
@@ -43,19 +46,25 @@ export function ContactCoordinates({
 
           <ContactCell
             icon={<PhoneIcon className="h-5 w-5" />}
-            eyebrow={phones.length > 1 ? "Téléphones" : "Téléphone"}
+            eyebrow={validPhones.length > 1 ? "Téléphones" : "Téléphone"}
           >
-            <div className="space-y-1.5">
-              {phones.map((phone) => (
-                <a
-                  key={phone}
-                  href={`tel:${phoneTel(phone)}`}
-                  className="contact-cell-link block"
-                >
-                  {phone}
-                </a>
+            <div className="space-y-4">
+              {validPhones.map((phone) => (
+                <div key={phone.number}>
+                  <a
+                    href={`tel:${phoneTel(phone.number)}`}
+                    className="contact-cell-link block"
+                  >
+                    {phone.number}
+                  </a>
+                  {phone.role ? (
+                    <span className="mt-1 block font-[family:var(--font-dm-sans)] text-[10px] uppercase tracking-[0.24em] text-[var(--ink-muted)]">
+                      {phone.role}
+                    </span>
+                  ) : null}
+                </div>
               ))}
-              <p className="contact-cell-meta mt-4 flex items-center gap-2">
+              <p className="contact-cell-meta flex items-center gap-2 pt-1">
                 <ClockIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--ink-muted)]" />
                 <span>{hours}</span>
               </p>

@@ -17,6 +17,19 @@
   --ink-text: #e4e4e7;
   --ink-ivory: #fafafa;
 
+  /* ============================================
+     Prestige Gold — signature metallic accent.
+     A champagne → core → antique triad, never a flat yellow.
+     Used sparingly (effet bijou): eyebrows, hairlines, active
+     states, focus ring, loader bezel. ~95% of the UI stays
+     strictly monochrome. The "gleam" sweep is what makes it
+     read as brushed gold rather than a highlighter.
+     ============================================ */
+  --gold-soft: #ead49b;
+  --gold: #c9a24e;
+  --gold-deep: #8a6d2f;
+  --gold-glow: rgba(201, 162, 78, 0.14);
+
   /* Compatibilité — gardés pour ne pas casser l'admin et autres */
   --background: var(--ink-onyx);
   --foreground: var(--ink-ivory);
@@ -46,6 +59,9 @@
   --color-ink-text-soft: var(--ink-text-soft);
   --color-ink-text: var(--ink-text);
   --color-ink-ivory: var(--ink-ivory);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-deep: var(--gold-deep);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-fraunces);
@@ -168,8 +184,17 @@ a {
   text-decoration: none;
 }
 
+/* Keyboard focus ring — soft gold, public site. The admin theme keeps
+   its own ring (higher specificity via .admin-theme), so this only
+   styles the public surfaces. */
+body :focus-visible {
+  outline: 1.5px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
 ::selection {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(201, 162, 78, 0.26);
 }
 
 * {
@@ -221,11 +246,11 @@ a {
   .lux-eyebrow {
     background-image: linear-gradient(
       100deg,
-      var(--ink-soft) 0%,
-      var(--ink-soft) 42%,
-      var(--ink-ivory) 50%,
-      var(--ink-soft) 58%,
-      var(--ink-soft) 100%
+      var(--gold-deep) 0%,
+      var(--gold) 40%,
+      var(--gold-soft) 50%,
+      var(--gold) 60%,
+      var(--gold-deep) 100%
     );
     background-size: 220% 100%;
     -webkit-background-clip: text;
@@ -241,6 +266,68 @@ a {
     }
     to {
       background-position: -120% 0;
+    }
+  }
+
+  /* ============================================
+     Gold accents (effet bijou) — used sparingly.
+     ============================================ */
+
+  /* Brushed-gold glyph fill — for arrows, dashes, small marks.
+     Static metallic gradient (top-lit → shadowed) so a single
+     "→" reads as gold leaf, not a flat color. */
+  .gold-glyph {
+    background-image: linear-gradient(
+      160deg,
+      var(--gold-soft) 0%,
+      var(--gold) 46%,
+      var(--gold-deep) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* GoldRule — a hairline section divider with a reflet of gold
+     that drifts slowly across it. Signature, quiet, alive.
+     Render as a thin element: <span class="gold-rule" />. */
+  .gold-rule {
+    position: relative;
+    display: block;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--gold-deep) 22%,
+      var(--gold) 50%,
+      var(--gold-deep) 78%,
+      transparent 100%
+    );
+    opacity: 0.55;
+    overflow: hidden;
+  }
+  .gold-rule::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--gold-soft) 50%,
+      transparent 100%
+    );
+    width: 38%;
+    transform: translateX(-140%);
+    animation: gold-rule-reflet 6.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  @keyframes gold-rule-reflet {
+    0% {
+      transform: translateX(-140%);
+    }
+    55%,
+    100% {
+      transform: translateX(380%);
     }
   }
 
@@ -314,6 +401,18 @@ a {
     transform: translateY(-18px);
   }
 
+  /* CTA shader backdrop — soft fade-in once the WebGL canvas paints.
+     Final opacity is held via `both` so the glow settles, not flickers.
+     The animated layer only renders when motion is allowed, so the global
+     reduced-motion guard never needs to touch this. */
+  .cta-shader-fade {
+    animation: cta-shader-in 1500ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
+  }
+  @keyframes cta-shader-in {
+    from { opacity: 0; }
+    to { opacity: var(--cta-shader-opacity, 0.58); }
+  }
+
   /* Info card cursor-following spotlight */
   .info-card-spot {
     position: absolute;
@@ -342,9 +441,9 @@ a {
     margin-top: 24px;
     background: linear-gradient(
       90deg,
-      var(--ink-line-soft) 0%,
-      var(--ink-text-soft) 50%,
-      var(--ink-line-soft) 100%
+      var(--gold-deep) 0%,
+      var(--gold-soft) 50%,
+      var(--gold-deep) 100%
     );
     animation: contact-rule-draw 1400ms cubic-bezier(0.65, 0, 0.35, 1) 380ms forwards;
     transform-origin: left center;
@@ -625,9 +724,9 @@ a {
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
-    rgba(250, 250, 250, 0.03) 110deg,
-    rgba(250, 250, 250, 0.9) 180deg,
-    rgba(250, 250, 250, 0.03) 250deg,
+    rgba(201, 162, 78, 0.04) 110deg,
+    var(--gold-soft) 180deg,
+    rgba(201, 162, 78, 0.04) 250deg,
     transparent 360deg
   );
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
@@ -640,7 +739,7 @@ a {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(201, 162, 78, 0.1);
 }
 
 /* the liquid glass orb */
@@ -740,4 +839,6 @@ html.app-loading .contact-heading-rule {
   .app-loader__liquid::after,
   .app-loader__ring { animation: none; }
   .app-loader { transition-duration: 250ms; }
+  .lux-eyebrow { animation: none; }
+  .gold-rule::after { animation: none; opacity: 0; }
 }

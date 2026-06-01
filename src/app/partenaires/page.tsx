@@ -3,6 +3,7 @@ import { PartnersHero } from "@/components/partners/partners-hero";
 import { PartnersCollaborations } from "@/components/partners/partners-collaborations";
 import { PartnersTypes } from "@/components/partners/partners-types";
 import { PartnersProcess } from "@/components/partners/partners-process";
+import { PartnersContact } from "@/components/partners/partners-contact";
 import { PartnersCta } from "@/components/partners/partners-cta";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function PartnersPage() {
       <PartnersCollaborations />
       <PartnersTypes />
       <PartnersProcess />
+      <PartnersContact />
       <PartnersCta />
     </>
   );

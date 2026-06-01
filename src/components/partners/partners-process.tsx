@@ -36,7 +36,12 @@ export function PartnersProcess() {
         <div ref={ref} className="reveal-stagger relative grid gap-px md:grid-cols-3">
           <span
             aria-hidden
-            className="reveal-line absolute inset-x-0 top-0 hidden h-px bg-[var(--ink-line-soft)] md:block"
+            className="reveal-line absolute inset-x-0 top-0 hidden h-px md:block"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent 0%, var(--gold-deep) 14%, var(--gold) 50%, var(--gold-deep) 86%, transparent 100%)",
+              opacity: 0.5,
+            }}
           />
           {STEPS.map((step, i) => (
             <div
@@ -47,7 +52,10 @@ export function PartnersProcess() {
                   : "md:pr-7"
               }`}
             >
-              <div className="font-[family:var(--font-fraunces)] text-[56px] font-light italic leading-none tracking-[-0.02em] text-[var(--ink-ivory)]">
+              {/* px/py enlarge the background-clip painting area so the italic
+                  glyph overhang isn't clipped to transparent; equal negative
+                  margins cancel the layout effect (zero shift). */}
+              <div className="gold-glyph w-fit px-[0.25em] py-[0.08em] -mx-[0.25em] -my-[0.08em] font-[family:var(--font-fraunces)] text-[56px] font-light italic leading-none tracking-[-0.02em]">
                 {step.num}
               </div>
               <div className="mt-5 font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.28em] text-[var(--ink-soft)]">

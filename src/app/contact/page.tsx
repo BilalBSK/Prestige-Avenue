@@ -11,7 +11,10 @@ export const metadata: Metadata = {
 
 const ADDRESS_LINE_1 = "191 route des Docks";
 const ADDRESS_LINE_2 = "76120 Le Grand-Quevilly";
-const PHONES = ["06 21 18 94 82", "07 68 27 93 88"];
+const PHONES = [
+  { number: "06 21 18 94 82", role: "Partenariats" },
+  { number: "07 68 27 93 88", role: "Réservations & infos" },
+];
 const EMAIL = "prestigeavenuee@gmail.com";
 const HOURS = "Lundi → Samedi · 9h — 19h";
 const CITY = "Le Grand-Quevilly";

@@ -71,7 +71,7 @@ function CarCardComponent({ car, gleamPrice = false }: CarCardProps) {
           </div>
           <span
             aria-hidden
-            className="font-[family:var(--font-fraunces)] text-[18px] italic text-[var(--ink-ivory)] transition-transform duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[4px]"
+            className="gold-glyph font-[family:var(--font-fraunces)] text-[18px] italic transition-transform duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[4px]"
           >
             →
           </span>

@@ -2,11 +2,16 @@ import Link from "next/link";
 import { SectionCounter } from "./section-counter";
 import { CtaArrow } from "./cta-arrow";
 import { CtaReveal } from "./cta-reveal";
+import { CtaShaderBackdrop } from "./cta-shader-backdrop";
 
 export function CtaSection() {
   return (
-    <section id="reserver" className="cta-final py-40 text-center md:py-48">
-      <div className="lux-container">
+    <section
+      id="reserver"
+      className="cta-final relative isolate overflow-hidden py-40 text-center md:py-48"
+    >
+      <CtaShaderBackdrop />
+      <div className="lux-container relative z-10">
         <CtaReveal>
           <div className="mb-7 flex justify-center">
             <SectionCounter index={6} />

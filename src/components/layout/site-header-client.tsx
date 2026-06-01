@@ -89,7 +89,16 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
           className="hidden items-center gap-7 font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.22em] md:flex md:gap-9"
         >
           {NAV_LINKS.map((link) => (
-            <HeaderLink key={link.href} href={link.href} label={link.label} />
+            <HeaderLink
+              key={link.href}
+              href={link.href}
+              label={link.label}
+              active={
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href)
+              }
+            />
           ))}
 
           {isAdmin && (
@@ -202,7 +211,7 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
                     aria-hidden
                     className={`ml-auto text-[15px] transition-all duration-200 ease-out ${
                       active
-                        ? "translate-x-0 text-[var(--ink-text-soft)] opacity-100"
+                        ? "gold-glyph translate-x-0 opacity-100"
                         : "-translate-x-1.5 text-[var(--ink-muted)] opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
                     }`}
                   >
@@ -291,17 +300,36 @@ function AdminIconLink() {
   );
 }
 
-function HeaderLink({ href, label }: { href: string; label: string }) {
+function HeaderLink({
+  href,
+  label,
+  active = false,
+}: {
+  href: string;
+  label: string;
+  active?: boolean;
+}) {
   return (
     <Link
       href={href}
-      className="header-link group relative text-[var(--ink-text-soft)] transition-colors duration-300 hover:text-[var(--ink-ivory)]"
+      aria-current={active ? "page" : undefined}
+      className={`header-link group relative transition-colors duration-300 hover:text-[var(--ink-ivory)] ${
+        active ? "text-[var(--ink-ivory)]" : "text-[var(--ink-text-soft)]"
+      }`}
     >
       <span className="relative inline-block">
         {label}
+        {/* Hover underline — soft gold, draws in from the left. */}
         <span
           aria-hidden
-          className="header-underline pointer-events-none absolute -bottom-1.5 left-0 right-0 h-px origin-left scale-x-0 bg-[var(--ink-ivory)] transition-transform duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+          className="header-underline pointer-events-none absolute -bottom-1.5 left-0 right-0 h-px origin-left scale-x-0 bg-[var(--gold)] transition-transform duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+        />
+        {/* Active marker — a small persistent gold dot, centered under the label. */}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute -bottom-[5px] left-1/2 h-[3px] w-[3px] -translate-x-1/2 rounded-full bg-[var(--gold)] transition-opacity duration-300 ${
+            active ? "opacity-100" : "opacity-0"
+          }`}
         />
       </span>
     </Link>
