@@ -30,7 +30,7 @@ export function PartnersProcess() {
           — Comment démarrer
         </p>
         <h2 className="mb-12 max-w-[680px] font-[family:var(--font-fraunces)] text-[clamp(32px,4vw,52px)] font-light leading-none tracking-[-0.025em] text-[var(--ink-ivory)]">
-          Trois étapes, <em className="italic font-normal">aucune friction.</em>
+          Trois étapes<em className="italic font-normal">simples et rapides.</em>
         </h2>
 
         <div ref={ref} className="reveal-stagger relative grid gap-px md:grid-cols-3">
