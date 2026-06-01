@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CollaborationSlide } from "@/services/collaboration.service";
 
 interface CollaborationsCarouselProps {
@@ -12,16 +12,46 @@ interface CollaborationsCarouselProps {
 // portraits deviennent étroits et les paysages larges. Aucun recadrage forcé.
 const ROW_HEIGHT_MOBILE = 300;
 const ROW_HEIGHT_DESKTOP = 440;
-const AUTO_SCROLL_PX_PER_SEC = 32;
+
+// Réglages du ruban : vitesse de croisière calme, seuil avant de considérer
+// qu'un pointeur « glisse » vraiment, et physique de l'inertie au relâcher.
+const AUTO_SPEED_PX_PER_SEC = 32;
+const DRAG_THRESHOLD_PX = 6;
+const FLICK_FRICTION = 5; // amortissement de l'inertie (s⁻¹) → ~0,8 s
+const MAX_FLICK_PX_PER_SEC = 2400;
 
 export function CollaborationsCarousel({ slides }: CollaborationsCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+
+  // Le ruban est animé par un `transform: translateX` piloté en JS (jamais par
+  // scrollLeft) : pas d'arrondi au pixel, pas de boucle de rétroaction onScroll,
+  // donc un défilement parfaitement lisse même avec une mise à l'échelle système.
   const rafRef = useRef<number>(0);
   const lastTsRef = useRef<number | null>(null);
-  const pausedRef = useRef(false);
-  const dragState = useRef({ isDown: false, startX: 0, startScroll: 0, moved: false });
+  const offsetRef = useRef(0); // décalage courant (px), croissant = vers la gauche
+  const periodRef = useRef(0); // largeur d'un jeu complet = point de bouclage
+  const flickRef = useRef(0); // impulsion d'inertie résiduelle (px/s)
+  const hiddenRef = useRef(false); // onglet masqué → on gèle
+  const focusedRef = useRef(false); // un crédit a le focus clavier → on gèle
+
+  const dragRef = useRef({
+    down: false,
+    active: false,
+    id: -1,
+    startX: 0,
+    startY: 0,
+    startOffset: 0,
+    lastX: 0,
+    lastT: 0,
+    velocity: 0,
+    moved: false,
+  });
+
   const [rowHeight, setRowHeight] = useState(ROW_HEIGHT_DESKTOP);
+  // Nombre de copies du jeu de photos. Au moins 2 pour boucler sans couture ; on
+  // en ajoute si un seul jeu est plus étroit que l'écran (évite un vide au bord).
+  const [copies, setCopies] = useState(2);
 
   // Hauteur de rangée responsive (sans dépendre de Tailwind pour le calcul JS).
   useEffect(() => {
@@ -32,134 +62,243 @@ export function CollaborationsCarousel({ slides }: CollaborationsCarouselProps) 
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  // Auto-défilement continu + boucle sans couture. La piste est dupliquée : dès
-  // qu'on dépasse la moitié (= un jeu complet de photos), on rembobine d'autant.
+  // Helpers partagés par le moteur rAF et les gestes : une seule définition pour
+  // éviter toute divergence. L'élément à l'index `slides.length` est le 1er clone ;
+  // son offsetLeft relatif au 1er élément = largeur d'un jeu complet (= période de
+  // bouclage), mesurée sans dépendre des valeurs de gap Tailwind.
+  const measurePeriod = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const kids = track.children;
+    if (kids.length > slides.length) {
+      const first = kids[0] as HTMLElement;
+      const cloneFirst = kids[slides.length] as HTMLElement;
+      periodRef.current = cloneFirst.offsetLeft - first.offsetLeft;
+    }
+  }, [slides.length]);
+
+  const wrap = useCallback((offset: number) => {
+    const period = periodRef.current;
+    if (period <= 0) return offset;
+    offset %= period;
+    if (offset < 0) offset += period;
+    return offset;
+  }, []);
+
+  const applyTransform = useCallback((offset: number) => {
+    const track = trackRef.current;
+    if (track) track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+  }, []);
+
+  // Garantit assez de copies pour couvrir l'écran au point de bouclage : au pire,
+  // l'offset atteint une période complète et la fenêtre visible va jusqu'à
+  // période + largeur écran, qui doit rester remplie. Renvoie true si un nouveau
+  // rendu a été demandé (l'appelant doit alors attendre la prochaine passe).
+  const ensureCoverage = useCallback(() => {
+    const scroller = scrollerRef.current;
+    const oneSet = periodRef.current;
+    if (!scroller || oneSet <= 0) return false;
+    const needed = Math.max(2, Math.ceil(scroller.clientWidth / oneSet) + 1);
+    if (needed > copies) {
+      setCopies(needed);
+      return true;
+    }
+    return false;
+  }, [copies]);
+
+  // Moteur d'auto-défilement + inertie. Un seul requestAnimationFrame possède le
+  // transform ; le drag et l'inertie passent par les mêmes refs, sans conflit.
   useEffect(() => {
     const scroller = scrollerRef.current;
     const track = trackRef.current;
-    if (!scroller || !track) return;
+    if (!scroller || !track || slides.length === 0) return;
+
+    measurePeriod();
+    if (ensureCoverage()) return; // re-rendu en attente avec plus de copies
+
+    applyTransform(wrap(offsetRef.current));
 
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced || slides.length === 0) return;
+    if (prefersReduced) return; // statique, mais le glissé manuel reste possible
 
-    function step(ts: number) {
-      const node = scrollerRef.current;
-      const trackNode = trackRef.current;
-      if (!node || !trackNode) return;
+    lastTsRef.current = null;
+
+    const step = (ts: number) => {
+      if (periodRef.current <= 0) measurePeriod(); // au cas où la 1re mesure a raté
 
       if (lastTsRef.current === null) lastTsRef.current = ts;
-      const dt = (ts - lastTsRef.current) / 1000;
+      let dt = (ts - lastTsRef.current) / 1000;
       lastTsRef.current = ts;
+      if (dt > 0.05) dt = 0.05; // borne après un onglet masqué / image saccadée
 
-      if (!pausedRef.current && !dragState.current.isDown) {
-        const half = trackNode.scrollWidth / 2;
-        let next = node.scrollLeft + AUTO_SCROLL_PX_PER_SEC * dt;
-        if (half > 0 && next >= half) next -= half;
-        node.scrollLeft = next;
+      const drag = dragRef.current;
+      // On avance tant que l'utilisateur ne tient pas le ruban et que l'onglet
+      // est visible. Vitesse = croisière + inertie résiduelle (additive, donc
+      // un flick accélère puis se fond dans la croisière sans à-coup).
+      if (!(drag.down && drag.active) && !hiddenRef.current && !focusedRef.current) {
+        let offset = offsetRef.current + (AUTO_SPEED_PX_PER_SEC + flickRef.current) * dt;
+        if (flickRef.current !== 0) {
+          flickRef.current *= Math.exp(-FLICK_FRICTION * dt);
+          if (Math.abs(flickRef.current) < 2) flickRef.current = 0;
+        }
+        offset = wrap(offset);
+        offsetRef.current = offset;
+        applyTransform(offset);
       }
+
       rafRef.current = requestAnimationFrame(step);
-    }
+    };
 
     rafRef.current = requestAnimationFrame(step);
     return () => {
       cancelAnimationFrame(rafRef.current);
       lastTsRef.current = null;
     };
-  }, [slides.length, rowHeight]);
+  }, [slides.length, rowHeight, copies, measurePeriod, ensureCoverage, wrap, applyTransform]);
 
-  // Pause quand l'onglet est masqué (économie + évite un saut au retour).
+  // Gel quand l'onglet est masqué (économie + évite un saut au retour).
   useEffect(() => {
     const onVisibility = () => {
-      pausedRef.current = document.hidden;
+      hiddenRef.current = document.hidden;
       if (!document.hidden) lastTsRef.current = null;
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  // Rembobinage si l'utilisateur glisse au-delà des bornes (garde la boucle).
-  function normalizeLoop() {
-    const node = scrollerRef.current;
-    const track = trackRef.current;
-    if (!node || !track) return;
-    const half = track.scrollWidth / 2;
-    if (half <= 0) return;
-    if (node.scrollLeft >= half) node.scrollLeft -= half;
-    else if (node.scrollLeft < 0) node.scrollLeft += half;
-  }
+  // Sur redimensionnement : re-mesure la période et garantit que les copies
+  // couvrent toujours la nouvelle largeur (sinon un vide pourrait apparaître au
+  // bouclage si la fenêtre s'élargit fortement).
+  useEffect(() => {
+    const onResize = () => {
+      measurePeriod();
+      ensureCoverage();
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [measurePeriod, ensureCoverage]);
 
-  function pause() {
-    pausedRef.current = true;
-  }
-  function resume() {
-    pausedRef.current = false;
-    lastTsRef.current = null;
-  }
-
+  // --- Glissé unifié souris / tactile / stylet via Pointer Events ------------
+  // `touch-action: pan-y` laisse le navigateur gérer le défilement vertical de
+  // la page ; seuls les gestes horizontaux nous parviennent. On ne « capture »
+  // le pointeur qu'une fois l'intention horizontale confirmée, pour ne pas
+  // voler un défilement vertical ni un simple clic sur un crédit partenaire.
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
-    if (event.pointerType === "touch") return; // le scroll tactile natif gère
-    const node = scrollerRef.current;
-    if (!node) return;
-    dragState.current = {
-      isDown: true,
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    flickRef.current = 0; // saisir le ruban coupe l'inertie en cours
+    dragRef.current = {
+      down: true,
+      active: false,
+      id: event.pointerId,
       startX: event.clientX,
-      startScroll: node.scrollLeft,
+      startY: event.clientY,
+      startOffset: offsetRef.current,
+      lastX: event.clientX,
+      lastT: event.timeStamp,
+      velocity: 0,
       moved: false,
     };
-    node.setPointerCapture(event.pointerId);
   }
 
   function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
-    const state = dragState.current;
-    if (!state.isDown) return;
+    const drag = dragRef.current;
+    if (!drag.down || event.pointerId !== drag.id) return;
     const node = scrollerRef.current;
     if (!node) return;
-    const delta = event.clientX - state.startX;
-    if (Math.abs(delta) > 4) state.moved = true;
-    node.scrollLeft = state.startScroll - delta;
-    normalizeLoop();
+
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+
+    if (!drag.active) {
+      if (Math.abs(dx) < DRAG_THRESHOLD_PX && Math.abs(dy) < DRAG_THRESHOLD_PX) return;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        drag.down = false; // intention verticale → on laisse défiler la page
+        return;
+      }
+      drag.active = true;
+      drag.moved = true;
+      try {
+        node.setPointerCapture(event.pointerId);
+      } catch {
+        /* capture indisponible : on continue sans */
+      }
+      drag.lastX = event.clientX;
+      drag.lastT = event.timeStamp;
+    }
+
+    // Position absolue depuis le début du geste → aucun cumul d'erreur.
+    const offset = wrap(drag.startOffset - dx);
+    offsetRef.current = offset;
+    applyTransform(offset);
+
+    // Vitesse du décalage (lissée) pour l'inertie au relâcher.
+    const dtMs = Math.max(event.timeStamp - drag.lastT, 1);
+    const vNow = (-(event.clientX - drag.lastX) / dtMs) * 1000;
+    drag.velocity = 0.7 * vNow + 0.3 * drag.velocity;
+    drag.lastX = event.clientX;
+    drag.lastT = event.timeStamp;
   }
 
   function endDrag(event: React.PointerEvent<HTMLDivElement>) {
+    const drag = dragRef.current;
+    if (event.pointerId !== drag.id) return;
     const node = scrollerRef.current;
-    if (node?.hasPointerCapture(event.pointerId)) {
+    if (node?.hasPointerCapture?.(event.pointerId)) {
       node.releasePointerCapture(event.pointerId);
     }
-    dragState.current.isDown = false;
+    if (drag.active) {
+      flickRef.current = Math.max(
+        Math.min(drag.velocity, MAX_FLICK_PX_PER_SEC),
+        -MAX_FLICK_PX_PER_SEC,
+      );
+      lastTsRef.current = null; // repart sans pic de dt
+    }
+    drag.down = false;
+    drag.active = false;
   }
 
   if (slides.length === 0) return null;
 
-  // Piste dupliquée pour une boucle continue ; clés stables par cycle.
-  const looped = [...slides, ...slides];
+  // Piste dupliquée pour une boucle continue ; le 1er jeu seul est lisible par
+  // les lecteurs d'écran et navigable au clavier, les copies sont décoratives.
+  const looped = Array.from({ length: copies }).flatMap((_, copyIndex) =>
+    slides.map((slide, i) => ({ slide, copyIndex, i })),
+  );
 
   return (
     <div
-      className="collab-scroller flex w-full cursor-grab gap-4 overflow-x-auto pb-2 active:cursor-grabbing md:gap-5"
+      className="collab-scroller relative w-full cursor-grab select-none overflow-hidden active:cursor-grabbing"
       ref={scrollerRef}
-      style={{ scrollbarWidth: "none", touchAction: "pan-x" }}
-      onMouseEnter={pause}
-      onMouseLeave={resume}
-      onTouchStart={pause}
-      onTouchEnd={resume}
-      onScroll={() => {
-        // Maintient la boucle lors du défilement tactile / inertie.
-        if (!dragState.current.isDown) normalizeLoop();
-      }}
+      style={{ touchAction: "pan-y" }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
+      onFocusCapture={() => {
+        // Pause au focus clavier (WCAG 2.2.2) : le focus ne bouge que sur action
+        // délibérée, jamais « tout seul » — contrairement au survol.
+        focusedRef.current = true;
+      }}
+      onBlurCapture={() => {
+        focusedRef.current = false;
+        lastTsRef.current = null;
+      }}
+      onClickCapture={(event) => {
+        // Un glissé ne doit jamais déclencher la navigation d'un crédit.
+        if (dragRef.current.moved) {
+          event.preventDefault();
+          event.stopPropagation();
+          dragRef.current.moved = false;
+        }
+      }}
     >
-      <div ref={trackRef} className="flex shrink-0 gap-4 md:gap-5">
-        {looped.map((slide, index) => {
+      <div ref={trackRef} className="flex w-max gap-4 md:gap-5" style={{ willChange: "transform" }}>
+        {looped.map(({ slide, copyIndex, i }) => {
           const cardWidth = Math.round(rowHeight * (slide.width / slide.height));
-          // Le second jeu n'est qu'un clone visuel pour la boucle : masqué aux
-          // lecteurs d'écran et hors du parcours clavier.
-          const isClone = index >= slides.length;
+          const isClone = copyIndex > 0;
           return (
             <figure
-              key={`${isClone ? "b" : "a"}-${index}-${slide.url}`}
+              key={`${copyIndex}-${i}-${slide.url}`}
               aria-hidden={isClone || undefined}
               className="group relative shrink-0 overflow-hidden rounded-[2px] bg-[var(--ink-elevated)]"
               style={{ width: cardWidth, height: rowHeight }}
@@ -191,10 +330,6 @@ export function CollaborationsCarousel({ slides }: CollaborationsCarouselProps) 
           );
         })}
       </div>
-
-      <style>{`
-        .collab-scroller::-webkit-scrollbar { display: none; }
-      `}</style>
     </div>
   );
 }
