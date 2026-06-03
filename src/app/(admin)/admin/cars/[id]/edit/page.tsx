@@ -1,5 +1,6 @@
 import { CarForm } from "@/components/admin/cars/car-form";
 import { PageHeader, PageMetaItem } from "@/components/admin/ui/page-header";
+import { parseShots } from "@/lib/cars/shots";
 import { getCarForAdmin } from "@/server/admin/cars.queries";
 import { type CarInput, featureSchema } from "@/server/admin/cars.schema";
 import { notFound } from "next/navigation";
@@ -35,6 +36,7 @@ function toFormValues(car: Awaited<ReturnType<typeof getCarForAdmin>>): CarInput
     features: featuresParsed.success ? featuresParsed.data : [],
     mainImage: car.mainImage,
     galleryImages: car.galleryImages,
+    galleryShots: parseShots(car.galleryShots),
     videoUrl: car.videoUrl,
     status: car.status,
     isFeatured: car.isFeatured,

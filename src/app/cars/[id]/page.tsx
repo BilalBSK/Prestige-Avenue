@@ -1,15 +1,16 @@
 import { notFound } from "next/navigation";
 import { CarDetailHero } from "@/components/cars/car-detail-hero";
 import { CarTitleBlock } from "@/components/cars/car-title-block";
-import { CarGallery } from "@/components/cars/car-gallery";
+import { CarStudio } from "@/components/cars/car-studio";
 import { CarSpecs } from "@/components/cars/car-specs";
 import { CarHighlights } from "@/components/cars/car-highlights";
 import { CarFeatures } from "@/components/cars/car-features";
-import { CarVideo } from "@/components/cars/car-video";
 import { CarPricingPanel } from "@/components/cars/car-pricing-panel";
 import { CarCtaSection } from "@/components/cars/car-cta-section";
 import { CarReserveBar } from "@/components/cars/car-reserve-bar";
 import { BookingSheetProvider } from "@/components/cars/booking-sheet-provider";
+import { flattenShots, parseShots, shotsFromLegacyGallery } from "@/lib/cars/shots";
+import { toEmbedUrl } from "@/lib/cars/video";
 import { getCarById } from "@/services/car.service";
 
 interface CarDetailPageProps {
@@ -42,7 +43,17 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
 
   const features = parseFeatures(car.features);
   const highlights = car.highlights.filter(Boolean);
-  const galleryImages = car.galleryImages.filter(Boolean);
+
+  // Studio photo : prises de vue cataloguées par angle, avec repli sur la
+  // galerie héritée pour les véhicules pas encore reclassés.
+  const shots = parseShots(car.galleryShots);
+  const studioShots =
+    shots.length > 0
+      ? flattenShots(shots)
+      : shotsFromLegacyGallery(car.galleryImages);
+  const embedUrl = car.videoUrl ? toEmbedUrl(car.videoUrl) : null;
+  const hasStudio = studioShots.length > 0 || embedUrl !== null;
+
   const pricePerDay = Number(car.pricePerDay);
   const weekendPackagePrice =
     car.weekendPackagePrice !== null && car.weekendPackagePrice !== undefined
@@ -55,10 +66,9 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
 
   let sectionIndex = 1;
   let total = 3;
-  if (galleryImages.length > 0) total += 1;
+  if (hasStudio) total += 1;
   if (highlights.length > 0) total += 1;
   if (features.length > 0) total += 1;
-  if (car.videoUrl) total += 1;
 
   return (
     <BookingSheetProvider
@@ -108,8 +118,12 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           total={total}
         />
 
-        {galleryImages.length > 0 && (
-          <CarGallery images={galleryImages} alt={`${car.brand} ${car.model}`} />
+        {hasStudio && (
+          <CarStudio
+            shots={studioShots}
+            embedUrl={embedUrl}
+            alt={`${car.brand} ${car.model}`}
+          />
         )}
 
         <CarSpecs
@@ -126,10 +140,6 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
         {highlights.length > 0 && <CarHighlights highlights={highlights} />}
 
         {features.length > 0 && <CarFeatures features={features} />}
-
-        {car.videoUrl && (
-          <CarVideo videoUrl={car.videoUrl} title={`${car.brand} ${car.model}`} />
-        )}
 
         <CarCtaSection
           brand={car.brand}

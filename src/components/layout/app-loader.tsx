@@ -28,6 +28,13 @@ export function AppLoader() {
     const start = performance.now();
     let fadeTimer = 0;
     let removeTimer = 0;
+    let safety = 0;
+    // The reveal can be triggered by `load`, by an already-complete document,
+    // or by the safety fallback. It must run exactly once: a second run would
+    // fire scrollToTopImmediate() AFTER the loader has lifted and the user has
+    // started scrolling — yanking them back to the top. This guard makes the
+    // lift idempotent so scroll-to-top only ever happens behind the splash.
+    let revealed = false;
 
     // Pin the page to the top WHILE the splash covers everything. The browser
     // may restore a prior scroll position before React runs, and Lenis (desktop)
@@ -38,9 +45,17 @@ export function AppLoader() {
     const f2 = window.setTimeout(scrollToTopImmediate, 180);
 
     const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      // We are committing to the lift — drop the fallback and the load listener
+      // so neither can re-enter reveal() and scroll-to-top a second time.
+      window.clearTimeout(safety);
+      window.removeEventListener("load", reveal);
+
       const elapsed = performance.now() - start;
       fadeTimer = window.setTimeout(() => {
         // Final assertion right before lifting, covering both scroll engines.
+        // This is the LAST scroll-to-top: nothing re-pins after the splash is gone.
         scrollToTopImmediate();
         setHidden(true);
         document.documentElement.classList.remove("app-loading");
@@ -48,7 +63,7 @@ export function AppLoader() {
       }, Math.max(0, MIN_VISIBLE_MS - elapsed));
     };
 
-    const safety = window.setTimeout(reveal, SAFETY_MS);
+    safety = window.setTimeout(reveal, SAFETY_MS);
 
     if (document.readyState === "complete") {
       reveal();

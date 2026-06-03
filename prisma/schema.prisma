@@ -95,7 +95,12 @@ model Car {
   features                   Json         @default("[]")
 
   mainImage                  String
+  // Galerie héritée (plat, sans angle). Conservée comme repli d'affichage
+  // pour les véhicules pas encore re-catalogués par prises de vue.
   galleryImages              String[]
+  // Prises de vue cataloguées par angle : [{ angle: "EXT_PROFILE", images: [url, …] }].
+  // Source d'affichage principale du studio photo (cf. src/lib/cars/shots.ts).
+  galleryShots               Json         @default("[]")
   videoUrl                   String?
 
   status                     CarStatus    @default(AVAILABLE)

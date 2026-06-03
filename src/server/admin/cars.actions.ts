@@ -35,6 +35,7 @@ function toPrismaData(input: CarInput) {
     features: input.features,
     mainImage: input.mainImage,
     galleryImages: input.galleryImages,
+    galleryShots: input.galleryShots as unknown as Prisma.InputJsonValue,
     videoUrl: input.videoUrl,
     status: input.status,
     isFeatured: input.isFeatured,

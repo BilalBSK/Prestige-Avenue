@@ -1,9 +1,21 @@
 import { CarCategory, CarStatus, FuelType, Transmission } from "@prisma/client";
 import { z } from "zod";
+import { SHOT_ANGLES, type ShotAngle } from "@/lib/cars/shots";
 
 export const featureSchema = z.object({
   title: z.string().min(3).max(60),
   body: z.string().min(10).max(300),
+});
+
+const SHOT_ANGLE_VALUES = SHOT_ANGLES.map((d) => d.angle) as [
+  ShotAngle,
+  ...ShotAngle[],
+];
+
+/** Une prise de vue : un angle canonique + 0..8 photos. */
+export const shotSchema = z.object({
+  angle: z.enum(SHOT_ANGLE_VALUES),
+  images: z.array(z.url()).max(8),
 });
 
 export const carFormSchema = z.object({
@@ -41,6 +53,9 @@ export const carFormSchema = z.object({
 
   mainImage: z.url(),
   galleryImages: z.array(z.url()).max(12),
+  // Prises de vue cataloguées par angle. Un angle peut n'avoir aucune photo
+  // (il sera simplement masqué côté public) ; on plafonne le total.
+  galleryShots: z.array(shotSchema).max(SHOT_ANGLES.length),
   videoUrl: z.url().nullable(),
 
   status: z.enum(CarStatus),

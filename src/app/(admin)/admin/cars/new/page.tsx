@@ -29,6 +29,7 @@ const DEFAULT_CAR: CarInput = {
   features: [],
   mainImage: "",
   galleryImages: [],
+  galleryShots: [],
   videoUrl: null,
   status: CarStatus.AVAILABLE,
   isFeatured: false,

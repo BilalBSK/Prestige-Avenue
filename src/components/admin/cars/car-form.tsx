@@ -7,6 +7,7 @@ import { ImagePicker } from "@/components/admin/ui/image-picker";
 import { Input } from "@/components/admin/ui/input";
 import { MediaGallery } from "@/components/admin/ui/media-gallery";
 import { NumberInput } from "@/components/admin/ui/number-input";
+import { ShotsEditor } from "@/components/admin/ui/shots-editor";
 import { Select } from "@/components/admin/ui/select";
 import { Switch } from "@/components/admin/ui/switch";
 import { TagsInput } from "@/components/admin/ui/tags-input";
@@ -75,6 +76,9 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
   const brand = watch("brand");
   const model = watch("model");
   const trim = watch("trim");
+  // La galerie héritée n'est montrée que si le véhicule en possède déjà :
+  // les nouveaux véhicules n'utilisent que les prises de vue par angle.
+  const hasLegacyGallery = (initial.galleryImages?.length ?? 0) > 0;
 
   async function onSubmit(values: CarInput) {
     try {
@@ -352,16 +356,16 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
             />
           </Field>
           <Field
-            label="Galerie"
-            hint="12 maximum · glisser pour réordonner · survolez une image pour la définir comme principale"
+            label="Prises de vue"
+            hint="Rangez les photos par angle (extérieur & intérieur). Chaque angle renseigné apparaît sur la fiche ; survolez une photo pour la définir comme couverture."
           >
             <Controller
               control={control}
-              name="galleryImages"
+              name="galleryShots"
               render={({ field }) => {
                 const mainImage = watch("mainImage");
                 return (
-                  <MediaGallery
+                  <ShotsEditor
                     value={field.value}
                     onChange={field.onChange}
                     folder={uploadFolder}
@@ -372,7 +376,32 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
               }}
             />
           </Field>
-          <Field label="URL vidéo" error={errors.videoUrl?.message}>
+
+          {hasLegacyGallery && (
+            <Field
+              label="Galerie héritée"
+              hint="Ancien format, sans angle. Conservé pour ne rien perdre — videz-le une fois les photos reclassées ci-dessus."
+            >
+              <Controller
+                control={control}
+                name="galleryImages"
+                render={({ field }) => {
+                  const mainImage = watch("mainImage");
+                  return (
+                    <MediaGallery
+                      value={field.value}
+                      onChange={field.onChange}
+                      folder={uploadFolder}
+                      mainImage={mainImage}
+                      onSetMain={(url) => setValue("mainImage", url, { shouldDirty: true, shouldValidate: true })}
+                    />
+                  );
+                }}
+              />
+            </Field>
+          )}
+
+          <Field label="URL vidéo" error={errors.videoUrl?.message} hint="YouTube ou Vimeo — intégrée dans le studio photo de la fiche.">
             <Controller
               control={control}
               name="videoUrl"

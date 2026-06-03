@@ -33,6 +33,14 @@ async function ensureCar(data) {
   });
 }
 
+// Construit `galleryShots` (prises de vue par angle) à partir d'un objet
+// { ANGLE: [url, …] }, en filtrant les angles vides. Voir src/lib/cars/shots.ts.
+function buildShots(byAngle) {
+  return Object.entries(byAngle)
+    .filter(([, images]) => Array.isArray(images) && images.length > 0)
+    .map(([angle, images]) => ({ angle, images }));
+}
+
 async function main() {
   await ensureUser({
     name: "Bilal Admin",
@@ -100,10 +108,29 @@ async function main() {
     ],
     mainImage:
       "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80",
-    galleryImages: [
-      "https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=1600&q=80",
-    ],
+    // Nouveau système : galerie vide, tout est rangé par prise de vue.
+    galleryImages: [],
+    galleryShots: buildShots({
+      EXT_THREE_QUARTER: [
+        "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=1600&q=80",
+      ],
+      EXT_FRONT: [
+        "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=1600&q=80",
+      ],
+      EXT_PROFILE: [
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80",
+      ],
+      EXT_REAR: [
+        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1600&q=80",
+      ],
+      INT_COCKPIT: [
+        "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80",
+      ],
+      INT_FRONT_SEATS: [
+        "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1600&q=80",
+      ],
+    }),
     videoUrl: null,
     status: "AVAILABLE",
     isFeatured: true,
@@ -152,11 +179,29 @@ async function main() {
     ],
     mainImage:
       "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1600&q=80",
-    galleryImages: [
-      "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1600&q=80",
-    ],
-    videoUrl: null,
+    galleryImages: [],
+    galleryShots: buildShots({
+      EXT_THREE_QUARTER: [
+        "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1600&q=80",
+      ],
+      EXT_FRONT: [
+        "https://images.unsplash.com/photo-1541443131876-44b03de101c5?auto=format&fit=crop&w=1600&q=80",
+      ],
+      EXT_PROFILE: [
+        "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1600&q=80",
+      ],
+      EXT_WHEELS: [
+        "https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=1600&q=80",
+      ],
+      INT_COCKPIT: [
+        "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1600&q=80",
+      ],
+      INT_DASHBOARD: [
+        "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1600&q=80",
+      ],
+    }),
+    // Démontre le "plan" vidéo intégré au studio.
+    videoUrl: "https://www.youtube.com/watch?v=ScMzIvxBSi4",
     status: "AVAILABLE",
     isFeatured: true,
     displayOrder: 2,
