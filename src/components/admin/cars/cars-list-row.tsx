@@ -50,7 +50,8 @@ export interface CarRow {
   status: CarStatus;
   mainImage: string;
   pricePerDay: number;
-  weekendPackagePrice: number | null;
+  weekendPackagePrice48h: number | null;
+  weekendPackagePrice72h: number | null;
   isFeatured: boolean;
   bookingCount: number;
 }
@@ -136,10 +137,16 @@ export function CarsListRow({ car, bookingCount }: CarsListRowProps) {
         </div>
       </td>
       <td className="px-3 py-2.5 text-right">
-        {car.weekendPackagePrice !== null ? (
-          <div className="admin-tabular text-[0.875rem] text-[color:var(--admin-text)]">
-            {Math.round(car.weekendPackagePrice)}
-            <span className="ml-0.5 text-[0.75rem] text-[color:var(--admin-text-muted)]">€</span>
+        {car.weekendPackagePrice48h !== null || car.weekendPackagePrice72h !== null ? (
+          <div className="admin-tabular text-[0.8125rem] leading-tight text-[color:var(--admin-text)]">
+            <div>
+              <span className="mr-1 text-[0.625rem] text-[color:var(--admin-text-muted)]">48h</span>
+              {car.weekendPackagePrice48h !== null ? `${Math.round(car.weekendPackagePrice48h)}€` : "—"}
+            </div>
+            <div>
+              <span className="mr-1 text-[0.625rem] text-[color:var(--admin-text-muted)]">72h</span>
+              {car.weekendPackagePrice72h !== null ? `${Math.round(car.weekendPackagePrice72h)}€` : "—"}
+            </div>
           </div>
         ) : (
           <span className="text-[0.8125rem] text-[color:var(--admin-text-muted)]">—</span>
@@ -207,7 +214,18 @@ export function CarsListCard({ car, bookingCount }: { car: CarRow; bookingCount:
           <div>
             <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Week-end</div>
             <div className="admin-tabular text-[0.875rem] text-[color:var(--admin-text)]">
-              {car.weekendPackagePrice !== null ? `${Math.round(car.weekendPackagePrice)}€` : "—"}
+              {car.weekendPackagePrice48h !== null || car.weekendPackagePrice72h !== null
+                ? [
+                    car.weekendPackagePrice48h !== null
+                      ? `48h ${Math.round(car.weekendPackagePrice48h)}€`
+                      : null,
+                    car.weekendPackagePrice72h !== null
+                      ? `72h ${Math.round(car.weekendPackagePrice72h)}€`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                : "—"}
             </div>
           </div>
           <div>

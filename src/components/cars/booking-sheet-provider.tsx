@@ -22,7 +22,8 @@ interface BookingSheetProviderProps {
   model: string;
   pricePerDay: number;
   pricePerKm?: number | null;
-  weekendPackagePrice: number | null;
+  weekendPackagePrice48h: number | null;
+  weekendPackagePrice72h: number | null;
 }
 
 export function BookingSheetProvider({
@@ -32,7 +33,8 @@ export function BookingSheetProvider({
   model,
   pricePerDay,
   pricePerKm = null,
-  weekendPackagePrice,
+  weekendPackagePrice48h,
+  weekendPackagePrice72h,
 }: BookingSheetProviderProps) {
   const [open, setOpen] = useState(false);
   const openSheet = useCallback(() => setOpen(true), []);
@@ -49,7 +51,8 @@ export function BookingSheetProvider({
         model={model}
         pricePerDay={pricePerDay}
         pricePerKm={pricePerKm}
-        weekendPackagePrice={weekendPackagePrice}
+        weekendPackagePrice48h={weekendPackagePrice48h}
+        weekendPackagePrice72h={weekendPackagePrice72h}
       />
     </BookingSheetContext.Provider>
   );

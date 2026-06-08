@@ -82,8 +82,12 @@ model Car {
   pricePerDay                Decimal      @db.Decimal(10, 2)
   pricePerKm                 Decimal?     @db.Decimal(10, 2)
   includedKmPerDay           Int?
-  weekendPackagePrice        Decimal?     @db.Decimal(10, 2)
-  weekendPackageIncludedKm   Int?
+  // Forfait week-end 48h : vendredi→dimanche OU samedi→lundi (2 jours).
+  weekendPackagePrice48h     Decimal?     @db.Decimal(10, 2)
+  weekendPackageIncludedKm48h Int?
+  // Forfait week-end 72h : vendredi→lundi (3 jours).
+  weekendPackagePrice72h     Decimal?     @db.Decimal(10, 2)
+  weekendPackageIncludedKm72h Int?
   depositAmount              Decimal      @db.Decimal(10, 2)
 
   minDriverAge               Int          @default(21)

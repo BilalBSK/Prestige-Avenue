@@ -37,20 +37,54 @@ export function calculateRentalDays(startDate: Date, endDate: Date): number {
   return days;
 }
 
+/**
+ * Motif de week-end d'un intervalle [start, end[ (les bornes sont des jours
+ * calendaires ; `end` est le jour de restitution, non facturé).
+ *
+ *  - "48h" : vendredi → dimanche  OU  samedi → lundi   (2 jours facturés)
+ *  - "72h" : vendredi → lundi                          (3 jours facturés)
+ *  - null  : aucun motif de week-end reconnu
+ *
+ * Source unique de vérité, partagée par la validation et la tarification.
+ */
+export type WeekendPattern = "48h" | "72h";
+
+export function classifyWeekendPattern(
+  startDate: Date,
+  endDate: Date,
+): WeekendPattern | null {
+  const rentalDays = calculateRentalDays(startDate, endDate);
+  const startDow = getCalendarDayOfWeekISO(startDate);
+  const endDow = getCalendarDayOfWeekISO(endDate);
+
+  // 72h — vendredi → lundi
+  if (rentalDays === 3 && startDow === 5 && endDow === 1) return "72h";
+
+  // 48h — vendredi → dimanche, ou samedi → lundi
+  if (rentalDays === 2 && ((startDow === 5 && endDow === 0) || (startDow === 6 && endDow === 1))) {
+    return "48h";
+  }
+
+  return null;
+}
+
 export function calculateTotalPrice(
-  car: Pick<Car, "pricePerDay" | "weekendPackagePrice">,
+  car: Pick<
+    Car,
+    "pricePerDay" | "weekendPackagePrice48h" | "weekendPackagePrice72h"
+  >,
   startDate: Date,
   endDate: Date,
 ): number {
   const rentalDays = calculateRentalDays(startDate, endDate);
+  const pattern = classifyWeekendPattern(startDate, endDate);
 
-  if (
-    rentalDays === 3 &&
-    getCalendarDayOfWeekISO(startDate) === 5 &&
-    getCalendarDayOfWeekISO(endDate) === 1 &&
-    car.weekendPackagePrice
-  ) {
-    return Number(car.weekendPackagePrice);
+  // Forfait week-end si la voiture en propose un pour ce motif ; sinon, au jour.
+  if (pattern === "72h" && car.weekendPackagePrice72h) {
+    return Number(car.weekendPackagePrice72h);
+  }
+  if (pattern === "48h" && car.weekendPackagePrice48h) {
+    return Number(car.weekendPackagePrice48h);
   }
 
   return Number((rentalDays * Number(car.pricePerDay)).toFixed(2));
@@ -87,16 +121,10 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
   const days = eachDayOfInterval({ start: startDate, end: lastChargedDay });
   const hasWeekendDay = days.some((day) => getCalendarDayOfWeekISO(day) >= 5);
 
-  if (hasWeekendDay) {
-    const isFullWeekendOnly =
-      rentalDays === 3 &&
-      getCalendarDayOfWeekISO(startDate) === 5 &&
-      getCalendarDayOfWeekISO(endDate) === 1;
-    if (!isFullWeekendOnly) {
-      throw new Error(
-        "Toute réservation incluant vendredi, samedi ou dimanche doit être faite du vendredi au lundi.",
-      );
-    }
+  if (hasWeekendDay && classifyWeekendPattern(startDate, endDate) === null) {
+    throw new Error(
+      "Toute réservation incluant le week-end doit être du vendredi au dimanche, du samedi au lundi, ou du vendredi au lundi.",
+    );
   }
 }
 

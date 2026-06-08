@@ -24,9 +24,12 @@ function toPrismaData(input: CarInput) {
     pricePerDay: new Prisma.Decimal(input.pricePerDay),
     pricePerKm: input.pricePerKm !== null ? new Prisma.Decimal(input.pricePerKm) : null,
     includedKmPerDay: input.includedKmPerDay,
-    weekendPackagePrice:
-      input.weekendPackagePrice !== null ? new Prisma.Decimal(input.weekendPackagePrice) : null,
-    weekendPackageIncludedKm: input.weekendPackageIncludedKm,
+    weekendPackagePrice48h:
+      input.weekendPackagePrice48h !== null ? new Prisma.Decimal(input.weekendPackagePrice48h) : null,
+    weekendPackageIncludedKm48h: input.weekendPackageIncludedKm48h,
+    weekendPackagePrice72h:
+      input.weekendPackagePrice72h !== null ? new Prisma.Decimal(input.weekendPackagePrice72h) : null,
+    weekendPackageIncludedKm72h: input.weekendPackageIncludedKm72h,
     depositAmount: new Prisma.Decimal(input.depositAmount),
     minDriverAge: input.minDriverAge,
     minLicenseYears: input.minLicenseYears,

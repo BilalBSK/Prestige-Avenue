@@ -55,9 +55,13 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
   const hasStudio = studioShots.length > 0 || videoUrl !== null;
 
   const pricePerDay = Number(car.pricePerDay);
-  const weekendPackagePrice =
-    car.weekendPackagePrice !== null && car.weekendPackagePrice !== undefined
-      ? Number(car.weekendPackagePrice)
+  const weekendPackagePrice48h =
+    car.weekendPackagePrice48h !== null && car.weekendPackagePrice48h !== undefined
+      ? Number(car.weekendPackagePrice48h)
+      : null;
+  const weekendPackagePrice72h =
+    car.weekendPackagePrice72h !== null && car.weekendPackagePrice72h !== undefined
+      ? Number(car.weekendPackagePrice72h)
       : null;
   const pricePerKm =
     car.pricePerKm !== null && car.pricePerKm !== undefined
@@ -77,7 +81,8 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
       model={car.model}
       pricePerDay={pricePerDay}
       pricePerKm={pricePerKm}
-      weekendPackagePrice={weekendPackagePrice}
+      weekendPackagePrice48h={weekendPackagePrice48h}
+      weekendPackagePrice72h={weekendPackagePrice72h}
     >
       <CarReserveBar
         brand={car.brand}
@@ -116,8 +121,10 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
 
         <CarPricingPanel
           pricePerDay={pricePerDay}
-          weekendPackagePrice={weekendPackagePrice}
-          weekendPackageIncludedKm={car.weekendPackageIncludedKm}
+          weekendPackagePrice48h={weekendPackagePrice48h}
+          weekendPackageIncludedKm48h={car.weekendPackageIncludedKm48h}
+          weekendPackagePrice72h={weekendPackagePrice72h}
+          weekendPackageIncludedKm72h={car.weekendPackageIncludedKm72h}
           includedKmPerDay={car.includedKmPerDay}
           pricePerKm={pricePerKm}
           depositAmount={Number(car.depositAmount)}

@@ -19,7 +19,8 @@ interface BookingStepDatesProps {
   carId: string;
   pricePerDay: number;
   pricePerKm: number | null;
-  weekendPackagePrice: number | null;
+  weekendPackagePrice48h: number | null;
+  weekendPackagePrice72h: number | null;
   startDate: string;
   endDate: string;
   onChange: (next: { startDate: string; endDate: string }) => void;
@@ -36,7 +37,8 @@ export function BookingStepDates({
   carId,
   pricePerDay,
   pricePerKm,
-  weekendPackagePrice,
+  weekendPackagePrice48h,
+  weekendPackagePrice72h,
   startDate,
   endDate,
   onChange,
@@ -178,8 +180,11 @@ export function BookingStepDates({
             {pricePerKm !== null
               ? ` + ${pricePerKm.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €/km`
               : ""}
-            {weekendPackagePrice !== null
-              ? ` · Forfait week-end ${weekendPackagePrice.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`
+            {weekendPackagePrice48h !== null
+              ? ` · 48h ${weekendPackagePrice48h.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`
+              : ""}
+            {weekendPackagePrice72h !== null
+              ? ` · 72h ${weekendPackagePrice72h.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`
               : ""}
           </p>
         </div>
@@ -189,7 +194,7 @@ export function BookingStepDates({
             Conditions
           </p>
           <ul className="mt-3 space-y-1.5 font-[family:var(--font-dm-sans)] text-[12px] leading-[1.6] text-[var(--ink-text-soft)]">
-            <li>— Week-end : du vendredi au lundi.</li>
+            <li>— Week-end : 48h (ven→dim ou sam→lun) ou 72h (ven→lun).</li>
             <li>— 1 jour : lundi à jeudi, 1 à 2 semaines à l&apos;avance.</li>
             <li>— Calendrier ouvert sur 2 mois.</li>
             {pricePerKm !== null && (

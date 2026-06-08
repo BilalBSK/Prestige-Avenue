@@ -101,8 +101,15 @@ export function BookingCalendar({ startDate, endDate, onChange }: BookingCalenda
   }
 
   const rentalDays = start && end ? differenceInCalendarDays(end, start) : 0;
-  const isWeekendPackage =
-    rentalDays === 3 && start && end && getDay(start) === 5 && getDay(end) === 1;
+  // Motif de week-end (cf. lib/booking.ts) — 72h: ven→lun ; 48h: ven→dim ou sam→lun.
+  const weekendLabel = (() => {
+    if (!start || !end) return null;
+    const s = getDay(start);
+    const e = getDay(end);
+    if (rentalDays === 3 && s === 5 && e === 1) return "Week-end 72h";
+    if (rentalDays === 2 && ((s === 5 && e === 0) || (s === 6 && e === 1))) return "Week-end 48h";
+    return null;
+  })();
 
   return (
     <div className="select-none">
@@ -217,7 +224,7 @@ export function BookingCalendar({ startDate, endDate, onChange }: BookingCalenda
               {formatLong(end)}
             </p>
             <span className="flex-shrink-0 font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.2em] text-[var(--ink-text-soft)]">
-              {isWeekendPackage ? "Week-end" : `${rentalDays} jour${rentalDays > 1 ? "s" : ""}`}
+              {weekendLabel ?? `${rentalDays} jour${rentalDays > 1 ? "s" : ""}`}
             </span>
           </>
         ) : (

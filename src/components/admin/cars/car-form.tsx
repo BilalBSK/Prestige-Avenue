@@ -245,10 +245,14 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
               )}
             />
           </Field>
-          <Field label="Forfait week-end 72h" error={errors.weekendPackagePrice?.message}>
+          <Field
+            label="Forfait week-end 48h"
+            hint="Ven→dim ou sam→lun"
+            error={errors.weekendPackagePrice48h?.message}
+          >
             <Controller
               control={control}
-              name="weekendPackagePrice"
+              name="weekendPackagePrice48h"
               render={({ field }) => (
                 <NumberInput
                   unit="€"
@@ -257,15 +261,15 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
                   onChange={(e) =>
                     field.onChange(e.target.value === "" ? null : Number(e.target.value))
                   }
-                  error={!!errors.weekendPackagePrice}
+                  error={!!errors.weekendPackagePrice48h}
                 />
               )}
             />
           </Field>
-          <Field label="Km inclus week-end" error={errors.weekendPackageIncludedKm?.message}>
+          <Field label="Km inclus 48h" error={errors.weekendPackageIncludedKm48h?.message}>
             <Controller
               control={control}
-              name="weekendPackageIncludedKm"
+              name="weekendPackageIncludedKm48h"
               render={({ field }) => (
                 <NumberInput
                   unit="km"
@@ -273,7 +277,44 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
                   onChange={(e) =>
                     field.onChange(e.target.value === "" ? null : Number(e.target.value))
                   }
-                  error={!!errors.weekendPackageIncludedKm}
+                  error={!!errors.weekendPackageIncludedKm48h}
+                />
+              )}
+            />
+          </Field>
+          <Field
+            label="Forfait week-end 72h"
+            hint="Ven→lun"
+            error={errors.weekendPackagePrice72h?.message}
+          >
+            <Controller
+              control={control}
+              name="weekendPackagePrice72h"
+              render={({ field }) => (
+                <NumberInput
+                  unit="€"
+                  step="0.01"
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                  }
+                  error={!!errors.weekendPackagePrice72h}
+                />
+              )}
+            />
+          </Field>
+          <Field label="Km inclus 72h" error={errors.weekendPackageIncludedKm72h?.message}>
+            <Controller
+              control={control}
+              name="weekendPackageIncludedKm72h"
+              render={({ field }) => (
+                <NumberInput
+                  unit="km"
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                  }
+                  error={!!errors.weekendPackageIncludedKm72h}
                 />
               )}
             />

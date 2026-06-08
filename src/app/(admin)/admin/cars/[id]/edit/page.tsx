@@ -25,9 +25,12 @@ function toFormValues(car: Awaited<ReturnType<typeof getCarForAdmin>>): CarInput
     pricePerDay: Number(car.pricePerDay),
     pricePerKm: car.pricePerKm !== null ? Number(car.pricePerKm) : null,
     includedKmPerDay: car.includedKmPerDay,
-    weekendPackagePrice:
-      car.weekendPackagePrice !== null ? Number(car.weekendPackagePrice) : null,
-    weekendPackageIncludedKm: car.weekendPackageIncludedKm,
+    weekendPackagePrice48h:
+      car.weekendPackagePrice48h !== null ? Number(car.weekendPackagePrice48h) : null,
+    weekendPackageIncludedKm48h: car.weekendPackageIncludedKm48h,
+    weekendPackagePrice72h:
+      car.weekendPackagePrice72h !== null ? Number(car.weekendPackagePrice72h) : null,
+    weekendPackageIncludedKm72h: car.weekendPackageIncludedKm72h,
     depositAmount: Number(car.depositAmount),
     minDriverAge: car.minDriverAge,
     minLicenseYears: car.minLicenseYears,

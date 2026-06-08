@@ -53,7 +53,10 @@ export default async function AdminCarsPage({
     status: c.status,
     mainImage: c.mainImage,
     pricePerDay: Number(c.pricePerDay),
-    weekendPackagePrice: c.weekendPackagePrice !== null ? Number(c.weekendPackagePrice) : null,
+    weekendPackagePrice48h:
+      c.weekendPackagePrice48h !== null ? Number(c.weekendPackagePrice48h) : null,
+    weekendPackagePrice72h:
+      c.weekendPackagePrice72h !== null ? Number(c.weekendPackagePrice72h) : null,
     isFeatured: c.isFeatured,
     bookingCount: c._count.bookings,
   }));

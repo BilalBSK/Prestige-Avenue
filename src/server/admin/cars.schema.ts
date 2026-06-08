@@ -40,8 +40,10 @@ export const carFormSchema = z.object({
   pricePerDay: z.number().positive().max(100000),
   pricePerKm: z.number().positive().max(100).nullable(),
   includedKmPerDay: z.number().int().positive().max(10000).nullable(),
-  weekendPackagePrice: z.number().positive().max(100000).nullable(),
-  weekendPackageIncludedKm: z.number().int().positive().max(10000).nullable(),
+  weekendPackagePrice48h: z.number().positive().max(100000).nullable(),
+  weekendPackageIncludedKm48h: z.number().int().positive().max(10000).nullable(),
+  weekendPackagePrice72h: z.number().positive().max(100000).nullable(),
+  weekendPackageIncludedKm72h: z.number().int().positive().max(10000).nullable(),
   depositAmount: z.number().positive().max(1000000),
 
   minDriverAge: z.number().int().min(18).max(99),

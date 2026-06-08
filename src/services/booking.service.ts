@@ -144,7 +144,8 @@ export async function createBookingRequest(input: CreateBookingRequestInput) {
         model: true,
         status: true,
         pricePerDay: true,
-        weekendPackagePrice: true,
+        weekendPackagePrice48h: true,
+        weekendPackagePrice72h: true,
       },
     });
 

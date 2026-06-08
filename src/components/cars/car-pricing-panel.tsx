@@ -5,8 +5,10 @@ import { SectionCounter } from "@/components/home/section-counter";
 
 interface CarPricingPanelProps {
   pricePerDay: number;
-  weekendPackagePrice: number | null;
-  weekendPackageIncludedKm: number | null;
+  weekendPackagePrice48h: number | null;
+  weekendPackageIncludedKm48h: number | null;
+  weekendPackagePrice72h: number | null;
+  weekendPackageIncludedKm72h: number | null;
   includedKmPerDay: number | null;
   pricePerKm: number | null;
   depositAmount: number;
@@ -52,8 +54,10 @@ function Row({ label, value, subValue, hint }: RowProps) {
 
 export function CarPricingPanel({
   pricePerDay,
-  weekendPackagePrice,
-  weekendPackageIncludedKm,
+  weekendPackagePrice48h,
+  weekendPackageIncludedKm48h,
+  weekendPackagePrice72h,
+  weekendPackageIncludedKm72h,
   includedKmPerDay,
   pricePerKm,
   depositAmount,
@@ -92,13 +96,24 @@ export function CarPricingPanel({
             }
             hint="Du lundi au jeudi, sur réservation 1 à 2 semaines à l'avance."
           />
-          {weekendPackagePrice !== null && (
+          {weekendPackagePrice48h !== null && (
+            <Row
+              label="Forfait week-end 48h"
+              value={`${weekendPackagePrice48h.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
+              hint={`Vendredi → dimanche ou samedi → lundi${
+                weekendPackageIncludedKm48h
+                  ? `, ${weekendPackageIncludedKm48h} km inclus`
+                  : ""
+              }.`}
+            />
+          )}
+          {weekendPackagePrice72h !== null && (
             <Row
               label="Forfait week-end 72h"
-              value={`${weekendPackagePrice.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
+              value={`${weekendPackagePrice72h.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
               hint={`Vendredi → lundi${
-                weekendPackageIncludedKm
-                  ? `, ${weekendPackageIncludedKm} km inclus`
+                weekendPackageIncludedKm72h
+                  ? `, ${weekendPackageIncludedKm72h} km inclus`
                   : ""
               }.`}
             />

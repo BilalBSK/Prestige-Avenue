@@ -18,16 +18,22 @@ interface BookingRequestSheetProps {
   model: string;
   pricePerDay: number;
   pricePerKm: number | null;
-  weekendPackagePrice: number | null;
+  weekendPackagePrice48h: number | null;
+  weekendPackagePrice72h: number | null;
 }
 
 const STEP_LABELS: [string, string, string] = ["Dates", "Contact", "Confirmation"];
 
+// Miroir client de calculateTotalPrice (lib/booking.ts) : applique le forfait
+// week-end correspondant au motif choisi si la voiture le propose, sinon au jour.
+//  - 72h : vendredi → lundi (3 jours)
+//  - 48h : vendredi → dimanche, ou samedi → lundi (2 jours)
 function calculateEstimate(
   startDateValue: string,
   endDateValue: string,
   pricePerDay: number,
-  weekendPackagePrice: number | null,
+  weekendPackagePrice48h: number | null,
+  weekendPackagePrice72h: number | null,
 ): number {
   if (!startDateValue || !endDateValue) return 0;
   const start = parseCalendarDate(startDateValue);
@@ -36,13 +42,18 @@ function calculateEstimate(
     return 0;
   }
   const days = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const startDow = getCalendarDayOfWeekISO(start);
+  const endDow = getCalendarDayOfWeekISO(end);
+
+  if (days === 3 && startDow === 5 && endDow === 1 && weekendPackagePrice72h !== null) {
+    return Number(weekendPackagePrice72h.toFixed(2));
+  }
   if (
-    days === 3 &&
-    getCalendarDayOfWeekISO(start) === 5 &&
-    getCalendarDayOfWeekISO(end) === 1 &&
-    weekendPackagePrice !== null
+    days === 2 &&
+    ((startDow === 5 && endDow === 0) || (startDow === 6 && endDow === 1)) &&
+    weekendPackagePrice48h !== null
   ) {
-    return Number(weekendPackagePrice.toFixed(2));
+    return Number(weekendPackagePrice48h.toFixed(2));
   }
   return Number((days * pricePerDay).toFixed(2));
 }
@@ -55,7 +66,8 @@ export function BookingRequestSheet({
   model,
   pricePerDay,
   pricePerKm,
-  weekendPackagePrice,
+  weekendPackagePrice48h,
+  weekendPackagePrice72h,
 }: BookingRequestSheetProps) {
   const router = useRouter();
   const csrfToken = useCsrfToken();
@@ -75,8 +87,15 @@ export function BookingRequestSheet({
   const submissionTokenRef = useRef<string>("");
 
   const estimatedTotal = useMemo(
-    () => calculateEstimate(startDate, endDate, pricePerDay, weekendPackagePrice),
-    [startDate, endDate, pricePerDay, weekendPackagePrice],
+    () =>
+      calculateEstimate(
+        startDate,
+        endDate,
+        pricePerDay,
+        weekendPackagePrice48h,
+        weekendPackagePrice72h,
+      ),
+    [startDate, endDate, pricePerDay, weekendPackagePrice48h, weekendPackagePrice72h],
   );
 
   function handleClose() {
@@ -166,7 +185,8 @@ export function BookingRequestSheet({
               carId={carId}
               pricePerDay={pricePerDay}
               pricePerKm={pricePerKm}
-              weekendPackagePrice={weekendPackagePrice}
+              weekendPackagePrice48h={weekendPackagePrice48h}
+              weekendPackagePrice72h={weekendPackagePrice72h}
               startDate={startDate}
               endDate={endDate}
               onChange={(next) => {
