@@ -9,6 +9,12 @@ interface GalleryTileProps {
   item: GalleryItem;
   /** Délai d'entrée (ms) pour échelonner la révélation par colonne. */
   revealDelay?: number;
+  /**
+   * Override du ratio d'affichage (ex: "3 / 4"). Utilisé par le carrousel
+   * mobile pour une bande horizontale homogène, quel que soit le ratio propre
+   * du média. Par défaut, on respecte le ratio défini sur l'item.
+   */
+  ratio?: string;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -25,7 +31,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * l'écran (IntersectionObserver) — et se figent sur leur poster si l'onglet
  * passe en arrière-plan ou si `prefers-reduced-motion` est actif.
  */
-export function GalleryTile({ item, revealDelay = 0 }: GalleryTileProps) {
+export function GalleryTile({ item, revealDelay = 0, ratio }: GalleryTileProps) {
   const prefersReduced = useReducedMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -83,7 +89,7 @@ export function GalleryTile({ item, revealDelay = 0 }: GalleryTileProps) {
         delay: revealDelay / 1000,
       }}
       className="group/tile relative block w-full overflow-hidden rounded-xl bg-[var(--ink-elevated)]"
-      style={{ aspectRatio: `${item.w} / ${item.h}` }}
+      style={{ aspectRatio: ratio ?? `${item.w} / ${item.h}` }}
     >
       {/* --- Média : zoom lent au survol (couche interne) --- */}
       <div className="absolute inset-0 transition-transform duration-[1300ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform group-hover/tile:scale-[1.06]">

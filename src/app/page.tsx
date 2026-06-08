@@ -25,8 +25,8 @@ export default async function Home() {
       <ScrollLegend items={LEGEND_ITEMS} />
       <HeroSection />
       <ManifestoSection />
-      <GallerySection />
       <FleetSection cars={featuredCars} />
+      <GallerySection />
       <ProcessSection />
       <InfoSection />
       <CtaSection />
