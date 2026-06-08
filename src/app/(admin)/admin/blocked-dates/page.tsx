@@ -11,7 +11,7 @@ function formatDate(date: Date): string {
   });
 }
 
-function nightCount(start: Date, end: Date): number {
+function dayCount(start: Date, end: Date): number {
   const ms = end.getTime() - start.getTime();
   return Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
@@ -62,7 +62,7 @@ export default async function AdminBlockedDatesPage() {
           <>
           <div className="divide-y divide-[color:var(--admin-line)] md:hidden">
             {blockedDates.map((blockedDate) => {
-              const nights = nightCount(blockedDate.startDate, blockedDate.endDate);
+              const days = dayCount(blockedDate.startDate, blockedDate.endDate);
               return (
                 <div key={blockedDate.id} className="p-4">
                   <div className="flex items-start justify-between gap-3">
@@ -76,7 +76,7 @@ export default async function AdminBlockedDatesPage() {
                     <span className="text-[color:var(--admin-text-muted)]">→</span>
                     <span className="admin-tabular">{formatDate(blockedDate.endDate)}</span>
                     <span className="admin-tabular text-[color:var(--admin-text-muted)]">
-                      · {nights} {nights > 1 ? "nuits" : "nuit"}
+                      · {days} {days > 1 ? "jours" : "jour"}
                     </span>
                   </div>
                   {blockedDate.reason && (
@@ -114,7 +114,7 @@ export default async function AdminBlockedDatesPage() {
               </thead>
               <tbody>
                 {blockedDates.map((blockedDate) => {
-                  const nights = nightCount(blockedDate.startDate, blockedDate.endDate);
+                  const days = dayCount(blockedDate.startDate, blockedDate.endDate);
                   return (
                     <tr
                       key={blockedDate.id}
@@ -130,7 +130,7 @@ export default async function AdminBlockedDatesPage() {
                         {formatDate(blockedDate.endDate)}
                       </td>
                       <td className="admin-tabular px-4 py-3 text-right text-[0.8125rem] text-[color:var(--admin-text-muted)]">
-                        {nights} {nights > 1 ? "nuits" : "nuit"}
+                        {days} {days > 1 ? "jours" : "jour"}
                       </td>
                       <td className="px-4 py-3 text-[0.8125rem] text-[color:var(--admin-text-soft)]">
                         {blockedDate.reason}

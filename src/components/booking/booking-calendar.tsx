@@ -100,9 +100,9 @@ export function BookingCalendar({ startDate, endDate, onChange }: BookingCalenda
     onChange({ startDate: startDate, endDate: ymd(day) });
   }
 
-  const nights = start && end ? differenceInCalendarDays(end, start) : 0;
+  const rentalDays = start && end ? differenceInCalendarDays(end, start) : 0;
   const isWeekendPackage =
-    nights === 3 && start && end && getDay(start) === 5 && getDay(end) === 1;
+    rentalDays === 3 && start && end && getDay(start) === 5 && getDay(end) === 1;
 
   return (
     <div className="select-none">
@@ -217,7 +217,7 @@ export function BookingCalendar({ startDate, endDate, onChange }: BookingCalenda
               {formatLong(end)}
             </p>
             <span className="flex-shrink-0 font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.2em] text-[var(--ink-text-soft)]">
-              {isWeekendPackage ? "Week-end" : `${nights} nuit${nights > 1 ? "s" : ""}`}
+              {isWeekendPackage ? "Week-end" : `${rentalDays} jour${rentalDays > 1 ? "s" : ""}`}
             </span>
           </>
         ) : (
