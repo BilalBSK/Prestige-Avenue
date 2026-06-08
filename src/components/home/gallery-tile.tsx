@@ -130,19 +130,6 @@ export function GalleryTile({ item, revealDelay = 0, ratio }: GalleryTileProps) 
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-[rgba(201,162,78,0)] transition-shadow duration-500 group-hover/tile:ring-[rgba(201,162,78,0.38)]"
       />
-
-      {/* --- Glyphe « clip vidéo », coin bas-gauche, discret --- */}
-      {item.type === "video" && !showStaticPoster ? (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border border-white/15 bg-[rgba(5,5,5,0.45)] px-2.5 py-1 backdrop-blur-md"
-        >
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--gold)]" />
-          <span className="font-[family:var(--font-dm-sans)] text-[9px] font-medium uppercase tracking-[0.2em] text-[var(--ink-text-soft)]">
-            Clip
-          </span>
-        </span>
-      ) : null}
     </motion.div>
   );
 }
