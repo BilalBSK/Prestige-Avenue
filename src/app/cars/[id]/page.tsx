@@ -10,7 +10,7 @@ import { CarCtaSection } from "@/components/cars/car-cta-section";
 import { CarReserveBar } from "@/components/cars/car-reserve-bar";
 import { BookingSheetProvider } from "@/components/cars/booking-sheet-provider";
 import { flattenShots, parseShots, shotsFromLegacyGallery } from "@/lib/cars/shots";
-import { toEmbedUrl } from "@/lib/cars/video";
+import { isHostedVideo } from "@/lib/cars/video";
 import { getCarById } from "@/services/car.service";
 
 interface CarDetailPageProps {
@@ -51,8 +51,8 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
     shots.length > 0
       ? flattenShots(shots)
       : shotsFromLegacyGallery(car.galleryImages);
-  const embedUrl = car.videoUrl ? toEmbedUrl(car.videoUrl) : null;
-  const hasStudio = studioShots.length > 0 || embedUrl !== null;
+  const videoUrl = isHostedVideo(car.videoUrl) ? car.videoUrl : null;
+  const hasStudio = studioShots.length > 0 || videoUrl !== null;
 
   const pricePerDay = Number(car.pricePerDay);
   const weekendPackagePrice =
@@ -105,6 +105,15 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           total={total}
         />
 
+        {hasStudio && (
+          <CarStudio
+            shots={studioShots}
+            videoUrl={videoUrl}
+            poster={car.mainImage}
+            alt={`${car.brand} ${car.model}`}
+          />
+        )}
+
         <CarPricingPanel
           pricePerDay={pricePerDay}
           weekendPackagePrice={weekendPackagePrice}
@@ -117,14 +126,6 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           index={sectionIndex++}
           total={total}
         />
-
-        {hasStudio && (
-          <CarStudio
-            shots={studioShots}
-            embedUrl={embedUrl}
-            alt={`${car.brand} ${car.model}`}
-          />
-        )}
 
         <CarSpecs
           power={car.power}

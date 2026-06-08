@@ -200,8 +200,9 @@ async function main() {
         "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1600&q=80",
       ],
     }),
-    // Démontre le "plan" vidéo intégré au studio.
-    videoUrl: "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+    // La vidéo est désormais un fichier auto-hébergé (R2), importé depuis
+    // l'admin — pas d'URL externe à semer ici.
+    videoUrl: null,
     status: "AVAILABLE",
     isFeatured: true,
     displayOrder: 2,

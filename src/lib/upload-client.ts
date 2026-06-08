@@ -6,12 +6,19 @@ interface PresignResponse {
 }
 
 type UploadScope = "cars" | "collaborations";
+type UploadKind = "image" | "video";
 
 interface UploadParams {
   file: File;
   folder: string;
   csrfToken: string;
   scope?: UploadScope;
+  kind?: UploadKind;
+}
+
+interface VideoUploadParams extends UploadParams {
+  /** Progression du transfert, de 0 à 1. */
+  onProgress?: (fraction: number) => void;
 }
 
 async function requestPresignedUrl({
@@ -19,6 +26,7 @@ async function requestPresignedUrl({
   folder,
   csrfToken,
   scope,
+  kind,
 }: UploadParams): Promise<PresignResponse> {
   const response = await fetch("/api/admin/upload", {
     method: "POST",
@@ -32,6 +40,7 @@ async function requestPresignedUrl({
       size: file.size,
       folder,
       ...(scope ? { scope } : {}),
+      ...(kind ? { kind } : {}),
     }),
   });
 
@@ -54,8 +63,52 @@ async function putToSignedUrl(uploadUrl: string, file: File): Promise<void> {
   }
 }
 
+/**
+ * PUT avec progression réelle. `fetch` n'expose pas l'avancement d'un upload —
+ * indispensable pour une vidéo de plusieurs dizaines de Mo, sinon l'admin croit
+ * l'interface figée. On retombe donc sur XMLHttpRequest, seul à émettre
+ * `upload.onprogress`.
+ */
+function putToSignedUrlWithProgress(
+  uploadUrl: string,
+  file: File,
+  onProgress?: (fraction: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", uploadUrl);
+    xhr.setRequestHeader("Content-Type", file.type);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        onProgress(event.loaded / event.total);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(1);
+        resolve();
+      } else {
+        reject(new Error(`Transfert refusé (${xhr.status}).`));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Transfert interrompu."));
+    xhr.onabort = () => reject(new Error("Transfert annulé."));
+    xhr.send(file);
+  });
+}
+
 export async function uploadImageToR2(params: UploadParams): Promise<string> {
   const presigned = await requestPresignedUrl(params);
   await putToSignedUrl(presigned.uploadUrl, params.file);
+  return presigned.publicUrl;
+}
+
+export async function uploadVideoToR2({
+  onProgress,
+  ...params
+}: VideoUploadParams): Promise<string> {
+  const presigned = await requestPresignedUrl({ ...params, kind: "video" });
+  await putToSignedUrlWithProgress(presigned.uploadUrl, params.file, onProgress);
   return presigned.publicUrl;
 }

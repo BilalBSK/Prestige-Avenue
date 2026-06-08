@@ -2,14 +2,23 @@ import { requireAdminSessionOrRedirect } from "@/lib/admin-auth";
 import {
   getExtensionFromMime,
   isAllowedImageMime,
+  isAllowedVideoMime,
   isUnderMaxImageSize,
+  isUnderMaxVideoSize,
+  MAX_VIDEO_SIZE_BYTES,
 } from "@/lib/blob";
 import { buildPublicUrl, getR2Client, getR2Config } from "@/lib/r2";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { uploadTokenInputSchema, type UploadTokenInput } from "./cars.schema";
 
-const SIGNED_URL_TTL_SECONDS = 60;
+// Les images partent en un PUT quasi instantané ; une vidéo (quelques dizaines
+// de Mo) peut prendre un moment sur une connexion modeste, d'où une URL signée
+// nettement plus longue pour ce cas.
+const IMAGE_SIGNED_URL_TTL_SECONDS = 60;
+const VIDEO_SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+const MAX_VIDEO_SIZE_MB = Math.round(MAX_VIDEO_SIZE_BYTES / (1024 * 1024));
 
 export interface PresignedUpload {
   uploadUrl: string;
@@ -22,11 +31,21 @@ export async function createPresignedUpload(input: UploadTokenInput): Promise<Pr
   await requireAdminSessionOrRedirect();
   const parsed = uploadTokenInputSchema.parse(input);
 
-  if (!isAllowedImageMime(parsed.mime)) {
-    throw new Error("Type de fichier non autorisé.");
-  }
-  if (!isUnderMaxImageSize(parsed.size)) {
-    throw new Error("Fichier trop volumineux (max 5 Mo).");
+  const isVideo = parsed.kind === "video";
+  if (isVideo) {
+    if (!isAllowedVideoMime(parsed.mime)) {
+      throw new Error("Format vidéo non autorisé (MP4, WebM, MOV).");
+    }
+    if (!isUnderMaxVideoSize(parsed.size)) {
+      throw new Error(`Vidéo trop volumineuse (max ${MAX_VIDEO_SIZE_MB} Mo).`);
+    }
+  } else {
+    if (!isAllowedImageMime(parsed.mime)) {
+      throw new Error("Type de fichier non autorisé.");
+    }
+    if (!isUnderMaxImageSize(parsed.size)) {
+      throw new Error("Fichier trop volumineux (max 5 Mo).");
+    }
   }
 
   const ext = getExtensionFromMime(parsed.mime);
@@ -44,8 +63,12 @@ export async function createPresignedUpload(input: UploadTokenInput): Promise<Pr
     ContentLength: parsed.size,
   });
 
+  const expiresIn = isVideo
+    ? VIDEO_SIGNED_URL_TTL_SECONDS
+    : IMAGE_SIGNED_URL_TTL_SECONDS;
+
   const uploadUrl = await getSignedUrl(client, command, {
-    expiresIn: SIGNED_URL_TTL_SECONDS,
+    expiresIn,
     signableHeaders: new Set(["content-type", "content-length"]),
   });
 
@@ -53,6 +76,6 @@ export async function createPresignedUpload(input: UploadTokenInput): Promise<Pr
     uploadUrl,
     publicUrl: buildPublicUrl(key),
     key,
-    expiresIn: SIGNED_URL_TTL_SECONDS,
+    expiresIn,
   };
 }

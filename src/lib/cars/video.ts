@@ -1,28 +1,38 @@
 /**
- * Normalise une URL YouTube / Vimeo vers son URL d'intégration (embed).
- * Renvoie `null` si l'URL est invalide. Partagé par le studio photo public.
+ * Vidéo de présentation d'un véhicule.
+ *
+ * Les vidéos sont désormais hébergées sur notre propre stockage (R2) et non
+ * plus référencées par une URL YouTube / Vimeo : le champ `Car.videoUrl`
+ * contient l'URL publique d'un fichier vidéo importé depuis l'admin.
+ *
+ * `isHostedVideo` filtre les valeurs lisibles par un lecteur `<video>` natif :
+ * une éventuelle ancienne URL YouTube/Vimeo (qui n'est pas un fichier) renvoie
+ * `false`, de sorte que la fiche ne tente jamais d'afficher un lecteur cassé.
  */
-export function toEmbedUrl(rawUrl: string): string | null {
-  try {
-    const url = new URL(rawUrl);
-    const host = url.hostname.replace(/^www\./, "");
 
-    if (host === "youtu.be") {
-      return `https://www.youtube-nocookie.com/embed/${url.pathname.slice(1)}`;
-    }
-    if (host.endsWith("youtube.com")) {
-      const v = url.searchParams.get("v");
-      if (v) return `https://www.youtube-nocookie.com/embed/${v}`;
-      if (url.pathname.startsWith("/embed/")) {
-        return `https://www.youtube-nocookie.com${url.pathname}`;
-      }
-    }
-    if (host.endsWith("vimeo.com")) {
-      const id = url.pathname.split("/").filter(Boolean)[0];
-      if (id) return `https://player.vimeo.com/video/${id}`;
-    }
-    return rawUrl;
+const VIDEO_FILE_EXTENSIONS = [".mp4", ".webm", ".mov"] as const;
+
+export function isHostedVideo(rawUrl: string | null | undefined): rawUrl is string {
+  if (!rawUrl) return false;
+  let pathname: string;
+  try {
+    pathname = new URL(rawUrl).pathname.toLowerCase();
   } catch {
-    return null;
+    return false;
   }
+  return VIDEO_FILE_EXTENSIONS.some((ext) => pathname.endsWith(ext));
+}
+
+/** Type MIME du lecteur `<source>`, déduit de l'extension du fichier. */
+export function videoMimeFromUrl(rawUrl: string): string {
+  const path = (() => {
+    try {
+      return new URL(rawUrl).pathname.toLowerCase();
+    } catch {
+      return rawUrl.toLowerCase();
+    }
+  })();
+  if (path.endsWith(".webm")) return "video/webm";
+  if (path.endsWith(".mov")) return "video/quicktime";
+  return "video/mp4";
 }

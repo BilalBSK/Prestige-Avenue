@@ -12,6 +12,7 @@ import { Select } from "@/components/admin/ui/select";
 import { Switch } from "@/components/admin/ui/switch";
 import { TagsInput } from "@/components/admin/ui/tags-input";
 import { Textarea } from "@/components/admin/ui/textarea";
+import { VideoPicker } from "@/components/admin/ui/video-picker";
 import { toast } from "@/components/admin/ui/toast";
 import { buildCarSlug } from "@/lib/slugify";
 import { createCar, updateCar } from "@/server/admin/cars.actions";
@@ -401,17 +402,15 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
             </Field>
           )}
 
-          <Field label="URL vidéo" error={errors.videoUrl?.message} hint="YouTube ou Vimeo — intégrée dans le studio photo de la fiche.">
+          <Field label="Vidéo" error={errors.videoUrl?.message} hint="Importée depuis votre ordinateur (MP4, WebM, MOV) — intégrée dans le studio de la fiche.">
             <Controller
               control={control}
               name="videoUrl"
               render={({ field }) => (
-                <Input
-                  type="url"
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.value === "" ? null : e.target.value)}
-                  error={!!errors.videoUrl}
-                  placeholder="https://…"
+                <VideoPicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  folder={uploadFolder}
                 />
               )}
             />

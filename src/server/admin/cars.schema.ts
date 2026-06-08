@@ -73,6 +73,9 @@ export const uploadTokenInputSchema = z.object({
   // Préfixe de plus haut niveau dans le bucket. Par défaut "cars" pour rester
   // rétrocompatible ; "collaborations" pour les photos de partenaires.
   scope: z.enum(["cars", "collaborations"]).default("cars"),
+  // Nature du média : conditionne les MIME/taille autorisés et la durée de
+  // l'URL signée. Par défaut "image" (rétrocompatible).
+  kind: z.enum(["image", "video"]).default("image"),
 });
 
 export type UploadTokenInput = z.infer<typeof uploadTokenInputSchema>;

@@ -1,6 +1,7 @@
 import { getFeaturedCars } from "@/services/car.service";
 import { HeroSection } from "@/components/home/hero-section";
 import { ManifestoSection } from "@/components/home/manifesto-section";
+import { GallerySection } from "@/components/home/gallery-section";
 import { FleetSection } from "@/components/home/fleet-section";
 import { ProcessSection } from "@/components/home/process-section";
 import { InfoSection } from "@/components/home/info-section";
@@ -24,6 +25,7 @@ export default async function Home() {
       <ScrollLegend items={LEGEND_ITEMS} />
       <HeroSection />
       <ManifestoSection />
+      <GallerySection />
       <FleetSection cars={featuredCars} />
       <ProcessSection />
       <InfoSection />

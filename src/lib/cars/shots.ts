@@ -25,10 +25,8 @@ export type ShotAngle =
   // Intérieur
   | "INT_COCKPIT"
   | "INT_FRONT_SEATS"
-  | "INT_REAR_SEATS"
   | "INT_DASHBOARD"
-  | "INT_DETAIL"
-  | "INT_TRUNK";
+  | "INT_DETAIL";
 
 export interface ShotAngleDef {
   angle: ShotAngle;
@@ -109,13 +107,6 @@ export const SHOT_ANGLES: readonly ShotAngleDef[] = [
     hint: "Sellerie et assises avant.",
   },
   {
-    angle: "INT_REAR_SEATS",
-    group: "INTERIEUR",
-    label: "Places arrière",
-    caption: "Places arrière",
-    hint: "Banquette / sièges arrière et espace aux jambes.",
-  },
-  {
     angle: "INT_DASHBOARD",
     group: "INTERIEUR",
     label: "Planche de bord",
@@ -128,13 +119,6 @@ export const SHOT_ANGLES: readonly ShotAngleDef[] = [
     label: "Détails int.",
     caption: "Détails intérieurs",
     hint: "Matériaux, surpiqûres, inserts — l'artisanat de l'habitacle.",
-  },
-  {
-    angle: "INT_TRUNK",
-    group: "INTERIEUR",
-    label: "Coffre",
-    caption: "Coffre & modularité",
-    hint: "Volume de chargement et modularité.",
   },
 ] as const;
 

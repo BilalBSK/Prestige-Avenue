@@ -5,10 +5,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRevealOnScroll } from "@/hooks/use-reveal-on-scroll";
 import type { FlatShot, ShotGroup } from "@/lib/cars/shots";
 import { SHOT_GROUPS } from "@/lib/cars/shots";
+import { videoMimeFromUrl } from "@/lib/cars/video";
 
 interface CarStudioProps {
   shots: FlatShot[];
-  embedUrl: string | null;
+  /** URL R2 de la vidéo auto-hébergée, ou null. */
+  videoUrl: string | null;
+  /** Image de couverture utilisée comme poster de la vidéo. */
+  poster?: string;
   alt: string;
 }
 
@@ -23,7 +27,7 @@ type StudioItem =
       /** Numéro 1-based de la photo au sein de son groupe (pour le marqueur "EXT · 02"). */
       groupIndex: number;
     }
-  | { kind: "video"; embedUrl: string };
+  | { kind: "video"; videoUrl: string };
 
 const GROUP_SHORT: Record<ShotGroup, string> = {
   EXTERIEUR: "EXT",
@@ -39,7 +43,7 @@ interface StudioTab {
   count: number | null;
 }
 
-export function CarStudio({ shots, embedUrl, alt }: CarStudioProps) {
+export function CarStudio({ shots, videoUrl, poster, alt }: CarStudioProps) {
   const headerRef = useRevealOnScroll<HTMLDivElement>({ threshold: 0.3 });
   const stageWrapRef = useRevealOnScroll<HTMLDivElement>({ threshold: 0.2 });
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -67,12 +71,12 @@ export function CarStudio({ shots, embedUrl, alt }: CarStudioProps) {
         groupIndex: n,
       };
     });
-    if (embedUrl) imageItems.push({ kind: "video", embedUrl });
+    if (videoUrl) imageItems.push({ kind: "video", videoUrl });
     return imageItems;
-  }, [shots, embedUrl]);
+  }, [shots, videoUrl]);
 
   const imageCount = items.filter((i) => i.kind === "image").length;
-  const hasVideo = Boolean(embedUrl);
+  const hasVideo = Boolean(videoUrl);
 
   // Onglets : un par groupe présent + "Vidéo" si disponible.
   const tabs = useMemo<StudioTab[]>(() => {
@@ -290,24 +294,27 @@ export function CarStudio({ shots, embedUrl, alt }: CarStudioProps) {
                   priority={i === 0}
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1152px) 90vw, 1152px"
-                  quality={90}
+                  quality={85}
                   draggable={false}
                 />
               </div>
             ) : null,
           )}
 
-          {/* Plan vidéo — monté uniquement lorsqu'il est actif (stoppe la lecture en quittant) */}
+          {/* Plan vidéo — lecteur natif auto-hébergé, monté uniquement lorsqu'il
+              est actif (la lecture s'arrête en quittant le plan). */}
           {activeItem?.kind === "video" && (
-            <iframe
-              src={activeItem.embedUrl}
-              title={`Vidéo — ${alt}`}
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-              className="absolute inset-0 z-20 h-full w-full bg-black"
-            />
+            <video
+              key={activeItem.videoUrl}
+              poster={poster}
+              controls
+              playsInline
+              preload="metadata"
+              className="absolute inset-0 z-20 h-full w-full bg-black object-contain"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <source src={activeItem.videoUrl} type={videoMimeFromUrl(activeItem.videoUrl)} />
+            </video>
           )}
 
           {/* Voile dégradé + grain — profondeur, masqué sur la vidéo */}
@@ -444,7 +451,7 @@ export function CarStudio({ shots, embedUrl, alt }: CarStudioProps) {
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                           sizes="112px"
-                          quality={60}
+                          quality={75}
                           draggable={false}
                         />
                       ) : (
@@ -496,7 +503,7 @@ export function CarStudio({ shots, embedUrl, alt }: CarStudioProps) {
               fill
               className="car-studio-lightbox-img object-contain"
               sizes="100vw"
-              quality={95}
+              quality={100}
               draggable={false}
             />
           </div>

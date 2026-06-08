@@ -1,0 +1,95 @@
+La page d'accueil souffre d'un manque de contenu visuel.
+
+## Stack de références obligatoires — à consulter avant de coder
+
+Avant d'écrire la moindre ligne, tu dois :
+
+1. Lire et appliquer le skill frontend-design dans son intégralité —
+   design tokens, typographie, espacements, couleurs, composants.
+   Ce skill est ta bible de rendu visuel sur ce projet.
+
+2. Appliquer les standards UI/UX pro max :
+   - Hiérarchie visuelle irréprochable (l'œil sait toujours où aller)
+   - Micro-interactions sur chaque élément interactif
+   - Accessibilité (contrastes, focus states, alt texts sur les placeholders)
+   - Performance : images lazy-loaded, vidéos ne bloquent pas le rendu
+   - Responsive parfait : mobile, tablette, desktop — aucun compromis
+
+3. Piocher sur 21st.dev via MCP les composants les plus impressionnants
+   qui correspondent au besoin. Ne te limite pas aux exemples listés 
+   plus bas — explore, compare plusieurs options, et choisis 
+   ce qui a le meilleur rendu visuel pour un site automobile premium.
+   Si un composant 21st.dev est meilleur que ce que tu aurais codé 
+   from scratch, utilise-le sans hésiter.
+
+## Philosophie d'intervention
+
+Tu travailles en priorité en ajout dans les zones vides.
+Tu peux toutefois modifier l'existant, mais uniquement si tu es certain 
+à 100% que ce changement élève le rendu global de façon significative — 
+pas pour simplifier ton travail, pas par habitude de refactoriser.
+Chaque modification d'un élément existant doit être justifiée en une phrase 
+avant d'être faite. En cas de doute, tu ajoutes sans toucher.
+
+## Assets visuels — utilise des placeholders
+
+Tu n'as pas accès aux vraies photos et vidéos. Intègre des placeholders 
+propres à la place :
+- Images : utilise unsplash.com avec des requêtes automobiles génériques
+  (ex: https://source.unsplash.com/1600x900/?luxury,car)
+- Vidéos : utilise une balise <video> avec un poster placeholder sombre 
+  et un commentaire <!-- REMPLACER : insérer ici le clip vidéo du client -->
+- Chaque placeholder doit avoir un commentaire clair indiquant 
+  exactement quoi mettre à la place et dans quel format
+
+L'objectif est que le client puisse faire le remplacement lui-même 
+en quelques minutes, sans toucher au reste du code.
+
+## Sections à créer / intégrer sur la homepage
+
+### 1. Hero visuel (au-dessus de la fold)
+- Fond en vidéo loop silencieuse ou grande image plein écran
+- Overlay sombre subtil pour lisibilité
+- Titre et CTA par-dessus, avec animation d'entrée
+
+### 2. Galerie immersive
+- Layout asymétrique type editorial (pas une grille carrée banale)
+- Mélange de formats : une grande image, deux petites, une vidéo inline 
+  — comme un magazine automobile haut de gamme
+- Chaque élément entre en scène avec une animation au scroll 
+  (parallax léger, fade + translate, ou reveal masqué)
+
+### 3. Spotlight vidéo
+- Section dédiée à 1 clip vidéo, pleine largeur
+- Lecture au hover ou au scroll (pas d'autoplay sonore)
+- Bordure ou traitement visuel premium autour du player
+
+## Règles de design strictes
+
+- Palette : respecte les couleurs existantes du site, sans exception
+- Typographie : aucun changement, cohérence totale avec l'existant
+- Espacement : généreux, aéré — du silence autour des éléments
+- Pas de carousel basique, pas de grille uniforme 3x3
+- Zéro effet "template gratuit" : chaque transition doit sembler intentionnelle
+
+## Animations — à récupérer depuis 21st.dev via MCP
+
+Utilise /ui pour chaque composant animé. Exemples de prompts à lancer :
+- `/ui scroll-reveal section with staggered image entrance`
+- `/ui full-bleed video hero with fade overlay and animated headline`
+- `/ui editorial asymmetric image grid with parallax`
+- `/ui inline video player with hover-to-play and reveal animation`
+
+Ne te limite pas à ces exemples — explore 21st.dev et choisis 
+ce qui correspond le mieux à un site automobile haut de gamme.
+Privilégie Framer Motion. Les animations doivent être fluides (easing doux), 
+pas tape-à-l'oeil. Durées entre 0.4s et 0.9s max.
+
+## Critère de succès
+
+Un visiteur qui arrive sur la page doit immédiatement ressentir 
+le sérieux et le prestige de la marque — pas lire, ressentir.
+Le contenu doit respirer, bouger avec intention, et donner envie de scroller.
+L'ensemble doit sembler avoir toujours été là — cohérent avec le reste du site.
+Les placeholders doivent être si bien intégrés que le rendu final 
+est déjà impressionnant avant même le remplacement par les vraies photos.
