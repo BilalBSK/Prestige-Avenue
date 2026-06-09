@@ -4,6 +4,7 @@ import {
   validateBusinessBookingRules,
 } from "@/lib/booking";
 import { prisma } from "@/lib/prisma";
+import { notifyNewBookingRequest } from "@/services/notification.service";
 import { BookingStatus, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
@@ -91,14 +92,15 @@ export async function createBookingRequest(input: CreateBookingRequestInput) {
   const sanitizedPhone = input.phone.trim();
   const sanitizedMessage = input.customerMessage?.trim().slice(0, 500) || null;
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const existingSubmission = await tx.booking.findUnique({
       where: { submissionToken: input.submissionToken },
       select: { id: true },
     });
 
     if (existingSubmission) {
-      return { bookingId: existingSubmission.id };
+      // Re-soumission idempotente : la demande existe déjà, on ne renotifie pas.
+      return { bookingId: existingSubmission.id, isNew: false as const };
     }
 
     const existingUser = await tx.user.findUnique({
@@ -195,8 +197,34 @@ export async function createBookingRequest(input: CreateBookingRequestInput) {
       },
     });
 
-    return { bookingId: booking.id };
+    return {
+      bookingId: booking.id,
+      isNew: true as const,
+      notification: {
+        carBrand: car.brand,
+        carModel: car.model,
+        startDate,
+        endDate,
+        totalPrice: totalPriceNumber,
+        customerName: fullName,
+        customerEmail: normalizedEmail,
+        customerPhone: sanitizedPhone || null,
+        customerMessage: sanitizedMessage,
+      },
+    };
   });
+
+  // Notification e-mail à l'agence, hors transaction et seulement pour une
+  // nouvelle demande. `notifyNewBookingRequest` absorbe ses propres erreurs :
+  // un e-mail en échec ne doit jamais faire échouer la réservation.
+  if (result.isNew) {
+    await notifyNewBookingRequest({
+      bookingId: result.bookingId,
+      ...result.notification,
+    });
+  }
+
+  return { bookingId: result.bookingId };
 }
 
 export async function getBookingById(bookingId: string) {
