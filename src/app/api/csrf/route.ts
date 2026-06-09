@@ -8,13 +8,14 @@ export async function GET() {
   const token = existing ?? generateCsrfToken();
 
   const response = NextResponse.json({ csrfToken: token });
-  if (!existing) {
-    response.cookies.set(CSRF_COOKIE_NAME, token, {
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      httpOnly: false,
-    });
-  }
+  // Toujours réaffirmer le cookie = token renvoyé, même s'il existe déjà.
+  // Le middleware peut avoir posé un autre token sur une requête concurrente
+  // au premier chargement ; cette route fait foi et garantit cookie === header.
+  response.cookies.set(CSRF_COOKIE_NAME, token, {
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    httpOnly: false,
+  });
   return response;
 }
