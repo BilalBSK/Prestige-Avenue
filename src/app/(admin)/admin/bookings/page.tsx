@@ -1,8 +1,10 @@
 import { BookingActions } from "@/components/admin/booking-actions";
+import { ManualBookingButton } from "@/components/admin/calendar/manual-booking-button";
 import { PageHeader, PageMetaItem } from "@/components/admin/ui/page-header";
 import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
 import { Select } from "@/components/admin/ui/select";
+import { PAYMENT_LABEL, PAYMENT_PILL, SOURCE_LABEL } from "@/lib/admin/booking-display";
 import { prisma } from "@/lib/prisma";
 import { BookingStatus } from "@prisma/client";
 
@@ -149,6 +151,11 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
             <PageMetaItem label="Revenu confirmé" value={formatEUR(confirmedRevenue)} />
           </>
         }
+        actions={
+          <ManualBookingButton
+            cars={cars.map((c) => ({ id: c.id, brand: c.brand, model: c.model }))}
+          />
+        }
       />
 
       <form className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-[1.5fr_1fr_1fr_1fr_auto]">
@@ -188,9 +195,11 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
                     <div className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
                       {booking.user.name}
                     </div>
-                    <div className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
-                      {booking.user.email}
-                    </div>
+                    {booking.user.email && (
+                      <div className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
+                        {booking.user.email}
+                      </div>
+                    )}
                     {booking.user.phone && (
                       <div className="admin-tabular text-[0.75rem] text-[color:var(--admin-text-muted)]">
                         {booking.user.phone}
@@ -276,9 +285,11 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
                         <div className="text-[0.8125rem] font-medium text-[color:var(--admin-text)]">
                           {booking.user.name}
                         </div>
-                        <div className="text-[0.75rem] text-[color:var(--admin-text-muted)]">
-                          {booking.user.email}
-                        </div>
+                        {booking.user.email && (
+                          <div className="text-[0.75rem] text-[color:var(--admin-text-muted)]">
+                            {booking.user.email}
+                          </div>
+                        )}
                         {booking.user.phone && (
                           <div className="admin-tabular text-[0.75rem] text-[color:var(--admin-text-muted)]">
                             {booking.user.phone}
@@ -349,11 +360,18 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
-                    {booking.user.name}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[0.875rem] font-medium text-[color:var(--admin-text)]">
+                      {booking.user.name}
+                    </span>
+                    {booking.source !== "WEBSITE" && (
+                      <span className="admin-pill bg-[color:var(--admin-surface-2)] text-[color:var(--admin-text-muted)]">
+                        {SOURCE_LABEL[booking.source]}
+                      </span>
+                    )}
                   </div>
                   <div className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
-                    {booking.user.email}
+                    {booking.user.email ?? booking.user.phone ?? "—"}
                   </div>
                 </div>
                 <span className={`admin-pill shrink-0 ${STATUS_STYLE[booking.status]}`}>
@@ -374,7 +392,15 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
                     {formatEUR(Number(booking.totalPrice))}
                   </div>
                 </div>
-                <div className="col-span-2">
+                <div>
+                  <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Règlement</div>
+                  <div className="mt-0.5">
+                    <span className={`admin-pill ${PAYMENT_PILL[booking.paymentStatus]}`}>
+                      {PAYMENT_LABEL[booking.paymentStatus]}
+                    </span>
+                  </div>
+                </div>
+                <div>
                   <div className="text-[0.6875rem] text-[color:var(--admin-text-muted)]">Période</div>
                   <div className="admin-tabular text-[0.8125rem] text-[color:var(--admin-text)]">
                     {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
@@ -454,6 +480,9 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
                     Montant
                   </th>
                   <th className="px-4 py-2.5 text-[0.75rem] font-medium text-[color:var(--admin-text-muted)]">
+                    Règlement
+                  </th>
+                  <th className="px-4 py-2.5 text-[0.75rem] font-medium text-[color:var(--admin-text-muted)]">
                     Statut
                   </th>
                   <th className="px-4 py-2.5 text-right text-[0.75rem] font-medium text-[color:var(--admin-text-muted)]">
@@ -468,11 +497,18 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
                     className="border-b border-[color:var(--admin-line)] last:border-0 hover:bg-[color:var(--admin-surface)]/40"
                   >
                     <td className="px-4 py-3 align-top">
-                      <div className="text-[0.8125rem] font-medium text-[color:var(--admin-text)]">
-                        {booking.user.name}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[0.8125rem] font-medium text-[color:var(--admin-text)]">
+                          {booking.user.name}
+                        </span>
+                        {booking.source !== "WEBSITE" && (
+                          <span className="admin-pill bg-[color:var(--admin-surface-2)] text-[color:var(--admin-text-muted)]">
+                            {SOURCE_LABEL[booking.source]}
+                          </span>
+                        )}
                       </div>
                       <div className="text-[0.75rem] text-[color:var(--admin-text-muted)]">
-                        {booking.user.email}
+                        {booking.user.email ?? booking.user.phone ?? "—"}
                       </div>
                     </td>
                     <td className="px-4 py-3 align-top text-[0.8125rem] text-[color:var(--admin-text)]">
@@ -490,6 +526,16 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
                       <div className="admin-tabular text-[0.8125rem] font-medium text-[color:var(--admin-text)]">
                         {formatEUR(Number(booking.totalPrice))}
                       </div>
+                    </td>
+                    <td className="px-4 py-3 align-top">
+                      <span className={`admin-pill ${PAYMENT_PILL[booking.paymentStatus]}`}>
+                        {PAYMENT_LABEL[booking.paymentStatus]}
+                      </span>
+                      {booking.paymentStatus === "PARTIAL" && (
+                        <div className="admin-tabular mt-1 text-[0.6875rem] text-[color:var(--admin-text-muted)]">
+                          {formatEUR(Number(booking.amountPaid))} / {formatEUR(Number(booking.totalPrice))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 align-top">
                       <span className={`admin-pill ${STATUS_STYLE[booking.status]}`}>

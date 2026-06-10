@@ -165,6 +165,27 @@
   background: currentColor;
 }
 
+/* Planning de flotte : barre de défilement discrète, en harmonie avec le thème */
+.admin-timeline-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--admin-line-strong) transparent;
+}
+.admin-timeline-scroll::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.admin-timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-timeline-scroll::-webkit-scrollbar-thumb {
+  background: var(--admin-line-strong);
+  border-radius: 9999px;
+  border: 2px solid var(--admin-bg-elev);
+}
+.admin-timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--admin-text-muted);
+}
+
 /* scroll-behavior is handled by Lenis on desktop, native on touch / reduced-motion */
 
 body {

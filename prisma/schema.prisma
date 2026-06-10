@@ -51,10 +51,38 @@ enum FuelType {
   ELECTRIC
 }
 
+// Origine d'une réservation. WEBSITE = demande publique via le site ;
+// PHONE / IN_PERSON = saisie manuelle par l'agence (hors paiement en ligne).
+enum BookingSource {
+  WEBSITE
+  PHONE
+  IN_PERSON
+}
+
+// Suivi du règlement hors-ligne (aucun paiement en ligne sur le site).
+// Le solde se règle sur place à la remise des clés.
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
+// Moyen de règlement encaissé par l'agence.
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  CHECK
+  OTHER
+}
+
 model User {
   id        String    @id @default(cuid())
   name      String
-  email     String    @unique
+  // Nullable : un client enregistré par téléphone peut ne pas avoir d'e-mail.
+  // Postgres autorise plusieurs NULL sous un index @unique ; l'auth ne requête
+  // que des e-mails non-nuls validés, la connexion n'est donc pas affectée.
+  email     String?   @unique
   password  String
   role      Role      @default(USER)
   phone     String?
@@ -130,8 +158,16 @@ model Booking {
   endDate          DateTime
   totalPrice       Decimal       @db.Decimal(10, 2)
   status           BookingStatus @default(PENDING_REVIEW)
+  source           BookingSource @default(WEBSITE)
   customerMessage  String?
   declineReason    String?
+  // Note interne de l'agence — invisible côté client, distincte de customerMessage.
+  internalNote     String?
+  // Suivi du règlement hors-ligne.
+  paymentStatus    PaymentStatus @default(UNPAID)
+  amountPaid       Decimal       @default(0) @db.Decimal(10, 2)
+  paymentMethod    PaymentMethod?
+  paymentNote      String?
   submissionToken  String?       @unique
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
@@ -141,6 +177,7 @@ model Booking {
   @@index([carId, startDate, endDate])
   @@index([userId, createdAt])
   @@index([status, createdAt])
+  @@index([startDate, endDate])
 }
 
 model BlockedDate {

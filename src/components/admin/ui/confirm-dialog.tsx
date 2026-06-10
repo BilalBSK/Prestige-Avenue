@@ -46,11 +46,18 @@ export function ConfirmDialogHost() {
 
   useEffect(() => {
     if (!options) return;
+    // Capture-phase + stopImmediatePropagation : quand un dialogue de confirmation
+    // est ouvert au-dessus d'un tiroir (Drawer), Échap ne doit fermer QUE le
+    // dialogue, pas le tiroir derrière (qui écoute aussi keydown sur window).
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close(false);
+      if (e.key === "Escape") {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        close(false);
+      }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [options]);
 
   if (!options) return null;
@@ -61,7 +68,7 @@ export function ConfirmDialogHost() {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[95] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={() => close(false)}
     >
       <div

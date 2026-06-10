@@ -4,8 +4,19 @@ import {
   validateBusinessBookingRules,
 } from "@/lib/booking";
 import { prisma } from "@/lib/prisma";
-import { notifyNewBookingRequest } from "@/services/notification.service";
-import { BookingStatus, Prisma } from "@prisma/client";
+import {
+  notifyBookingConfirmed,
+  notifyBookingDeclined,
+  notifyNewBookingRequest,
+} from "@/services/notification.service";
+import {
+  BookingSource,
+  BookingStatus,
+  PaymentMethod,
+  PaymentStatus,
+  Prisma,
+  Role,
+} from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 
@@ -28,6 +39,69 @@ const BLOCKING_STATUSES: BookingStatus[] = [
   BookingStatus.CONFIRMED,
   BookingStatus.IN_PROGRESS,
 ];
+
+/**
+ * Vérifie, dans une transaction, qu'aucune réservation bloquante (CONFIRMED /
+ * IN_PROGRESS) ni période d'indisponibilité ne chevauche [startDate, endDate[
+ * pour ce véhicule. `excludeBookingId` permet d'ignorer la réservation en cours
+ * d'édition. Lève une erreur « indisponible » en cas de conflit.
+ */
+async function assertNoOverlap(
+  tx: Prisma.TransactionClient,
+  carId: string,
+  startDate: Date,
+  endDate: Date,
+  excludeBookingId?: string,
+): Promise<void> {
+  const [bookingOverlap, blockedOverlap] = await Promise.all([
+    tx.booking.count({
+      where: {
+        carId,
+        status: { in: BLOCKING_STATUSES },
+        startDate: { lt: endDate },
+        endDate: { gt: startDate },
+        ...(excludeBookingId ? { id: { not: excludeBookingId } } : {}),
+      },
+    }),
+    tx.blockedDate.count({
+      where: {
+        carId,
+        startDate: { lt: endDate },
+        endDate: { gt: startDate },
+      },
+    }),
+  ]);
+
+  if (bookingOverlap > 0 || blockedOverlap > 0) {
+    throw new Error("Période indisponible : elle chevauche une réservation confirmée ou une indisponibilité.");
+  }
+}
+
+/**
+ * Déduit un règlement cohérent à partir d'un montant encaissé et du total.
+ * Garantit l'invariant amountPaid ∈ [0, total] et un statut aligné, quelles que
+ * soient les valeurs reçues du client. Si `status` est forcé (PAID/UNPAID),
+ * le montant est ajusté en conséquence.
+ */
+function normalizePayment(
+  total: number,
+  amountPaidInput: number,
+  statusInput?: PaymentStatus,
+): { paymentStatus: PaymentStatus; amountPaid: number } {
+  const totalRounded = Math.max(0, Number(total.toFixed(2)));
+
+  if (statusInput === PaymentStatus.PAID) {
+    return { paymentStatus: PaymentStatus.PAID, amountPaid: totalRounded };
+  }
+  if (statusInput === PaymentStatus.UNPAID) {
+    return { paymentStatus: PaymentStatus.UNPAID, amountPaid: 0 };
+  }
+
+  const clamped = Math.min(Math.max(0, Number(amountPaidInput.toFixed(2))), totalRounded);
+  if (clamped <= 0) return { paymentStatus: PaymentStatus.UNPAID, amountPaid: 0 };
+  if (clamped >= totalRounded) return { paymentStatus: PaymentStatus.PAID, amountPaid: totalRounded };
+  return { paymentStatus: PaymentStatus.PARTIAL, amountPaid: clamped };
+}
 
 export async function checkAvailability(input: AvailabilityInput) {
   const { startDate, endDate } = normalizeBookingDates(input.startDate, input.endDate);
@@ -159,27 +233,7 @@ export async function createBookingRequest(input: CreateBookingRequestInput) {
       throw new Error("Véhicule indisponible.");
     }
 
-    const [bookingOverlap, blockedOverlap] = await Promise.all([
-      tx.booking.count({
-        where: {
-          carId: input.carId,
-          status: { in: BLOCKING_STATUSES },
-          startDate: { lt: endDate },
-          endDate: { gt: startDate },
-        },
-      }),
-      tx.blockedDate.count({
-        where: {
-          carId: input.carId,
-          startDate: { lt: endDate },
-          endDate: { gt: startDate },
-        },
-      }),
-    ]);
-
-    if (bookingOverlap > 0 || blockedOverlap > 0) {
-      throw new Error("Période indisponible.");
-    }
+    await assertNoOverlap(tx, input.carId, startDate, endDate);
 
     const totalPriceNumber = calculateTotalPrice(car, startDate, endDate);
     const totalPrice = new Prisma.Decimal(totalPriceNumber);
@@ -249,6 +303,265 @@ export async function getBookingById(bookingId: string) {
   });
 }
 
+export interface CreateManualBookingInput {
+  carId: string;
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  startDate: string | Date;
+  endDate: string | Date;
+  /** Prix forcé par l'agence ; si absent, on calcule le tarif standard. */
+  totalPrice?: number;
+  /** Seuls CONFIRMED (bloque les dates) ou PENDING_REVIEW sont autorisés à la création. */
+  initialStatus: Extract<BookingStatus, "CONFIRMED" | "PENDING_REVIEW">;
+  source: Extract<BookingSource, "PHONE" | "IN_PERSON">;
+  amountPaid?: number;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: PaymentMethod | null;
+  paymentNote?: string;
+  internalNote?: string;
+  /** Envoyer l'e-mail de confirmation au client (uniquement si CONFIRMED + e-mail présent). */
+  sendConfirmationEmail?: boolean;
+}
+
+/**
+ * Crée une réservation saisie manuellement par l'agence (téléphone / sur place).
+ *
+ * Override admin : les règles métier du site (week-ends imposés, délai 1–2
+ * semaines, horizon 2 mois) NE s'appliquent PAS — l'agence est souveraine sur
+ * les dates. En revanche, la protection anti-double-réservation reste TOUJOURS
+ * active (chevauchement avec une résa bloquante ou une indisponibilité → refus),
+ * dans la même transaction que le flux public.
+ *
+ * Le client est rapproché par e-mail (si fourni), sinon par téléphone, sinon créé.
+ */
+export async function createManualBooking(input: CreateManualBookingInput) {
+  const { startDate, endDate } = normalizeBookingDates(input.startDate, input.endDate);
+
+  const fullName = input.customerName.trim().replace(/\s+/g, " ");
+  if (!fullName) {
+    throw new Error("Le nom du client est requis.");
+  }
+  const normalizedEmail = input.customerEmail?.trim().toLowerCase() || null;
+  const sanitizedPhone = input.customerPhone?.trim() || null;
+  if (!normalizedEmail && !sanitizedPhone) {
+    throw new Error("Renseignez au moins un e-mail ou un téléphone.");
+  }
+  const sanitizedInternalNote = input.internalNote?.trim().slice(0, 1000) || null;
+  const sanitizedPaymentNote = input.paymentNote?.trim().slice(0, 500) || null;
+
+  const result = await prisma.$transaction(async (tx) => {
+    const car = await tx.car.findUnique({
+      where: { id: input.carId },
+      select: {
+        id: true,
+        brand: true,
+        model: true,
+        status: true,
+        pricePerDay: true,
+        weekendPackagePrice48h: true,
+        weekendPackagePrice72h: true,
+      },
+    });
+
+    if (!car) {
+      throw new Error("Véhicule introuvable.");
+    }
+
+    // Une réservation CONFIRMED bloque les dates → on exige un véhicule actif.
+    // Une PENDING_REVIEW ne bloque pas, on tolère donc un véhicule en maintenance
+    // (override admin : utile pour pré-réserver un véhicule en sortie d'atelier).
+    if (input.initialStatus === BookingStatus.CONFIRMED && car.status !== "AVAILABLE") {
+      throw new Error("Véhicule indisponible : impossible de confirmer une réservation dessus.");
+    }
+
+    // Anti-double-réservation TOUJOURS active, comme le flux public : on n'inscrit
+    // jamais (même en attente) une période déjà bloquée par une réservation
+    // confirmée/en cours ou une indisponibilité.
+    await assertNoOverlap(tx, input.carId, startDate, endDate);
+
+    // Rapprochement du client : e-mail prioritaire, puis téléphone, puis création.
+    let bookingUserId: string | null = null;
+
+    if (normalizedEmail) {
+      const byEmail = await tx.user.findUnique({
+        where: { email: normalizedEmail },
+        select: { id: true, name: true, phone: true, role: true },
+      });
+      if (byEmail) {
+        bookingUserId = byEmail.id;
+        if (
+          byEmail.role === Role.USER &&
+          (byEmail.name !== fullName || (sanitizedPhone && byEmail.phone !== sanitizedPhone))
+        ) {
+          await tx.user.update({
+            where: { id: byEmail.id },
+            data: { name: fullName, ...(sanitizedPhone ? { phone: sanitizedPhone } : {}) },
+          });
+        }
+      }
+    }
+
+    if (!bookingUserId && sanitizedPhone) {
+      // `phone` n'est pas unique : un même numéro peut désigner plusieurs comptes
+      // (saisi par erreur, ligne partagée, numéro recyclé). On ne rapproche donc
+      // QUE si le téléphone correspond à exactement un client ET que le nom
+      // concorde — sinon on crée un nouveau client plutôt que de risquer
+      // d'attacher la réservation au mauvais dossier. On ne renomme jamais un
+      // client existant ; on complète seulement un e-mail manquant.
+      const byPhone = await tx.user.findMany({
+        where: { phone: sanitizedPhone, role: Role.USER },
+        select: { id: true, name: true, email: true },
+        take: 2,
+      });
+      const normalizedName = fullName.toLowerCase();
+      const soleMatch =
+        byPhone.length === 1 && byPhone[0].name.trim().toLowerCase() === normalizedName
+          ? byPhone[0]
+          : null;
+      if (soleMatch) {
+        bookingUserId = soleMatch.id;
+        // Complète l'e-mail s'il manquait et qu'on en a un maintenant — sauf si
+        // cet e-mail est déjà pris par un autre compte (contrainte @unique).
+        if (normalizedEmail && !soleMatch.email) {
+          const emailTaken = await tx.user.findUnique({
+            where: { email: normalizedEmail },
+            select: { id: true },
+          });
+          if (!emailTaken) {
+            await tx.user.update({
+              where: { id: soleMatch.id },
+              data: { email: normalizedEmail },
+            });
+          }
+        }
+      }
+    }
+
+    if (!bookingUserId) {
+      const generatedPassword = await bcrypt.hash(randomUUID(), 10);
+      const createdUser = await tx.user.create({
+        data: {
+          name: fullName,
+          email: normalizedEmail,
+          phone: sanitizedPhone,
+          password: generatedPassword,
+        },
+        select: { id: true },
+      });
+      bookingUserId = createdUser.id;
+    }
+
+    const computedPrice = calculateTotalPrice(car, startDate, endDate);
+    const totalPriceNumber =
+      input.totalPrice !== undefined && input.totalPrice >= 0
+        ? Number(input.totalPrice.toFixed(2))
+        : computedPrice;
+
+    const payment = normalizePayment(
+      totalPriceNumber,
+      input.amountPaid ?? 0,
+      input.paymentStatus,
+    );
+
+    const booking = await tx.booking.create({
+      data: {
+        userId: bookingUserId,
+        carId: input.carId,
+        startDate,
+        endDate,
+        totalPrice: new Prisma.Decimal(totalPriceNumber),
+        status: input.initialStatus,
+        source: input.source,
+        paymentStatus: payment.paymentStatus,
+        amountPaid: new Prisma.Decimal(payment.amountPaid),
+        paymentMethod: input.paymentMethod ?? null,
+        paymentNote: sanitizedPaymentNote,
+        internalNote: sanitizedInternalNote,
+        // Jeton d'idempotence pour rester cohérent avec le flux public.
+        submissionToken: randomUUID(),
+      },
+    });
+
+    return {
+      bookingId: booking.id,
+      status: booking.status,
+      notify:
+        input.sendConfirmationEmail &&
+        input.initialStatus === BookingStatus.CONFIRMED &&
+        normalizedEmail
+          ? {
+              carBrand: car.brand,
+              carModel: car.model,
+              startDate,
+              endDate,
+              totalPrice: totalPriceNumber,
+              customerName: fullName,
+              customerEmail: normalizedEmail,
+            }
+          : null,
+    };
+  });
+
+  // E-mail de confirmation hors transaction — absorbe ses propres erreurs.
+  if (result.notify) {
+    await notifyBookingConfirmed({
+      bookingId: result.bookingId,
+      ...result.notify,
+    });
+  }
+
+  return { bookingId: result.bookingId };
+}
+
+export interface UpdateBookingPaymentInput {
+  amountPaid?: number;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: PaymentMethod | null;
+  paymentNote?: string | null;
+  internalNote?: string | null;
+}
+
+/**
+ * Met à jour le suivi du règlement d'une réservation (encaissement hors-ligne).
+ * L'invariant amountPaid ∈ [0, total] et la cohérence du statut sont garantis
+ * par `normalizePayment`.
+ */
+export async function updateBookingPayment(
+  bookingId: string,
+  input: UpdateBookingPaymentInput,
+) {
+  return prisma.$transaction(async (tx) => {
+    const booking = await tx.booking.findUnique({
+      where: { id: bookingId },
+      select: { id: true, totalPrice: true, amountPaid: true, paymentStatus: true },
+    });
+    if (!booking) {
+      throw new Error("Réservation introuvable.");
+    }
+
+    const total = Number(booking.totalPrice);
+    const nextAmount =
+      input.amountPaid !== undefined ? input.amountPaid : Number(booking.amountPaid);
+    const payment = normalizePayment(total, nextAmount, input.paymentStatus);
+
+    return tx.booking.update({
+      where: { id: bookingId },
+      data: {
+        paymentStatus: payment.paymentStatus,
+        amountPaid: new Prisma.Decimal(payment.amountPaid),
+        ...(input.paymentMethod !== undefined ? { paymentMethod: input.paymentMethod } : {}),
+        ...(input.paymentNote !== undefined
+          ? { paymentNote: input.paymentNote?.trim().slice(0, 500) || null }
+          : {}),
+        ...(input.internalNote !== undefined
+          ? { internalNote: input.internalNote?.trim().slice(0, 1000) || null }
+          : {}),
+      },
+    });
+  });
+}
+
 const ALLOWED_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
   PENDING_REVIEW: [BookingStatus.CONFIRMED, BookingStatus.DECLINED],
   CONFIRMED: [BookingStatus.IN_PROGRESS, BookingStatus.CANCELLED],
@@ -263,7 +576,7 @@ export async function transitionBooking(
   nextStatus: BookingStatus,
   declineReason?: string,
 ) {
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     const booking = await tx.booking.findUnique({
       where: { id: bookingId },
       select: { id: true, status: true },
@@ -284,7 +597,7 @@ export async function transitionBooking(
       throw new Error("Un motif de refus est requis.");
     }
 
-    const updated = await tx.booking.update({
+    return tx.booking.update({
       where: { id: bookingId },
       data: {
         status: nextStatus,
@@ -292,8 +605,38 @@ export async function transitionBooking(
           ? { declineReason: declineReason?.trim().slice(0, 500) ?? null }
           : {}),
       },
+      include: {
+        car: { select: { brand: true, model: true } },
+        user: { select: { name: true, email: true } },
+      },
     });
-
-    return updated;
   });
+
+  // E-mails au client, hors transaction. Chaque notifier absorbe ses propres
+  // erreurs : un e-mail en échec ne doit jamais bloquer la transition.
+  if (nextStatus === BookingStatus.CONFIRMED) {
+    await notifyBookingConfirmed({
+      bookingId: updated.id,
+      carBrand: updated.car.brand,
+      carModel: updated.car.model,
+      startDate: updated.startDate,
+      endDate: updated.endDate,
+      totalPrice: Number(updated.totalPrice),
+      customerName: updated.user.name,
+      customerEmail: updated.user.email,
+    });
+  } else if (nextStatus === BookingStatus.DECLINED) {
+    await notifyBookingDeclined({
+      bookingId: updated.id,
+      carBrand: updated.car.brand,
+      carModel: updated.car.model,
+      startDate: updated.startDate,
+      endDate: updated.endDate,
+      customerName: updated.user.name,
+      customerEmail: updated.user.email,
+      declineReason: updated.declineReason,
+    });
+  }
+
+  return updated;
 }

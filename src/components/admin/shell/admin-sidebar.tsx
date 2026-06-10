@@ -34,6 +34,16 @@ function IconBookings(props: IconProps) {
     </svg>
   );
 }
+function IconCalendar(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v3M16 3v3" />
+      <rect x="6.5" y="13" width="5" height="2.5" rx="0.5" fill="currentColor" stroke="none" />
+      <rect x="13" y="13" width="4.5" height="2.5" rx="0.5" fill="currentColor" stroke="none" opacity="0.5" />
+    </svg>
+  );
+}
 function IconClients(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -68,6 +78,7 @@ interface NavItem {
 
 export const ADMIN_NAV: NavItem[] = [
   { href: "/admin/dashboard", label: "Tableau de bord", icon: IconDashboard },
+  { href: "/admin/calendar", label: "Calendrier", icon: IconCalendar },
   { href: "/admin/cars", label: "Flotte", icon: IconCars },
   { href: "/admin/collaborations", label: "Collaborations", icon: IconCollaborations },
   { href: "/admin/bookings", label: "Réservations", icon: IconBookings },

@@ -47,6 +47,11 @@ interface Shortcut {
 
 const SHORTCUTS: Shortcut[] = [
   {
+    title: "Calendrier",
+    description: "Visualiser le planning de la flotte et ajouter une réservation.",
+    href: "/admin/calendar",
+  },
+  {
     title: "Flotte",
     description: "Ajouter, éditer et réordonner les véhicules du catalogue.",
     href: "/admin/cars",

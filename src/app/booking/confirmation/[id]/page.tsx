@@ -57,11 +57,17 @@ export default async function BookingConfirmationPage({ params }: ConfirmationPa
             Demande <em className="italic font-normal">reçue.</em>
           </h1>
           <p className="mt-6 max-w-[560px] font-[family:var(--font-fraunces)] text-[clamp(18px,2.2vw,24px)] font-light italic leading-[1.4] text-[var(--ink-text)]">
-            Merci. Nous validons sous 24 h ouvrées et vous écrivons à{" "}
-            <span className="not-italic font-normal text-[var(--ink-ivory)]">
-              {booking.user.email}
-            </span>
-            .
+            {booking.user.email ? (
+              <>
+                Merci. Nous validons sous 24 h ouvrées et vous écrivons à{" "}
+                <span className="not-italic font-normal text-[var(--ink-ivory)]">
+                  {booking.user.email}
+                </span>
+                .
+              </>
+            ) : (
+              <>Merci. Nous validons votre demande sous 24 h ouvrées et vous recontactons rapidement.</>
+            )}
           </p>
         </div>
       </section>

@@ -82,9 +82,11 @@ export default async function AdminClientsPage() {
                     <p className="truncate text-[0.875rem] font-medium text-[color:var(--admin-text)]">
                       {user.name}
                     </p>
-                    <p className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
-                      {user.email}
-                    </p>
+                    {user.email && (
+                      <p className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
+                        {user.email}
+                      </p>
+                    )}
                     {user.phone && (
                       <p className="admin-tabular truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
                         {user.phone}
