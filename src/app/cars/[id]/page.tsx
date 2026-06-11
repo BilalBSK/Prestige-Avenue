@@ -9,6 +9,7 @@ import { CarPricingPanel } from "@/components/cars/car-pricing-panel";
 import { CarCtaSection } from "@/components/cars/car-cta-section";
 import { CarReserveBar } from "@/components/cars/car-reserve-bar";
 import { BookingSheetProvider } from "@/components/cars/booking-sheet-provider";
+import { parseRentalConditions } from "@/lib/cars/conditions";
 import { flattenShots, parseShots, shotsFromLegacyGallery } from "@/lib/cars/shots";
 import { isHostedVideo } from "@/lib/cars/video";
 import { getCarById } from "@/services/car.service";
@@ -54,6 +55,21 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
   const videoUrl = isHostedVideo(car.videoUrl) ? car.videoUrl : null;
   const hasStudio = studioShots.length > 0 || videoUrl !== null;
 
+  // Image d'illustration de la section « Sélection ». Priorité à l'image
+  // choisie par l'admin ; à défaut, repli sur une vue intérieure (l'habitacle
+  // « rend remarquable »), puis la première prise de vue, puis l'image
+  // principale (toujours présente). Garantit un visuel non vide en toutes
+  // circonstances, sans backfill des véhicules existants.
+  const adminHighlightImage = car.highlightImage?.trim() ? car.highlightImage : null;
+  const fallbackShot =
+    studioShots.find((shot) => shot.group === "INTERIEUR") ?? studioShots[0] ?? null;
+  const highlightImage = adminHighlightImage ?? fallbackShot?.url ?? car.mainImage;
+  // Légende : si l'admin a fourni l'image, on la légende sobrement au modèle ;
+  // sinon on réutilise la légende d'angle de la prise de vue de repli.
+  const highlightCaption = adminHighlightImage
+    ? `${car.brand} ${car.model}`
+    : fallbackShot?.caption ?? `${car.brand} ${car.model}`;
+
   const pricePerDay = Number(car.pricePerDay);
   const weekendPackagePrice48h =
     car.weekendPackagePrice48h !== null && car.weekendPackagePrice48h !== undefined
@@ -67,6 +83,7 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
     car.pricePerKm !== null && car.pricePerKm !== undefined
       ? Number(car.pricePerKm)
       : null;
+  const rentalConditions = parseRentalConditions(car.rentalConditions);
 
   let sectionIndex = 1;
   let total = 3;
@@ -128,8 +145,7 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           includedKmPerDay={car.includedKmPerDay}
           pricePerKm={pricePerKm}
           depositAmount={Number(car.depositAmount)}
-          minDriverAge={car.minDriverAge}
-          minLicenseYears={car.minLicenseYears}
+          rentalConditions={rentalConditions}
           index={sectionIndex++}
           total={total}
         />
@@ -145,7 +161,15 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           total={total}
         />
 
-        {highlights.length > 0 && <CarHighlights highlights={highlights} />}
+        {highlights.length > 0 && (
+          <CarHighlights
+            highlights={highlights}
+            image={highlightImage}
+            imageCaption={highlightCaption}
+            brand={car.brand}
+            model={car.model}
+          />
+        )}
 
         {features.length > 0 && <CarFeatures features={features} />}
 

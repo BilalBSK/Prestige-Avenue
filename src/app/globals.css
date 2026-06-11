@@ -406,6 +406,8 @@ body :focus-visible {
   .reveal-stagger.is-visible > *:not(.reveal-line):nth-child(4) { transition-delay: 360ms; opacity: 1; transform: translateY(0); }
   .reveal-stagger.is-visible > *:not(.reveal-line):nth-child(5) { transition-delay: 480ms; opacity: 1; transform: translateY(0); }
   .reveal-stagger.is-visible > *:not(.reveal-line):nth-child(6) { transition-delay: 600ms; opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-visible > *:not(.reveal-line):nth-child(7) { transition-delay: 720ms; opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-visible > *:not(.reveal-line):nth-child(8) { transition-delay: 840ms; opacity: 1; transform: translateY(0); }
 
   .reveal-line {
     transform: scaleX(0);

@@ -1,10 +1,35 @@
 import { CarCategory, CarStatus, FuelType, Transmission } from "@prisma/client";
 import { z } from "zod";
 import { SHOT_ANGLES, type ShotAngle } from "@/lib/cars/shots";
+import {
+  MAX_RENTAL_CONDITIONS,
+  RENTAL_CONDITION_HINT_MAX,
+  RENTAL_CONDITION_LABEL_MAX,
+  RENTAL_CONDITION_VALUE_MAX,
+} from "@/lib/cars/conditions";
 
 export const featureSchema = z.object({
   title: z.string().min(3).max(60),
   body: z.string().min(10).max(300),
+});
+
+/** Une condition de location : intitulé + valeur mise en avant + note optionnelle. */
+export const rentalConditionSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .min(2, "Intitulé requis")
+    .max(RENTAL_CONDITION_LABEL_MAX, `${RENTAL_CONDITION_LABEL_MAX} caractères max.`),
+  value: z
+    .string()
+    .trim()
+    .min(1, "Valeur requise")
+    .max(RENTAL_CONDITION_VALUE_MAX, `${RENTAL_CONDITION_VALUE_MAX} caractères max.`),
+  hint: z
+    .string()
+    .trim()
+    .max(RENTAL_CONDITION_HINT_MAX, `${RENTAL_CONDITION_HINT_MAX} caractères max.`)
+    .nullish(),
 });
 
 const SHOT_ANGLE_VALUES = SHOT_ANGLES.map((d) => d.angle) as [
@@ -46,14 +71,16 @@ export const carFormSchema = z.object({
   weekendPackageIncludedKm72h: z.number().int().positive().max(10000).nullable(),
   depositAmount: z.number().positive().max(1000000),
 
-  minDriverAge: z.number().int().min(18).max(99),
-  minLicenseYears: z.number().int().min(0).max(50),
+  rentalConditions: z.array(rentalConditionSchema).max(MAX_RENTAL_CONDITIONS),
 
   description: z.string().min(50).max(2000),
   highlights: z.array(z.string().min(3).max(80)).max(8),
   features: z.array(featureSchema).max(10),
 
   mainImage: z.url(),
+  // Image d'illustration de la section « Sélection ». Optionnelle : repli côté
+  // public sur une vue intérieure puis sur mainImage.
+  highlightImage: z.url().nullable(),
   galleryImages: z.array(z.url()).max(12),
   // Prises de vue cataloguées par angle. Un angle peut n'avoir aucune photo
   // (il sera simplement masqué côté public) ; on plafonne le total.

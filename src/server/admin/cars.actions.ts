@@ -2,6 +2,7 @@
 
 import { requireAdminSessionOrRedirect } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { parseRentalConditions } from "@/lib/cars/conditions";
 import { CARS_BRANDS_TAG, CARS_FEATURED_TAG, CARS_LIST_TAG } from "@/services/car.service";
 import { Prisma } from "@prisma/client";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -31,12 +32,16 @@ function toPrismaData(input: CarInput) {
       input.weekendPackagePrice72h !== null ? new Prisma.Decimal(input.weekendPackagePrice72h) : null,
     weekendPackageIncludedKm72h: input.weekendPackageIncludedKm72h,
     depositAmount: new Prisma.Decimal(input.depositAmount),
-    minDriverAge: input.minDriverAge,
-    minLicenseYears: input.minLicenseYears,
+    // Normalisé (trim, notes vides retirées, plafonné) avant stockage, pour que
+    // la DB ne contienne que des conditions propres et directement affichables.
+    rentalConditions: parseRentalConditions(
+      input.rentalConditions,
+    ) as unknown as Prisma.InputJsonValue,
     description: input.description,
     highlights: input.highlights,
     features: input.features,
     mainImage: input.mainImage,
+    highlightImage: input.highlightImage,
     galleryImages: input.galleryImages,
     galleryShots: input.galleryShots as unknown as Prisma.InputJsonValue,
     videoUrl: input.videoUrl,

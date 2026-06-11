@@ -1,5 +1,6 @@
 import { CarForm } from "@/components/admin/cars/car-form";
 import { PageHeader } from "@/components/admin/ui/page-header";
+import { RENTAL_CONDITION_PRESETS } from "@/lib/cars/conditions";
 import { type CarInput } from "@/server/admin/cars.schema";
 import { CarCategory, CarStatus, FuelType, Transmission } from "@prisma/client";
 
@@ -24,12 +25,13 @@ const DEFAULT_CAR: CarInput = {
   weekendPackagePrice72h: null,
   weekendPackageIncludedKm72h: null,
   depositAmount: 0,
-  minDriverAge: 21,
-  minLicenseYears: 2,
+  // Conditions de base pré-remplies : l'admin ajuste, supprime ou complète.
+  rentalConditions: RENTAL_CONDITION_PRESETS.slice(0, 3).map((c) => ({ ...c })),
   description: "",
   highlights: [],
   features: [],
   mainImage: "",
+  highlightImage: null,
   galleryImages: [],
   galleryShots: [],
   videoUrl: null,

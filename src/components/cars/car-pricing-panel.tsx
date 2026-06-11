@@ -2,6 +2,7 @@
 
 import { useRevealOnScroll } from "@/hooks/use-reveal-on-scroll";
 import { SectionCounter } from "@/components/home/section-counter";
+import type { RentalCondition } from "@/lib/cars/conditions";
 
 interface CarPricingPanelProps {
   pricePerDay: number;
@@ -12,8 +13,7 @@ interface CarPricingPanelProps {
   includedKmPerDay: number | null;
   pricePerKm: number | null;
   depositAmount: number;
-  minDriverAge: number;
-  minLicenseYears: number;
+  rentalConditions: RentalCondition[];
   index: number;
   total: number;
 }
@@ -61,8 +61,7 @@ export function CarPricingPanel({
   includedKmPerDay,
   pricePerKm,
   depositAmount,
-  minDriverAge,
-  minLicenseYears,
+  rentalConditions,
   index,
   total,
 }: CarPricingPanelProps) {
@@ -130,11 +129,14 @@ export function CarPricingPanel({
             value={`${depositAmount.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`}
             hint="Empreinte bancaire — non débitée sauf incident."
           />
-          <Row
-            label="Conducteur"
-            value={`${minDriverAge}+ ans · ${minLicenseYears} ans permis`}
-            hint="Permis de conduire en cours de validité, pièce d'identité."
-          />
+          {rentalConditions.map((condition, i) => (
+            <Row
+              key={`${condition.label}-${i}`}
+              label={condition.label}
+              value={condition.value}
+              hint={condition.hint}
+            />
+          ))}
         </div>
       </div>
     </section>

@@ -86,8 +86,11 @@ async function main() {
     weekendPackagePrice72h: 320.0,
     weekendPackageIncludedKm72h: 600,
     depositAmount: 1500.0,
-    minDriverAge: 21,
-    minLicenseYears: 2,
+    rentalConditions: [
+      { label: "Âge minimum", value: "21 ans", hint: "Âge requis du conducteur principal." },
+      { label: "Permis de conduire", value: "Depuis 2 ans", hint: "Permis en cours de validité, catégorie B." },
+      { label: "Pièce d'identité", value: "Obligatoire", hint: "Carte d'identité ou passeport en cours de validité." },
+    ],
     shortTagline:
       "La citadine statutaire : lignes élégantes et technologies embarquées.",
     description:
@@ -159,8 +162,12 @@ async function main() {
     weekendPackagePrice72h: 490.0,
     weekendPackageIncludedKm72h: 600,
     depositAmount: 2500.0,
-    minDriverAge: 23,
-    minLicenseYears: 3,
+    rentalConditions: [
+      { label: "Âge minimum", value: "23 ans", hint: "Âge requis du conducteur principal." },
+      { label: "Permis de conduire", value: "Depuis 3 ans", hint: "Permis en cours de validité, catégorie B." },
+      { label: "Pièce d'identité", value: "Obligatoire", hint: "Carte d'identité ou passeport en cours de validité." },
+      { label: "Justificatif de domicile", value: "De moins de 3 mois", hint: "Facture d'énergie, téléphone ou avis d'imposition récent." },
+    ],
     shortTagline:
       "L'hybride rechargeable premium, 272 ch et jusqu'à 142 km en électrique.",
     description:
@@ -232,8 +239,11 @@ async function main() {
     weekendPackagePrice72h: 280.0,
     weekendPackageIncludedKm72h: 600,
     depositAmount: 1500.0,
-    minDriverAge: 21,
-    minLicenseYears: 2,
+    rentalConditions: [
+      { label: "Âge minimum", value: "21 ans", hint: "Âge requis du conducteur principal." },
+      { label: "Permis de conduire", value: "Depuis 2 ans", hint: "Permis en cours de validité, catégorie B." },
+      { label: "Pièce d'identité", value: "Obligatoire", hint: "Carte d'identité ou passeport en cours de validité." },
+    ],
     shortTagline:
       "Le sport chic à portée de main, jusqu'à 80% électrique en ville.",
     description:

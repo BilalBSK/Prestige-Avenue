@@ -118,8 +118,10 @@ model Car {
   weekendPackageIncludedKm72h Int?
   depositAmount              Decimal      @db.Decimal(10, 2)
 
-  minDriverAge               Int          @default(21)
-  minLicenseYears            Int          @default(2)
+  // Conditions de location libres, pilotées par l'admin : [{ label, value, hint? }].
+  // Remplace les anciens champs rigides minDriverAge / minLicenseYears (cf.
+  // src/lib/cars/conditions.ts). Affichées telles quelles sur la fiche publique.
+  rentalConditions           Json         @default("[]")
 
   shortTagline               String?
   description                String
@@ -127,6 +129,9 @@ model Car {
   features                   Json         @default("[]")
 
   mainImage                  String
+  // Image d'illustration de la section « Sélection » de la fiche publique.
+  // Optionnelle : repli sur une vue intérieure puis sur mainImage si absente.
+  highlightImage             String?
   // Galerie héritée (plat, sans angle). Conservée comme repli d'affichage
   // pour les véhicules pas encore re-catalogués par prises de vue.
   galleryImages              String[]

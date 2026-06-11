@@ -7,6 +7,7 @@ import { ImagePicker } from "@/components/admin/ui/image-picker";
 import { Input } from "@/components/admin/ui/input";
 import { MediaGallery } from "@/components/admin/ui/media-gallery";
 import { NumberInput } from "@/components/admin/ui/number-input";
+import { RentalConditionsEditor } from "@/components/admin/ui/rental-conditions-editor";
 import { ShotsEditor } from "@/components/admin/ui/shots-editor";
 import { Select } from "@/components/admin/ui/select";
 import { Switch } from "@/components/admin/ui/switch";
@@ -331,25 +332,21 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
       </FormSection>
 
       <FormSection
-        title="Éligibilité conducteur"
-        description="Critères minimums pour louer ce véhicule."
+        title="Conditions de location"
+        description="Critères et pièces requis pour louer ce véhicule. Propres à chaque véhicule, ils s'affichent tels quels sur la fiche publique."
       >
-        <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Âge minimum" required error={errors.minDriverAge?.message}>
-            <NumberInput
-              {...register("minDriverAge", { valueAsNumber: true })}
-              unit="ans"
-              error={!!errors.minDriverAge}
+        <Controller
+          control={control}
+          name="rentalConditions"
+          render={({ field }) => (
+            <RentalConditionsEditor
+              value={field.value}
+              onChange={field.onChange}
+              maxItems={12}
+              errors={errors.rentalConditions}
             />
-          </Field>
-          <Field label="Permis depuis" required error={errors.minLicenseYears?.message}>
-            <NumberInput
-              {...register("minLicenseYears", { valueAsNumber: true })}
-              unit="ans"
-              error={!!errors.minLicenseYears}
-            />
-          </Field>
-        </div>
+          )}
+        />
       </FormSection>
 
       <FormSection
@@ -394,6 +391,23 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
               name="mainImage"
               render={({ field }) => (
                 <ImagePicker value={field.value} onChange={field.onChange} folder={uploadFolder} />
+              )}
+            />
+          </Field>
+          <Field
+            label="Image « Sélection »"
+            error={errors.highlightImage?.message}
+            hint="Illustre la section « Ce qui la rend remarquable » de la fiche. Idéalement une vue d'ambiance (habitacle, détail). Optionnelle : à défaut, une vue intérieure puis l'image principale sont utilisées."
+          >
+            <Controller
+              control={control}
+              name="highlightImage"
+              render={({ field }) => (
+                <ImagePicker
+                  value={field.value ?? ""}
+                  onChange={(url) => field.onChange(url === "" ? null : url)}
+                  folder={uploadFolder}
+                />
               )}
             />
           </Field>

@@ -1,5 +1,6 @@
 import { CarForm } from "@/components/admin/cars/car-form";
 import { PageHeader, PageMetaItem } from "@/components/admin/ui/page-header";
+import { parseRentalConditions } from "@/lib/cars/conditions";
 import { parseShots } from "@/lib/cars/shots";
 import { getCarForAdmin } from "@/server/admin/cars.queries";
 import { type CarInput, featureSchema } from "@/server/admin/cars.schema";
@@ -32,12 +33,12 @@ function toFormValues(car: Awaited<ReturnType<typeof getCarForAdmin>>): CarInput
       car.weekendPackagePrice72h !== null ? Number(car.weekendPackagePrice72h) : null,
     weekendPackageIncludedKm72h: car.weekendPackageIncludedKm72h,
     depositAmount: Number(car.depositAmount),
-    minDriverAge: car.minDriverAge,
-    minLicenseYears: car.minLicenseYears,
+    rentalConditions: parseRentalConditions(car.rentalConditions),
     description: car.description,
     highlights: car.highlights,
     features: featuresParsed.success ? featuresParsed.data : [],
     mainImage: car.mainImage,
+    highlightImage: car.highlightImage,
     galleryImages: car.galleryImages,
     galleryShots: parseShots(car.galleryShots),
     videoUrl: car.videoUrl,
