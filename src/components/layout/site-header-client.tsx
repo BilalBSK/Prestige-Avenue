@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
@@ -72,15 +73,19 @@ export function SiteHeaderClient({ isAdmin }: SiteHeaderClientProps) {
         <Link
           href="/"
           aria-label="Prestige Avenue — Accueil"
-          className="group relative z-[60] font-[family:var(--font-fraunces)] font-light leading-none tracking-[-0.01em] text-[var(--ink-ivory)] transition-[font-size,letter-spacing] duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="group relative z-[60] flex items-center transition-opacity duration-300 hover:opacity-80"
         >
-          <span
-            className={`block transition-all duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              scrolled ? "text-[20px]" : "text-[22px] md:text-[26px]"
+          <Image
+            src="/logo/logo.png"
+            alt="Prestige Avenue"
+            width={2547}
+            height={768}
+            priority
+            sizes="(max-width: 768px) 160px, 215px"
+            className={`w-auto select-none transition-[height] duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              scrolled ? "h-10" : "h-12 md:h-16"
             }`}
-          >
-            Prestige <em className="font-normal italic">Avenue</em>
-          </span>
+          />
         </Link>
 
         {/* Desktop navigation */}
