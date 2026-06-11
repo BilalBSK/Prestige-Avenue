@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface DrawerProps {
   open: boolean;
@@ -24,6 +25,9 @@ const FOCUSABLE =
 export function Drawer({ open, onClose, title, eyebrow, children, footer }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const lastActiveRef = useRef<HTMLElement | null>(null);
+  // Monté côté client uniquement : le portail vise document.body, indisponible au SSR.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -78,9 +82,12 @@ export function Drawer({ open, onClose, title, eyebrow, children, footer }: Draw
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  // Rendu en portail sur <body> : le tiroir échappe ainsi à tout contexte
+  // d'empilement / overflow d'un ancêtre (notamment <main class="isolate">) et
+  // se superpose toujours au-dessus de la barre supérieure et de la sidebar.
+  return createPortal(
     <div
       className="admin-theme fixed inset-0 z-[80]"
       role="dialog"
@@ -140,6 +147,7 @@ export function Drawer({ open, onClose, title, eyebrow, children, footer }: Draw
           [aria-modal="true"] *[class*="admin-drawer-"] { animation: none !important; }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body,
   );
 }

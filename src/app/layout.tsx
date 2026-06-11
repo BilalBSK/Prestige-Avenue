@@ -42,6 +42,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  // Base des URL absolues (canonical, OpenGraph) générées par les pages enfant.
+  metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
   title: "Prestige Avenue — Location de véhicules de prestige à Rouen",
   description:
     "Location de voitures de luxe à Rouen. Soumettez votre demande en ligne, validation sous 24 h, règlement à la remise des clés.",

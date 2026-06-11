@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { notFound, permanentRedirect } from "next/navigation";
 import { CarDetailHero } from "@/components/cars/car-detail-hero";
 import { CarTitleBlock } from "@/components/cars/car-title-block";
 import { CarStudio } from "@/components/cars/car-studio";
@@ -12,10 +13,10 @@ import { BookingSheetProvider } from "@/components/cars/booking-sheet-provider";
 import { parseRentalConditions } from "@/lib/cars/conditions";
 import { flattenShots, parseShots, shotsFromLegacyGallery } from "@/lib/cars/shots";
 import { isHostedVideo } from "@/lib/cars/video";
-import { getCarById } from "@/services/car.service";
+import { getCarById, getCarBySlug, getPublicCarRoutes } from "@/services/car.service";
 
 interface CarDetailPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 interface FeatureEntry {
@@ -37,10 +38,66 @@ function parseFeatures(raw: unknown): FeatureEntry[] {
     .filter((entry): entry is FeatureEntry => entry !== null);
 }
 
+// Résout la fiche à partir du segment d'URL. Le segment canonique est le slug
+// lisible ; on tolère un ancien identifiant cuid (liens partagés / favoris
+// d'avant la bascule) afin de pouvoir rediriger vers l'URL propre.
+async function resolveCar(segment: string) {
+  const bySlug = await getCarBySlug(segment);
+  if (bySlug) return bySlug;
+  return getCarById(segment);
+}
+
+// Pré-rend les fiches publiables au build. Les véhicules ajoutés ensuite sont
+// rendus à la demande (dynamicParams reste à true par défaut).
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  const routes = await getPublicCarRoutes();
+  return routes.map((car) => ({ slug: car.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: CarDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const car = await resolveCar(slug);
+  if (!car || car.status === "DISABLED") {
+    return { title: "Véhicule introuvable — Prestige Avenue" };
+  }
+
+  const name = [car.brand, car.model, car.trim].filter(Boolean).join(" ");
+  const title = `${name} en location à Rouen`;
+  const description =
+    car.shortTagline?.trim() ||
+    car.description.replace(/\s+/g, " ").trim().slice(0, 155);
+  const canonical = `/cars/${car.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      title: `${title} — Prestige Avenue`,
+      description,
+      url: canonical,
+      images: car.mainImage ? [{ url: car.mainImage, alt: name }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} — Prestige Avenue`,
+      description,
+      images: car.mainImage ? [car.mainImage] : undefined,
+    },
+  };
+}
+
 export default async function CarDetailPage({ params }: CarDetailPageProps) {
-  const { id } = await params;
-  const car = await getCarById(id);
+  const { slug } = await params;
+  const car = await resolveCar(slug);
   if (!car || car.status === "DISABLED") notFound();
+
+  // URL canonique = le slug. Si on est arrivé via un ancien identifiant cuid,
+  // on redirige en 308 vers l'URL lisible (préserve favoris et référencement).
+  if (car.slug !== slug) permanentRedirect(`/cars/${car.slug}`);
 
   const features = parseFeatures(car.features);
   const highlights = car.highlights.filter(Boolean);

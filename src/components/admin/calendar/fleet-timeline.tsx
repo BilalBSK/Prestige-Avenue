@@ -14,7 +14,12 @@ import { BookingStatus } from "@prisma/client";
 import { SegmentDetailPanel } from "./segment-detail-panel";
 
 const DAY_WIDTH = 48; // px par jour
-const VEHICLE_COL = 216; // px, colonne véhicule figée
+// Largeur de la colonne véhicule figée. Pilotée en CSS (var --veh-col : 96px sous
+// `sm`, 216px au-delà) pour être responsive sans flash SSR : étroite sur mobile
+// (plus de jours visibles), large sur desktop. Les barres sont positionnées dans
+// la piste voisine, indépendamment de cette largeur — la rétrécir n'affecte donc
+// pas leur géométrie. Cette constante ne sert que de repli au calcul de défilement.
+const VEHICLE_COL_DESKTOP = 216;
 const LANE_HEIGHT = 40; // px par voie d'empilement
 const ROW_PAD = 10; // px de marge verticale dans une rangée
 
@@ -46,33 +51,39 @@ export function FleetTimeline({
   thisMonthParam,
 }: FleetTimelineProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const vehColRef = useRef<HTMLDivElement | null>(null);
   const [selected, setSelected] = useState<ScheduleSegment | null>(null);
 
   const trackWidth = days.length * DAY_WIDTH;
   const isViewingThisMonth = currentMonthParam === thisMonthParam;
 
   // Au montage / changement de mois : centre la colonne du jour si elle est visible.
+  // Lit la largeur réelle de la colonne véhicule (responsive via CSS) plutôt qu'une
+  // constante, pour rester juste sur mobile comme sur desktop.
   useEffect(() => {
     const node = scrollRef.current;
     if (!node || todayIndex === null) return;
-    const target = todayIndex * DAY_WIDTH - node.clientWidth / 2 + VEHICLE_COL;
+    const vehCol = vehColRef.current?.offsetWidth ?? VEHICLE_COL_DESKTOP;
+    const target = todayIndex * DAY_WIDTH - node.clientWidth / 2 + vehCol;
     node.scrollTo({ left: Math.max(0, target), behavior: "auto" });
   }, [todayIndex, currentMonthParam]);
 
   return (
-    <div className="rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)]">
+    <div
+      className="rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] [--veh-col:96px] sm:[--veh-col:216px]"
+    >
       {/* Barre d'outils : navigation mois + légende */}
       <div className="flex flex-col gap-3 border-b border-[color:var(--admin-line)] p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <MonthNavLink href={`/admin/calendar?month=${prevMonth}`} dir="prev" label="Mois précédent" />
-          <h2 className="min-w-[150px] text-center text-[0.9375rem] font-semibold tracking-tight text-[color:var(--admin-text)]">
+          <h2 className="flex-1 text-center text-[0.9375rem] font-semibold tracking-tight text-[color:var(--admin-text)] sm:min-w-[150px] sm:flex-none">
             {monthLabel}
           </h2>
           <MonthNavLink href={`/admin/calendar?month=${nextMonth}`} dir="next" label="Mois suivant" />
           {!isViewingThisMonth && (
             <Link
               href="/admin/calendar"
-              className="ml-1 rounded-md border border-[color:var(--admin-line-strong)] px-2.5 py-1.5 text-[0.75rem] font-medium text-[color:var(--admin-text-soft)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)]"
+              className="ml-1 rounded-md border border-[color:var(--admin-line-strong)] px-2.5 py-2 text-[0.75rem] font-medium text-[color:var(--admin-text-soft)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)] sm:py-1.5"
             >
               Aujourd&apos;hui
             </Link>
@@ -86,15 +97,15 @@ export function FleetTimeline({
       ) : (
         <div
           ref={scrollRef}
-          className="admin-timeline-scroll overflow-auto"
-          style={{ maxHeight: "calc(100vh - 19rem)" }}
+          className="admin-timeline-scroll overflow-auto overscroll-x-contain [max-height:calc(100dvh-15rem)] sm:[max-height:calc(100dvh-19rem)]"
+          style={{ WebkitOverflowScrolling: "touch" }}
         >
-          <div style={{ width: VEHICLE_COL + trackWidth, minWidth: "100%" }}>
+          <div style={{ width: `calc(var(--veh-col) + ${trackWidth}px)`, minWidth: "100%" }}>
             {/* En-tête des jours — figé en haut */}
             <div className="sticky top-0 z-30 flex border-b border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)]">
               <div
-                className="sticky left-0 z-10 flex shrink-0 items-center border-r border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)] px-4 text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-[color:var(--admin-text-muted)]"
-                style={{ width: VEHICLE_COL }}
+                ref={vehColRef}
+                className="sticky left-0 z-10 flex w-[var(--veh-col)] shrink-0 items-center border-r border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)] px-3 text-[0.625rem] font-medium uppercase tracking-[0.08em] text-[color:var(--admin-text-muted)] sm:px-4 sm:text-[0.6875rem]"
               >
                 Véhicule
               </div>
@@ -134,11 +145,9 @@ export function FleetTimeline({
                   style={{ height: rowHeight }}
                 >
                   {/* Cellule véhicule figée à gauche */}
-                  <div
-                    className="sticky left-0 z-20 flex shrink-0 items-center gap-2.5 border-r border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] px-3"
-                    style={{ width: VEHICLE_COL }}
-                  >
-                    <div className="relative h-9 w-12 shrink-0 overflow-hidden rounded bg-[color:var(--admin-surface)]">
+                  <div className="sticky left-0 z-20 flex w-[var(--veh-col)] shrink-0 items-center gap-2.5 border-r border-[color:var(--admin-line-strong)] bg-[color:var(--admin-bg-elev)] px-2.5 sm:px-3">
+                    {/* Miniature masquée sur mobile : la colonne est trop étroite, marque + modèle suffisent à identifier. */}
+                    <div className="relative hidden h-9 w-12 shrink-0 overflow-hidden rounded bg-[color:var(--admin-surface)] sm:block">
                       {car.mainImage && (
                         <Image
                           src={car.mainImage}
@@ -150,10 +159,10 @@ export function FleetTimeline({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <div className="truncate text-[0.8125rem] font-medium text-[color:var(--admin-text)]">
+                      <div className="truncate text-[0.75rem] font-medium text-[color:var(--admin-text)] sm:text-[0.8125rem]">
                         {car.brand}
                       </div>
-                      <div className="truncate text-[0.75rem] text-[color:var(--admin-text-muted)]">
+                      <div className="truncate text-[0.6875rem] text-[color:var(--admin-text-muted)] sm:text-[0.75rem]">
                         {car.model}
                       </div>
                     </div>
@@ -327,7 +336,7 @@ function MonthNavLink({ href, dir, label }: { href: string; dir: "prev" | "next"
     <Link
       href={href}
       aria-label={label}
-      className="flex h-8 w-8 items-center justify-center rounded-md border border-[color:var(--admin-line-strong)] text-[color:var(--admin-text-soft)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)]"
+      className="flex h-9 w-9 items-center justify-center rounded-md border border-[color:var(--admin-line-strong)] text-[color:var(--admin-text-soft)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)] active:bg-[color:var(--admin-surface-2)] sm:h-8 sm:w-8"
     >
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
         <path

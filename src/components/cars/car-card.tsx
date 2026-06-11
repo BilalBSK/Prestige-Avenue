@@ -23,7 +23,7 @@ function CarCardComponent({ car, gleamPrice = false }: CarCardProps) {
 
   return (
     <Link
-      href={`/cars/${car.id}`}
+      href={`/cars/${car.slug}`}
       className="car-card group block overflow-hidden rounded-lg border border-[var(--ink-line)] bg-[var(--ink-surface)] transition-[border-color] duration-[350ms] ease-out hover:border-[var(--ink-dim)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--ink-elevated)]">

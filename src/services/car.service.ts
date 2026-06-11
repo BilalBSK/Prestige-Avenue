@@ -91,6 +91,33 @@ export const getCarById = unstable_cache(
   { tags: [CARS_LIST_TAG], revalidate: 300 },
 );
 
+// Résolution d'une fiche par son slug lisible (source des URL publiques
+// /cars/[slug]). Mis en cache et invalidé avec le reste du catalogue.
+export const getCarBySlug = unstable_cache(
+  async (slug: string) => {
+    return prisma.car.findUnique({
+      where: { slug },
+    });
+  },
+  ["car:detail-by-slug"],
+  { tags: [CARS_LIST_TAG], revalidate: 300 },
+);
+
+// Slugs + métadonnées des fiches publiables, pour `generateStaticParams`
+// (pré-rendu au build) et le sitemap. Exclut les véhicules DISABLED
+// (supprimés logiquement) qui renvoient 404.
+export const getPublicCarRoutes = unstable_cache(
+  async () => {
+    return prisma.car.findMany({
+      where: { status: { not: "DISABLED" } },
+      select: { slug: true, status: true, updatedAt: true },
+      orderBy: { displayOrder: "asc" },
+    });
+  },
+  ["cars:routes"],
+  { tags: [CARS_LIST_TAG], revalidate: 300 },
+);
+
 export async function getCarByIdOrThrow(carId: string) {
   return prisma.car.findUniqueOrThrow({
     where: { id: carId },

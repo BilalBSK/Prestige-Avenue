@@ -100,12 +100,23 @@ export function AdminBrand() {
   );
 }
 
-export function AdminNavList({ onNavigate }: { onNavigate?: () => void }) {
+export function AdminNavList({
+  onNavigate,
+  variant = "sidebar",
+  stagger = false,
+}: {
+  onNavigate?: () => void;
+  /** "drawer" = mobile : cibles tactiles plus larges + révélation en cascade. */
+  variant?: "sidebar" | "drawer";
+  /** Rejoue l'animation d'entrée des onglets (drawer à l'ouverture). */
+  stagger?: boolean;
+}) {
   const pathname = usePathname();
+  const isDrawer = variant === "drawer";
 
   return (
-    <nav className="flex flex-1 flex-col gap-0.5 px-3 py-4">
-      {ADMIN_NAV.map((item) => {
+    <nav className={`flex flex-1 flex-col px-3 py-4 ${isDrawer ? "gap-1" : "gap-0.5"}`}>
+      {ADMIN_NAV.map((item, i) => {
         const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
         return (
@@ -113,15 +124,28 @@ export function AdminNavList({ onNavigate }: { onNavigate?: () => void }) {
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            className={`group flex items-center gap-3 rounded-md px-3 py-2 text-[0.8125rem] font-medium transition-colors ${
+            aria-current={active ? "page" : undefined}
+            style={stagger ? { animationDelay: `${i * 45}ms` } : undefined}
+            className={`group relative flex items-center gap-3 rounded-md font-medium transition-colors ${
+              isDrawer ? "px-3.5 py-2.5 text-[0.875rem]" : "px-3 py-2 text-[0.8125rem]"
+            } ${stagger ? "admin-nav-reveal" : ""} ${
               active
                 ? "bg-[color:var(--admin-surface-2)] text-[color:var(--admin-text)]"
                 : "text-[color:var(--admin-text-soft)] hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)]"
             }`}
           >
+            {/* Liseré or sur l'onglet actif — effet bijou */}
+            {active && (
+              <span
+                aria-hidden
+                className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[color:var(--admin-accent)]"
+              />
+            )}
             <Icon
-              className={`h-4 w-4 shrink-0 transition-colors ${
-                active ? "text-[color:var(--admin-accent)]" : "text-[color:var(--admin-text-muted)] group-hover:text-[color:var(--admin-text-soft)]"
+              className={`shrink-0 transition-colors ${isDrawer ? "h-[1.125rem] w-[1.125rem]" : "h-4 w-4"} ${
+                active
+                  ? "text-[color:var(--admin-accent)]"
+                  : "text-[color:var(--admin-text-muted)] group-hover:text-[color:var(--admin-text-soft)]"
               }`}
               aria-hidden
             />
