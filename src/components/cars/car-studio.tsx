@@ -49,6 +49,13 @@ export function CarStudio({ shots, videoUrl, poster, alt }: CarStudioProps) {
   const railRef = useRef<HTMLDivElement | null>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const drag = useRef({ down: false, startX: 0, startScroll: 0, moved: false });
+  const railDrag = useRef({
+    active: false,
+    captured: false,
+    startX: 0,
+    startScroll: 0,
+    moved: false,
+  });
 
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
@@ -174,30 +181,45 @@ export function CarStudio({ shots, videoUrl, poster, alt }: CarStudioProps) {
   }
 
   // Drag-to-scroll de la pellicule (desktop — Lenis confisque la molette).
+  // On NE capture PAS le pointeur au pointerdown : la capture redirige le clic
+  // qui suit vers la pellicule au lieu de la vignette, ce qui empêchait le clic
+  // de changer la vue. On ne capture qu'une fois un vrai glissé détecté, afin
+  // qu'un simple clic atteigne toujours le bouton de la vignette.
   function onRailDown(e: React.PointerEvent<HTMLDivElement>) {
     if (e.pointerType === "touch") return;
     const node = railRef.current;
     if (!node) return;
-    drag.current = {
-      down: true,
+    railDrag.current = {
+      active: true,
+      captured: false,
       startX: e.clientX,
       startScroll: node.scrollLeft,
       moved: false,
     };
-    node.setPointerCapture(e.pointerId);
   }
   function onRailMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!drag.current.down) return;
+    if (!railDrag.current.active) return;
     const node = railRef.current;
     if (!node) return;
-    const delta = e.clientX - drag.current.startX;
-    if (Math.abs(delta) > 4) drag.current.moved = true;
-    node.scrollLeft = drag.current.startScroll - delta;
+    const delta = e.clientX - railDrag.current.startX;
+    if (!railDrag.current.moved && Math.abs(delta) > 4) {
+      railDrag.current.moved = true;
+      // Glissé confirmé : on capture maintenant pour suivre le pointeur même
+      // s'il sort verticalement de la pellicule pendant le défilement.
+      node.setPointerCapture(e.pointerId);
+      railDrag.current.captured = true;
+    }
+    if (railDrag.current.moved) {
+      node.scrollLeft = railDrag.current.startScroll - delta;
+    }
   }
   function onRailUp(e: React.PointerEvent<HTMLDivElement>) {
     const node = railRef.current;
-    if (node?.hasPointerCapture(e.pointerId)) node.releasePointerCapture(e.pointerId);
-    drag.current.down = false;
+    if (railDrag.current.captured && node?.hasPointerCapture(e.pointerId)) {
+      node.releasePointerCapture(e.pointerId);
+    }
+    railDrag.current.active = false;
+    railDrag.current.captured = false;
   }
 
   if (total === 0) return null;
@@ -430,7 +452,7 @@ export function CarStudio({ shots, videoUrl, poster, alt }: CarStudioProps) {
                         thumbRefs.current[i] = el;
                       }}
                       onClick={() => {
-                        if (!drag.current.moved) goTo(i);
+                        if (!railDrag.current.moved) goTo(i);
                       }}
                       aria-label={
                         item.kind === "image"
