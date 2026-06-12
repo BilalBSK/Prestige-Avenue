@@ -22,6 +22,8 @@ interface CarDetailPageProps {
 interface FeatureEntry {
   title: string;
   body: string;
+  /** Image épinglée par l'admin pour ce paragraphe ; null = appariement auto. */
+  image: string | null;
 }
 
 function parseFeatures(raw: unknown): FeatureEntry[] {
@@ -33,7 +35,11 @@ function parseFeatures(raw: unknown): FeatureEntry[] {
       const title = typeof obj.title === "string" ? obj.title.trim() : "";
       const body = typeof obj.body === "string" ? obj.body.trim() : "";
       if (!title || !body) return null;
-      return { title, body };
+      const image =
+        typeof obj.image === "string" && obj.image.trim().length > 0
+          ? obj.image.trim()
+          : null;
+      return { title, body, image };
     })
     .filter((entry): entry is FeatureEntry => entry !== null);
 }

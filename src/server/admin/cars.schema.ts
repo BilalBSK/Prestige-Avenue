@@ -11,6 +11,11 @@ import {
 export const featureSchema = z.object({
   title: z.string().min(3).max(60),
   body: z.string().min(10).max(300),
+  // Image illustrant ce paragraphe sur la fiche (section « Sous le capot »).
+  // Optionnelle : à défaut, la fiche réutilise automatiquement une prise de vue
+  // du studio. `nullish` pour rester compatible avec les véhicules existants
+  // (équipements stockés sans champ image).
+  image: z.url().nullish(),
 });
 
 /** Une condition de location : intitulé + valeur mise en avant + note optionnelle. */

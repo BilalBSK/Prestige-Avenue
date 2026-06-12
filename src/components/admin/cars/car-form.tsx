@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/admin/ui/button";
 import { FeaturesEditor } from "@/components/admin/ui/features-editor";
+import type { FeatureLibraryImage } from "@/components/admin/ui/feature-image-picker";
 import { Field } from "@/components/admin/ui/field";
 import { ImagePicker } from "@/components/admin/ui/image-picker";
 import { Input } from "@/components/admin/ui/input";
@@ -16,6 +17,7 @@ import { Textarea } from "@/components/admin/ui/textarea";
 import { VideoPicker } from "@/components/admin/ui/video-picker";
 import { toast } from "@/components/admin/ui/toast";
 import { buildCarSlug } from "@/lib/slugify";
+import { getShotAngleDef } from "@/lib/cars/shots";
 import { createCar, updateCar } from "@/server/admin/cars.actions";
 import { carFormSchema, type CarInput } from "@/server/admin/cars.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -366,13 +368,60 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
               )}
             />
           </Field>
-          <Field label="Équipements détaillés" hint="10 maximum">
+          <Field
+            label="Équipements détaillés"
+            hint="10 maximum · chaque paragraphe est illustré sur la fiche — épinglez une image ou laissez l'automatique"
+          >
             <Controller
               control={control}
               name="features"
-              render={({ field }) => (
-                <FeaturesEditor value={field.value} onChange={field.onChange} maxItems={10} />
-              )}
+              render={({ field }) => {
+                // Bibliothèque proposée au choix + séquence d'appariement
+                // automatique : on reconstruit, à l'identique de la fiche
+                // publique, à partir des prises de vue, de la couverture et de
+                // l'image « Sélection » courantes.
+                const shots = watch("galleryShots");
+                const main = watch("mainImage");
+                const highlight = watch("highlightImage");
+                const legacy = watch("galleryImages");
+
+                const seen = new Set<string>();
+                const library: FeatureLibraryImage[] = [];
+                const pushImg = (url: string, label: string, group: string) => {
+                  const u = url?.trim();
+                  if (!u || seen.has(u)) return;
+                  seen.add(u);
+                  library.push({ url: u, label, group });
+                };
+
+                if (main) pushImg(main, "Image principale", "Couverture");
+                if (highlight) pushImg(highlight, "Section Sélection", "Sélection");
+                const autoSequence: string[] = [];
+                for (const shot of shots) {
+                  const def = getShotAngleDef(shot.angle);
+                  shot.images.forEach((url, idx) => {
+                    autoSequence.push(url);
+                    pushImg(
+                      url,
+                      shot.images.length > 1 ? `${def.caption} ${idx + 1}` : def.caption,
+                      `Studio · ${def.group === "EXTERIEUR" ? "Extérieur" : "Intérieur"}`,
+                    );
+                  });
+                }
+                for (const url of legacy) pushImg(url, "Galerie", "Galerie héritée");
+
+                return (
+                  <FeaturesEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    maxItems={10}
+                    folder={uploadFolder}
+                    library={library}
+                    autoSequence={autoSequence}
+                    autoFallback={main || null}
+                  />
+                );
+              }}
             />
           </Field>
         </div>

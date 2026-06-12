@@ -9,6 +9,8 @@ import type { FlatShot } from "@/lib/cars/shots";
 interface Feature {
   title: string;
   body: string;
+  /** Image épinglée par l'admin ; null = appariement automatique sur le studio. */
+  image?: string | null;
 }
 
 interface CarFeaturesProps {
@@ -66,17 +68,25 @@ export function CarFeatures({ features, shots, mainImage, brand, model }: CarFea
 
         <div className="flex flex-col gap-20 md:gap-28 lg:gap-32">
           {features.map((feature, i) => {
-            // Appariement déterministe : on cycle sur les prises de vue
-            // disponibles ; à défaut (véhicule sans studio), repli sur l'image
-            // principale. Garantit un visuel non vide pour chaque paragraphe.
+            // Priorité à l'image épinglée par l'admin. À défaut, appariement
+            // déterministe sur les prises de vue du studio (cycle), puis repli
+            // sur l'image principale. Garantit un visuel non vide par paragraphe
+            // et la rétro-compatibilité des véhicules sans image renseignée.
+            const pinned = feature.image?.trim() ? feature.image.trim() : null;
             const shot = shots.length > 0 ? shots[i % shots.length] : null;
+            const imageUrl = pinned ?? shot?.url ?? mainImage;
+            // Légende : une image épinglée est légendée au modèle ; une prise de
+            // vue automatique conserve sa légende d'angle.
+            const imageCaption = pinned
+              ? `${brand} ${model}`
+              : shot?.caption ?? `${brand} ${model}`;
             return (
               <FeatureRow
                 key={`${feature.title}-${i}`}
                 index={i}
                 feature={feature}
-                imageUrl={shot?.url ?? mainImage}
-                imageCaption={shot?.caption ?? `${brand} ${model}`}
+                imageUrl={imageUrl}
+                imageCaption={imageCaption}
                 brand={brand}
               />
             );
