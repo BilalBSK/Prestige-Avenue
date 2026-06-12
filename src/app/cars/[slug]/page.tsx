@@ -228,7 +228,15 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           />
         )}
 
-        {features.length > 0 && <CarFeatures features={features} />}
+        {features.length > 0 && (
+          <CarFeatures
+            features={features}
+            shots={studioShots}
+            mainImage={car.mainImage}
+            brand={car.brand}
+            model={car.model}
+          />
+        )}
 
         <CarCtaSection
           brand={car.brand}
