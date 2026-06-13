@@ -22,6 +22,7 @@
 # production
 /build
 /email-production-setup.md
+/go-live-checklist.md
 # misc
 .DS_Store
 *.pem

@@ -10,7 +10,6 @@ interface CarTitleBlockProps {
   shortTagline: string | null;
   description: string;
   index: number;
-  total: number;
 }
 
 export function CarTitleBlock({
@@ -20,13 +19,12 @@ export function CarTitleBlock({
   shortTagline,
   description,
   index,
-  total,
 }: CarTitleBlockProps) {
   const ref = useRevealOnScroll<HTMLDivElement>({ threshold: 0.2 });
   return (
     <section className="lux-container py-32 md:py-40">
       <div ref={ref} className="reveal-fade-up max-w-[920px]">
-        <SectionCounter index={index} total={total} className="mb-6" />
+        <SectionCounter index={index} className="mb-6" />
         <h2 className="font-[family:var(--font-fraunces)] text-[clamp(40px,5vw,68px)] font-light leading-[1] tracking-[-0.025em] text-[var(--ink-ivory)]">
           Le modèle, <em className="italic font-normal">en détail.</em>
         </h2>

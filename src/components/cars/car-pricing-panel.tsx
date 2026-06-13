@@ -15,7 +15,6 @@ interface CarPricingPanelProps {
   depositAmount: number;
   rentalConditions: RentalCondition[];
   index: number;
-  total: number;
 }
 
 interface RowProps {
@@ -63,7 +62,6 @@ export function CarPricingPanel({
   depositAmount,
   rentalConditions,
   index,
-  total,
 }: CarPricingPanelProps) {
   const ref = useRevealOnScroll<HTMLDivElement>({ threshold: 0.15 });
 
@@ -71,9 +69,9 @@ export function CarPricingPanel({
     <section className="border-t border-[var(--ink-line)] py-24 md:py-32">
       <div className="lux-container">
         <div className="mb-12 max-w-[820px] md:mb-16">
-          <SectionCounter index={index} total={total} className="mb-4" />
+          <SectionCounter index={index} className="mb-4" />
           <h3 className="font-[family:var(--font-fraunces)] text-[clamp(32px,4vw,52px)] font-light leading-[1] tracking-[-0.025em] text-[var(--ink-ivory)]">
-            Les conditions, <em className="italic font-normal">claires.</em>
+            Les conditions
           </h3>
           <p className="mt-6 max-w-[540px] font-[family:var(--font-dm-sans)] text-[14px] leading-[1.7] text-[var(--ink-text-soft)]">
             Aucun paiement en ligne. Vous soumettez une demande, nous validons,

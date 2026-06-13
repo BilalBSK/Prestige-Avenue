@@ -25,7 +25,6 @@ interface CarSpecsProps {
   doors: number;
   year: number;
   index: number;
-  total: number;
 }
 
 interface SpecCellProps {
@@ -68,7 +67,6 @@ export function CarSpecs({
   doors,
   year,
   index,
-  total,
 }: CarSpecsProps) {
   const ref = useRevealOnScroll<HTMLDivElement>({ threshold: 0.15 });
   return (
@@ -76,7 +74,7 @@ export function CarSpecs({
       <div className="lux-container">
         <div className="mb-12 flex items-end justify-between md:mb-16">
           <div>
-            <SectionCounter index={index} total={total} className="mb-4" />
+            <SectionCounter index={index} className="mb-4" />
             <h2 className="font-[family:var(--font-fraunces)] text-[clamp(32px,4vw,52px)] font-light leading-[1] tracking-[-0.025em] text-[var(--ink-ivory)]">
               La fiche, <em className="italic font-normal">en chiffres.</em>
             </h2>

@@ -100,11 +100,16 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
     }
   }
 
+  // L'ordre des sections suit le cheminement de la fiche publique
+  // (src/app/cars/[slug]/page.tsx) : identité → médias (couverture + studio)
+  // → présentation → tarif → conditions → spécifications → sélection →
+  // équipements détaillés → publication. Les visuels sont ainsi définis AVANT
+  // les sections « Sélection » et « Équipements » qui les réutilisent.
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pb-24">
       <FormSection
         title="Identification"
-        description="Informations affichées dans le catalogue et les réservations."
+        description="Informations affichées dans le catalogue et en en-tête de la fiche."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Marque" required error={errors.brand?.message}>
@@ -158,48 +163,93 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
       </FormSection>
 
       <FormSection
-        title="Spécifications"
-        description="Données techniques visibles sur la fiche produit."
+        title="Médias"
+        description="Couverture et studio photo de la fiche. À renseigner en premier : les sections « Sélection » et « Équipements détaillés » réutilisent ces visuels."
       >
-        <div className="grid gap-4 md:grid-cols-3">
-          <Field label="Puissance" required error={errors.power?.message}>
-            <NumberInput
-              {...register("power", { valueAsNumber: true })}
-              unit="ch"
-              error={!!errors.power}
+        <div className="space-y-4">
+          <Field
+            label="Image principale"
+            required
+            error={errors.mainImage?.message}
+            hint="Affichée en couverture du véhicule. Vous pouvez aussi la choisir depuis les prises de vue ci-dessous."
+          >
+            <Controller
+              control={control}
+              name="mainImage"
+              render={({ field }) => (
+                <ImagePicker value={field.value} onChange={field.onChange} folder={uploadFolder} />
+              )}
             />
           </Field>
-          <Field label="Transmission" required error={errors.transmission?.message}>
-            <Select
-              {...register("transmission")}
-              options={TRANSMISSION_OPTIONS}
-              error={!!errors.transmission}
+          <Field
+            label="Prises de vue"
+            hint="Rangez les photos par angle (extérieur & intérieur). Chaque angle renseigné apparaît sur la fiche ; survolez une photo pour la définir comme couverture."
+          >
+            <Controller
+              control={control}
+              name="galleryShots"
+              render={({ field }) => {
+                const mainImage = watch("mainImage");
+                return (
+                  <ShotsEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    folder={uploadFolder}
+                    mainImage={mainImage}
+                    onSetMain={(url) => setValue("mainImage", url, { shouldDirty: true, shouldValidate: true })}
+                  />
+                );
+              }}
             />
           </Field>
-          <Field label="Carburant" required error={errors.fuelType?.message}>
-            <Select
-              {...register("fuelType")}
-              options={FUEL_OPTIONS}
-              error={!!errors.fuelType}
-            />
-          </Field>
-          <Field label="Sièges" required error={errors.seats?.message}>
-            <NumberInput
-              {...register("seats", { valueAsNumber: true })}
-              error={!!errors.seats}
-              min={2}
-              max={9}
-            />
-          </Field>
-          <Field label="Portes" required error={errors.doors?.message}>
-            <NumberInput
-              {...register("doors", { valueAsNumber: true })}
-              error={!!errors.doors}
-              min={2}
-              max={5}
+
+          {hasLegacyGallery && (
+            <Field
+              label="Galerie héritée"
+              hint="Ancien format, sans angle. Conservé pour ne rien perdre — videz-le une fois les photos reclassées ci-dessus."
+            >
+              <Controller
+                control={control}
+                name="galleryImages"
+                render={({ field }) => {
+                  const mainImage = watch("mainImage");
+                  return (
+                    <MediaGallery
+                      value={field.value}
+                      onChange={field.onChange}
+                      folder={uploadFolder}
+                      mainImage={mainImage}
+                      onSetMain={(url) => setValue("mainImage", url, { shouldDirty: true, shouldValidate: true })}
+                    />
+                  );
+                }}
+              />
+            </Field>
+          )}
+
+          <Field label="Vidéo" error={errors.videoUrl?.message} hint="Importée depuis votre ordinateur (MP4, WebM, MOV) — intégrée dans le studio de la fiche.">
+            <Controller
+              control={control}
+              name="videoUrl"
+              render={({ field }) => (
+                <VideoPicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  folder={uploadFolder}
+                />
+              )}
             />
           </Field>
         </div>
+      </FormSection>
+
+      <FormSection
+        title="Présentation"
+        description="Texte d'introduction affiché sous le titre du véhicule."
+      >
+        <Field label="Description" required error={errors.description?.message}>
+          <Textarea {...register("description")} error={!!errors.description} rows={5} />
+        </Field>
       </FormSection>
 
       <FormSection
@@ -352,13 +402,55 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
       </FormSection>
 
       <FormSection
-        title="Présentation"
-        description="Contenu lu par le client avant réservation."
+        title="Spécifications"
+        description="Données techniques visibles sur la fiche produit."
+      >
+        <div className="grid gap-4 md:grid-cols-3">
+          <Field label="Puissance" required error={errors.power?.message}>
+            <NumberInput
+              {...register("power", { valueAsNumber: true })}
+              unit="ch"
+              error={!!errors.power}
+            />
+          </Field>
+          <Field label="Transmission" required error={errors.transmission?.message}>
+            <Select
+              {...register("transmission")}
+              options={TRANSMISSION_OPTIONS}
+              error={!!errors.transmission}
+            />
+          </Field>
+          <Field label="Carburant" required error={errors.fuelType?.message}>
+            <Select
+              {...register("fuelType")}
+              options={FUEL_OPTIONS}
+              error={!!errors.fuelType}
+            />
+          </Field>
+          <Field label="Sièges" required error={errors.seats?.message}>
+            <NumberInput
+              {...register("seats", { valueAsNumber: true })}
+              error={!!errors.seats}
+              min={2}
+              max={9}
+            />
+          </Field>
+          <Field label="Portes" required error={errors.doors?.message}>
+            <NumberInput
+              {...register("doors", { valueAsNumber: true })}
+              error={!!errors.doors}
+              min={2}
+              max={5}
+            />
+          </Field>
+        </div>
+      </FormSection>
+
+      <FormSection
+        title="Sélection"
+        description="Points forts mis en avant et visuel d'ambiance associé."
       >
         <div className="space-y-4">
-          <Field label="Description" required error={errors.description?.message}>
-            <Textarea {...register("description")} error={!!errors.description} rows={5} />
-          </Field>
           <Field label="Points forts" hint="8 maximum · Entrée pour valider">
             <Controller
               control={control}
@@ -369,84 +461,9 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
             />
           </Field>
           <Field
-            label="Équipements détaillés"
-            hint="10 maximum · chaque paragraphe est illustré sur la fiche — épinglez une image ou laissez l'automatique"
-          >
-            <Controller
-              control={control}
-              name="features"
-              render={({ field }) => {
-                // Bibliothèque proposée au choix + séquence d'appariement
-                // automatique : on reconstruit, à l'identique de la fiche
-                // publique, à partir des prises de vue, de la couverture et de
-                // l'image « Sélection » courantes.
-                const shots = watch("galleryShots");
-                const main = watch("mainImage");
-                const highlight = watch("highlightImage");
-                const legacy = watch("galleryImages");
-
-                const seen = new Set<string>();
-                const library: FeatureLibraryImage[] = [];
-                const pushImg = (url: string, label: string, group: string) => {
-                  const u = url?.trim();
-                  if (!u || seen.has(u)) return;
-                  seen.add(u);
-                  library.push({ url: u, label, group });
-                };
-
-                if (main) pushImg(main, "Image principale", "Couverture");
-                if (highlight) pushImg(highlight, "Section Sélection", "Sélection");
-                const autoSequence: string[] = [];
-                for (const shot of shots) {
-                  const def = getShotAngleDef(shot.angle);
-                  shot.images.forEach((url, idx) => {
-                    autoSequence.push(url);
-                    pushImg(
-                      url,
-                      shot.images.length > 1 ? `${def.caption} ${idx + 1}` : def.caption,
-                      `Studio · ${def.group === "EXTERIEUR" ? "Extérieur" : "Intérieur"}`,
-                    );
-                  });
-                }
-                for (const url of legacy) pushImg(url, "Galerie", "Galerie héritée");
-
-                return (
-                  <FeaturesEditor
-                    value={field.value}
-                    onChange={field.onChange}
-                    maxItems={10}
-                    folder={uploadFolder}
-                    library={library}
-                    autoSequence={autoSequence}
-                    autoFallback={main || null}
-                  />
-                );
-              }}
-            />
-          </Field>
-        </div>
-      </FormSection>
-
-      <FormSection title="Médias" description="Photographies et vidéo de présentation.">
-        <div className="space-y-4">
-          <Field
-            label="Image principale"
-            required
-            error={errors.mainImage?.message}
-            hint="Affichée en couverture du véhicule. Vous pouvez aussi la choisir depuis la galerie ci-dessous."
-          >
-            <Controller
-              control={control}
-              name="mainImage"
-              render={({ field }) => (
-                <ImagePicker value={field.value} onChange={field.onChange} folder={uploadFolder} />
-              )}
-            />
-          </Field>
-          <Field
             label="Image « Sélection »"
             error={errors.highlightImage?.message}
-            hint="Illustre la section « Ce qui la rend remarquable » de la fiche. Idéalement une vue d'ambiance (habitacle, détail). Optionnelle : à défaut, une vue intérieure puis l'image principale sont utilisées."
+            hint="Idéalement une vue d'ambiance (habitacle, détail). Optionnelle : à défaut, une vue intérieure puis l'image principale sont utilisées."
           >
             <Controller
               control={control}
@@ -460,66 +477,69 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
               )}
             />
           </Field>
-          <Field
-            label="Prises de vue"
-            hint="Rangez les photos par angle (extérieur & intérieur). Chaque angle renseigné apparaît sur la fiche ; survolez une photo pour la définir comme couverture."
-          >
-            <Controller
-              control={control}
-              name="galleryShots"
-              render={({ field }) => {
-                const mainImage = watch("mainImage");
-                return (
-                  <ShotsEditor
-                    value={field.value}
-                    onChange={field.onChange}
-                    folder={uploadFolder}
-                    mainImage={mainImage}
-                    onSetMain={(url) => setValue("mainImage", url, { shouldDirty: true, shouldValidate: true })}
-                  />
-                );
-              }}
-            />
-          </Field>
+        </div>
+      </FormSection>
 
-          {hasLegacyGallery && (
-            <Field
-              label="Galerie héritée"
-              hint="Ancien format, sans angle. Conservé pour ne rien perdre — videz-le une fois les photos reclassées ci-dessus."
-            >
-              <Controller
-                control={control}
-                name="galleryImages"
-                render={({ field }) => {
-                  const mainImage = watch("mainImage");
-                  return (
-                    <MediaGallery
-                      value={field.value}
-                      onChange={field.onChange}
-                      folder={uploadFolder}
-                      mainImage={mainImage}
-                      onSetMain={(url) => setValue("mainImage", url, { shouldDirty: true, shouldValidate: true })}
-                    />
+      <FormSection
+        title="Équipements détaillés"
+        description="Section « Sous le capot » de la fiche : paragraphes illustrés. Chaque paragraphe réutilise une photo déjà importée (couverture, Sélection, studio) ou l'appariement automatique."
+      >
+        <Field
+          label="Paragraphes"
+          hint="10 maximum · chaque paragraphe est illustré sur la fiche — épinglez une image ou laissez l'automatique"
+        >
+          <Controller
+            control={control}
+            name="features"
+            render={({ field }) => {
+              // Bibliothèque proposée au choix + séquence d'appariement
+              // automatique : on reconstruit, à l'identique de la fiche
+              // publique, à partir des prises de vue, de la couverture et de
+              // l'image « Sélection » courantes.
+              const shots = watch("galleryShots");
+              const main = watch("mainImage");
+              const highlight = watch("highlightImage");
+              const legacy = watch("galleryImages");
+
+              const seen = new Set<string>();
+              const library: FeatureLibraryImage[] = [];
+              const pushImg = (url: string, label: string, group: string) => {
+                const u = url?.trim();
+                if (!u || seen.has(u)) return;
+                seen.add(u);
+                library.push({ url: u, label, group });
+              };
+
+              if (main) pushImg(main, "Image principale", "Couverture");
+              if (highlight) pushImg(highlight, "Section Sélection", "Sélection");
+              const autoSequence: string[] = [];
+              for (const shot of shots) {
+                const def = getShotAngleDef(shot.angle);
+                shot.images.forEach((url, idx) => {
+                  autoSequence.push(url);
+                  pushImg(
+                    url,
+                    shot.images.length > 1 ? `${def.caption} ${idx + 1}` : def.caption,
+                    `Studio · ${def.group === "EXTERIEUR" ? "Extérieur" : "Intérieur"}`,
                   );
-                }}
-              />
-            </Field>
-          )}
+                });
+              }
+              for (const url of legacy) pushImg(url, "Galerie", "Galerie héritée");
 
-          <Field label="Vidéo" error={errors.videoUrl?.message} hint="Importée depuis votre ordinateur (MP4, WebM, MOV) — intégrée dans le studio de la fiche.">
-            <Controller
-              control={control}
-              name="videoUrl"
-              render={({ field }) => (
-                <VideoPicker
+              return (
+                <FeaturesEditor
                   value={field.value}
                   onChange={field.onChange}
+                  maxItems={10}
                   folder={uploadFolder}
+                  library={library}
+                  autoSequence={autoSequence}
+                  autoFallback={main || null}
                 />
-              )}
-            />
-          </Field>
-        </div>
+              );
+            }}
+          />
+        </Field>
       </FormSection>
 
       <FormSection title="Publication" description="Visibilité du véhicule sur le site public.">

@@ -24,7 +24,7 @@ export function CarsHero({ totalCount }: CarsHeroProps) {
       <div className="lux-container relative z-10 grid w-full pb-14 pt-[140px] md:pb-20 md:pt-[160px]">
         <div className="max-w-[920px]">
           <div className="hero-cta-1 mb-6">
-            <SectionCounter index={1} total={2} />
+            <SectionCounter index={1} />
           </div>
           <h1 className="hero-lede1 font-[family:var(--font-fraunces)] text-[clamp(48px,7vw,88px)] font-light leading-[0.96] tracking-[-0.035em] text-[var(--ink-ivory)]">
             Catalogue

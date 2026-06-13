@@ -26,7 +26,7 @@ export function GallerySection() {
               Galerie
             </span>
             <h2 className="mt-5 font-[family:var(--font-fraunces)] text-[clamp(40px,5vw,56px)] font-light leading-none tracking-[-0.025em] text-[var(--ink-ivory)]">
-              <em>Qui sommes-nous ?</em>
+              <em>Notre univers</em>
             </h2>
           </div>
         </header>

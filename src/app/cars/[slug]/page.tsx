@@ -149,10 +149,6 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
   const rentalConditions = parseRentalConditions(car.rentalConditions);
 
   let sectionIndex = 1;
-  let total = 3;
-  if (hasStudio) total += 1;
-  if (highlights.length > 0) total += 1;
-  if (features.length > 0) total += 1;
 
   return (
     <BookingSheetProvider
@@ -187,7 +183,6 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           shortTagline={car.shortTagline}
           description={car.description}
           index={sectionIndex++}
-          total={total}
         />
 
         {hasStudio && (
@@ -210,7 +205,6 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           depositAmount={Number(car.depositAmount)}
           rentalConditions={rentalConditions}
           index={sectionIndex++}
-          total={total}
         />
 
         <CarSpecs
@@ -221,7 +215,6 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           doors={car.doors}
           year={car.year}
           index={sectionIndex++}
-          total={total}
         />
 
         {highlights.length > 0 && (
