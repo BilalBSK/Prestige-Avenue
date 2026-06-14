@@ -1,3 +1,4 @@
+import { CSRF_COOKIE_MAX_AGE_SECONDS } from "@/lib/csrf-shared";
 import { CSRF_COOKIE_NAME, generateCsrfToken } from "@/lib/csrf";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -16,6 +17,7 @@ export async function GET() {
     secure: process.env.NODE_ENV === "production",
     path: "/",
     httpOnly: false,
+    maxAge: CSRF_COOKIE_MAX_AGE_SECONDS,
   });
   return response;
 }

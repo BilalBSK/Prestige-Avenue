@@ -2,6 +2,22 @@ const { PrismaClient, Role } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const galleryDemo = require("../src/lib/home/gallery-demo.json");
 
+// Garde-fou anti-catastrophe : le seed est conçu pour une base LOCALE de dev.
+// Lancé par erreur sur la prod, il réécrirait des données réelles (incident du
+// 2026-06-14 : visuels voitures écrasés). On refuse toute base non-locale, sauf
+// override explicite et conscient : SEED_ALLOW_REMOTE=1.
+const dbUrl = process.env.DATABASE_URL ?? "";
+const isLocalDb = /@(localhost|127\.0\.0\.1)[:/]/.test(dbUrl);
+if (!isLocalDb && process.env.SEED_ALLOW_REMOTE !== "1") {
+  const host = dbUrl.split("@")[1]?.split(/[:/]/)[0] ?? "(inconnu)";
+  console.error(
+    `\n⛔ Seed refusé : DATABASE_URL ne pointe pas vers une base locale (hôte: ${host}).\n` +
+      `   Le seed est réservé au dev local. Pour forcer en connaissance de cause :\n` +
+      `   SEED_ALLOW_REMOTE=1 npm run seed\n`,
+  );
+  process.exit(1);
+}
+
 const prisma = new PrismaClient();
 
 async function ensureUser({ name, email, password, role, phone }) {
@@ -24,12 +40,28 @@ async function ensureUser({ name, email, password, role, phone }) {
   });
 }
 
+// Champs médias pilotés par l'admin : une fois la voiture créée, le seed ne doit
+// JAMAIS les réécrire — sinon un seed lancé par erreur efface les visuels importés
+// depuis l'admin (incident du 2026-06-14). On les pose à la création, on les
+// préserve ensuite. Même philosophie que ensureDemoGallery.
+const ADMIN_MANAGED_CAR_FIELDS = [
+  "mainImage",
+  "highlightImage",
+  "galleryImages",
+  "galleryShots",
+  "videoUrl",
+];
+
 async function ensureCar(data) {
   // Upsert by slug so re-running the seed is idempotent and IDs stay stable
   // across runs — otherwise URLs and Next.js caches break after each re-seed.
+  // À la mise à jour, on retire les champs médias (ils appartiennent à l'admin) ;
+  // tout le reste (prix, specs, descriptions…) reste re-semable.
+  const update = { ...data };
+  for (const field of ADMIN_MANAGED_CAR_FIELDS) delete update[field];
   return prisma.car.upsert({
     where: { slug: data.slug },
-    update: data,
+    update,
     create: data,
   });
 }

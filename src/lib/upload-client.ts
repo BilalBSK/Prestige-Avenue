@@ -1,3 +1,5 @@
+import { ensureCsrfToken } from "./csrf-client";
+
 interface PresignResponse {
   uploadUrl: string;
   publicUrl: string;
@@ -28,11 +30,19 @@ async function requestPresignedUrl({
   scope,
   kind,
 }: UploadParams): Promise<PresignResponse> {
+  // Jeton CSRF lu en DIRECT depuis le cookie vivant au moment de l'envoi : c'est
+  // la seule source de vérité partagée avec le serveur. Le jeton passé en
+  // paramètre (mémorisé à l'ouverture de la page) peut être périmé si le cookie
+  // a été régénéré entre-temps — on le garde en repli seulement. Élimine la
+  // cause de « CSRF invalide » au réveil / après longue inactivité.
+  const liveToken = await ensureCsrfToken();
+  const token = liveToken || csrfToken;
+
   const response = await fetch("/api/admin/upload", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-csrf-token": csrfToken,
+      "x-csrf-token": token,
     },
     body: JSON.stringify({
       filename: file.name,

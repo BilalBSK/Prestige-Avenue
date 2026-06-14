@@ -1,8 +1,12 @@
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
+import {
+  CSRF_COOKIE_MAX_AGE_SECONDS,
+  CSRF_COOKIE_NAME,
+  CSRF_HEADER_NAME,
+} from "./csrf-shared";
 
-export const CSRF_COOKIE_NAME = "csrf-token";
-export const CSRF_HEADER_NAME = "x-csrf-token";
+export { CSRF_COOKIE_NAME, CSRF_HEADER_NAME };
 
 export function generateCsrfToken(): string {
   return crypto.randomUUID();
@@ -22,6 +26,7 @@ export async function getOrCreateCsrfToken(): Promise<string> {
     secure: process.env.NODE_ENV === "production",
     path: "/",
     httpOnly: false,
+    maxAge: CSRF_COOKIE_MAX_AGE_SECONDS,
   });
 
   return token;

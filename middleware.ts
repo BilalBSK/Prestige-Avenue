@@ -1,4 +1,8 @@
-import { CSRF_COOKIE_NAME, generateCsrfToken } from "@/lib/csrf";
+import {
+  CSRF_COOKIE_MAX_AGE_SECONDS,
+  CSRF_COOKIE_NAME,
+} from "@/lib/csrf-shared";
+import { generateCsrfToken } from "@/lib/csrf";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -10,6 +14,7 @@ function withCsrfCookie(request: NextRequest, response: NextResponse) {
     secure: process.env.NODE_ENV === "production",
     path: "/",
     httpOnly: false,
+    maxAge: CSRF_COOKIE_MAX_AGE_SECONDS,
   });
   return response;
 }
