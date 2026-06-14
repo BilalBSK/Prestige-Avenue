@@ -53,6 +53,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Teinte la barre du navigateur mobile en noir signature, raccord avec la
+  // direction « dark luxury » (et le background_color du manifeste PWA).
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
