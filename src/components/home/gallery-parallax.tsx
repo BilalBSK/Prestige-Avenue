@@ -2,10 +2,11 @@
 
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { GALLERY_ITEMS } from "@/lib/home/gallery-items";
+import type { GalleryItem } from "@/lib/home/gallery-items";
 import { GalleryTile } from "./gallery-tile";
 
 interface GalleryParallaxProps {
+  items: GalleryItem[];
   /** 2 (tablette) ou 3 (desktop) colonnes. */
   columnCount: 2 | 3;
 }
@@ -19,7 +20,7 @@ interface GalleryParallaxProps {
  * mouvement. Médias répartis en round-robin (item i → colonne i % n) : l'ordre
  * de lecture est préservé et les hauteurs des colonnes s'équilibrent.
  */
-export function GalleryParallax({ columnCount }: GalleryParallaxProps) {
+export function GalleryParallax({ items, columnCount }: GalleryParallaxProps) {
   const prefersReduced = useReducedMotion();
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -41,11 +42,8 @@ export function GalleryParallax({ columnCount }: GalleryParallaxProps) {
   const columnY = [y0, y1, y2];
 
   // Répartition round-robin dans le nombre de colonnes courant.
-  const columns: (typeof GALLERY_ITEMS)[number][][] = Array.from(
-    { length: columnCount },
-    () => [],
-  );
-  GALLERY_ITEMS.forEach((item, index) => {
+  const columns: GalleryItem[][] = Array.from({ length: columnCount }, () => []);
+  items.forEach((item, index) => {
     columns[index % columnCount].push(item);
   });
 

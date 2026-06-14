@@ -1,24 +1,21 @@
 /* ============================================================================
-   GALERIE D'ACCUEIL — contenu (données de test, à remplacer).
+   GALERIE D'ACCUEIL — types & ratios d'affichage.
 
-   C'EST LE SEUL FICHIER À ÉDITER pour changer les visuels de la galerie.
-   Chaque entrée est une tuile de la grille « colonnes parallaxe ».
+   La galerie n'est plus codée en dur ici : elle est pilotée depuis l'admin
+   (/admin/gallery) et lue en base via `getGalleryItems()`
+   (src/services/home-gallery.service.ts). Ce fichier ne porte plus que :
+     • le type `GalleryItem` consommé par les composants d'affichage,
+     • la table de correspondance ratio nommé → (w, h).
 
-   Pour brancher les vrais médias du client, remplacez `src` (et `poster`
-   pour les vidéos) par :
-     • une URL hébergée sur le stockage R2 (recommandé en production), ou
-     • un chemin local dans /public (ex: "/gallery/audi-rs6-avant.jpg").
-
-   Le couple (w, h) ne définit PAS la taille en pixels — seulement le RATIO
-   d'affichage de la tuile (via `aspect-ratio` + `object-cover`). Variez-le
-   (portrait 4/5, paysage 3/2, carré 1/1…) pour conserver le rythme éditorial
-   et l'équilibre des colonnes. Le domaine images.unsplash.com et le bucket R2
-   sont déjà autorisés dans next.config.ts.
+   Le couple (w, h) ne définit PAS une taille en pixels — seulement le RATIO
+   d'affichage de la tuile (via `aspect-ratio` + `object-cover`). Trois formats
+   rythment les colonnes parallaxe : portrait, paysage, carré.
 
    ORDRE : les médias sont répartis en round-robin (item i → colonne i % n).
-   L'ordre ci-dessous place donc un clip vidéo dans chaque colonne (desktop)
-   plutôt que de les empiler — gardez cet entrelacement si vous réorganisez.
+   L'ordre est piloté par `displayOrder` côté admin.
    ============================================================================ */
+
+import type { GalleryRatio } from "@prisma/client";
 
 export interface GalleryItem {
   /** Image fixe ou clip vidéo (muet, en boucle, lecture auto en vue). */
@@ -39,76 +36,19 @@ export interface GalleryItem {
   h: number;
 }
 
-/** Petit util pour des URLs Unsplash homogènes (placeholder de test). */
-const u = (id: string, w = 1400) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+/** Correspondance ratio nommé (enum Prisma) → couple (w, h) d'aspect-ratio. */
+export const GALLERY_RATIOS: Record<GalleryRatio, { w: number; h: number }> = {
+  PORTRAIT: { w: 4, h: 5 },
+  LANDSCAPE: { w: 3, h: 2 },
+  SQUARE: { w: 1, h: 1 },
+};
 
-export const GALLERY_ITEMS: GalleryItem[] = [
-  // — colonne 0 —
-  {
-    type: "video",
-    src: "/video/background.mp4",
-    poster: u("1503376780353-7e6692767b70", 1600),
-    alt: "Berline de prestige en mouvement, lumière basse",
-    w: 16,
-    h: 10,
-  },
-  // — colonne 1 —
-  {
-    type: "image",
-    src: u("1493238792000-8113da705763", 1400),
-    alt: "Feu arrière allumé d'une voiture de sport à la tombée du jour",
-    w: 3,
-    h: 2,
-  },
-  // — colonne 2 —
-  {
-    type: "video",
-    src: "/video/background2.mp4",
-    poster: u("1517994112540-009c47ea476b", 1200),
-    alt: "Face avant d'une voiture de sport, éclairage tamisé",
-    w: 1,
-    h: 1,
-  },
-  // — colonne 0 —
-  {
-    type: "image",
-    src: u("1555215695-3004980ad54e", 1000),
-    alt: "Coupé sportif de profil, carrosserie sombre",
-    w: 4,
-    h: 5,
-  },
-  // — colonne 1 —
-  {
-    type: "video",
-    src: "/video/background3.mp4",
-    poster: u("1494976388531-d1058494cdd8", 1200),
-    alt: "Détail de carrosserie filmé en lumière rasante",
-    w: 4,
-    h: 5,
-  },
-  // — colonne 2 —
-  {
-    type: "image",
-    src: u("1552519507-da3b142c6e3d", 1400),
-    alt: "Voiture de sport en extérieur à la tombée du jour",
-    w: 3,
-    h: 2,
-  },
-  // — colonne 0 —
-  {
-    type: "image",
-    src: u("1583121274602-3e2820c69888", 1000),
-    alt: "Supercar à l'arrêt, reflets nocturnes",
-    w: 4,
-    h: 5,
-  },
-  // — colonne 1 —
-  {
-    type: "image",
-    src: u("1494976388531-d1058494cdd8", 1400),
-    alt: "Voiture de collection, traitement sombre et sculptural",
-    w: 3,
-    h: 2,
-  },
+/** Options de format pour les sélecteurs admin (libellé + aperçu du ratio). */
+export const GALLERY_RATIO_OPTIONS: {
+  value: GalleryRatio;
+  label: string;
+}[] = [
+  { value: "PORTRAIT", label: "Portrait" },
+  { value: "LANDSCAPE", label: "Paysage" },
+  { value: "SQUARE", label: "Carré" },
 ];

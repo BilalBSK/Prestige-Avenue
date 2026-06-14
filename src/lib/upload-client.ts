@@ -5,7 +5,7 @@ interface PresignResponse {
   expiresIn: number;
 }
 
-type UploadScope = "cars" | "collaborations";
+type UploadScope = "cars" | "collaborations" | "home";
 type UploadKind = "image" | "video";
 
 interface UploadParams {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { GalleryItem } from "@/lib/home/gallery-items";
 import { GalleryParallax } from "./gallery-parallax";
 import { GalleryCarousel } from "./gallery-carousel";
 
@@ -17,7 +18,7 @@ type Mode = "carousel" | "two" | "three";
  * SSR est "three" (desktop) ; la largeur réelle est lue après montage — un
  * simple changement d'état post-hydratation, sans mismatch.
  */
-export function GalleryShowcase() {
+export function GalleryShowcase({ items }: { items: GalleryItem[] }) {
   const [mode, setMode] = useState<Mode>("three");
 
   useEffect(() => {
@@ -30,6 +31,6 @@ export function GalleryShowcase() {
     return () => window.removeEventListener("resize", compute);
   }, []);
 
-  if (mode === "carousel") return <GalleryCarousel />;
-  return <GalleryParallax columnCount={mode === "two" ? 2 : 3} />;
+  if (mode === "carousel") return <GalleryCarousel items={items} />;
+  return <GalleryParallax items={items} columnCount={mode === "two" ? 2 : 3} />;
 }

@@ -14,9 +14,11 @@ interface ImagePickerProps {
   value: string;
   onChange: (url: string) => void;
   folder: string;
+  /** Préfixe R2 de plus haut niveau. Par défaut "cars" (rétrocompatible). */
+  scope?: "cars" | "collaborations" | "home";
 }
 
-export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
+export function ImagePicker({ value, onChange, folder, scope }: ImagePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const csrfToken = useCsrfToken();
@@ -37,7 +39,7 @@ export function ImagePicker({ value, onChange, folder }: ImagePickerProps) {
 
     setUploading(true);
     try {
-      const publicUrl = await uploadImageToR2({ file, folder, csrfToken });
+      const publicUrl = await uploadImageToR2({ file, folder, csrfToken, scope });
       onChange(publicUrl);
       toast.success("Image importée.");
     } catch (err) {

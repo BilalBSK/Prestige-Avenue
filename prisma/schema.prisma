@@ -76,6 +76,22 @@ enum PaymentMethod {
   OTHER
 }
 
+// Nature d'une tuile de la galerie d'accueil : photo fixe ou clip vidéo court
+// (muet, en boucle, lecture auto en vue).
+enum GalleryMediaType {
+  IMAGE
+  VIDEO
+}
+
+// Format d'affichage d'une tuile (ratio piloté par l'admin, pas les dimensions
+// réelles du fichier) : il rythme les colonnes parallaxe de la galerie.
+// PORTRAIT 4/5, LANDSCAPE 3/2, SQUARE 1/1 — cf. GALLERY_RATIOS.
+enum GalleryRatio {
+  PORTRAIT
+  LANDSCAPE
+  SQUARE
+}
+
 model User {
   id        String    @id @default(cuid())
   name      String
@@ -207,6 +223,29 @@ model Collaboration {
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([isPublished, displayOrder])
+}
+
+// Une tuile de la galerie « Notre univers » de la page d'accueil. Pilotée
+// entièrement depuis l'admin (/admin/gallery) — remplace l'ancien tableau codé
+// en dur dans src/lib/home/gallery-items.ts. L'ordre d'affichage (displayOrder)
+// pilote la répartition round-robin en colonnes (desktop) et la séquence du
+// carrousel (mobile).
+model GalleryItem {
+  id           String           @id @default(cuid())
+  mediaType    GalleryMediaType @default(IMAGE)
+  // URL R2 publique : l'image, ou le fichier vidéo (.mp4/.webm) si VIDEO.
+  src          String
+  // Vidéo uniquement : image affichée avant lecture et sous prefers-reduced-motion.
+  poster       String?
+  // Texte alternatif descriptif (accessibilité).
+  alt          String
+  ratio        GalleryRatio     @default(LANDSCAPE)
+  isPublished  Boolean          @default(true)
+  displayOrder Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   @@index([isPublished, displayOrder])
 }

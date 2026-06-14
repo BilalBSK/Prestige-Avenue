@@ -1,3 +1,4 @@
+import { getGalleryItems } from "@/services/home-gallery.service";
 import { GalleryShowcase } from "./gallery-showcase";
 
 /**
@@ -5,11 +6,18 @@ import { GalleryShowcase } from "./gallery-showcase";
  *
  * Volontairement NON numérotée (pas de SectionCounter ni d'entrée dans le
  * ScrollLegend) : c'est une respiration visuelle, pas une étape du parcours.
- * Composant serveur fin qui pose un en-tête minimal et délègue l'interactivité
- * (grille parallaxe desktop / carrousel mobile, lecture vidéo en vue) à l'îlot
- * client `GalleryShowcase`. Aucun texte n'est posé sur les visuels eux-mêmes.
+ * Composant serveur fin qui lit les tuiles publiées en base (pilotées depuis
+ * /admin/gallery), pose un en-tête minimal et délègue l'interactivité (grille
+ * parallaxe desktop / carrousel mobile, lecture vidéo en vue) à l'îlot client
+ * `GalleryShowcase`. Aucun texte n'est posé sur les visuels eux-mêmes.
+ *
+ * Galerie vide → la section ne s'affiche pas du tout (dégradation propre, pas
+ * de bloc orphelin).
  */
-export function GallerySection() {
+export async function GallerySection() {
+  const items = await getGalleryItems();
+  if (items.length === 0) return null;
+
   return (
     <section id="galerie" className="gallery relative overflow-hidden py-20 md:py-40">
       {/* Halo radial très diffus : ancre la grille, donne de la profondeur sans
@@ -31,7 +39,7 @@ export function GallerySection() {
           </div>
         </header>
 
-        <GalleryShowcase />
+        <GalleryShowcase items={items} />
       </div>
     </section>
   );

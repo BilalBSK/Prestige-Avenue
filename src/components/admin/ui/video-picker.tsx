@@ -18,9 +18,11 @@ interface VideoPickerProps {
   value: string | null;
   onChange: (url: string | null) => void;
   folder: string;
+  /** Préfixe R2 de plus haut niveau. Par défaut "cars" (rétrocompatible). */
+  scope?: "cars" | "collaborations" | "home";
 }
 
-export function VideoPicker({ value, onChange, folder }: VideoPickerProps) {
+export function VideoPicker({ value, onChange, folder, scope }: VideoPickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -47,6 +49,7 @@ export function VideoPicker({ value, onChange, folder }: VideoPickerProps) {
         file,
         folder,
         csrfToken,
+        scope,
         onProgress: setProgress,
       });
       onChange(publicUrl);

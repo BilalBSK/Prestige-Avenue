@@ -105,8 +105,9 @@ export const uploadTokenInputSchema = z.object({
   size: z.number().int().positive(),
   folder: z.string().min(1).max(80),
   // Préfixe de plus haut niveau dans le bucket. Par défaut "cars" pour rester
-  // rétrocompatible ; "collaborations" pour les photos de partenaires.
-  scope: z.enum(["cars", "collaborations"]).default("cars"),
+  // rétrocompatible ; "collaborations" pour les photos de partenaires ;
+  // "home" pour les médias de la galerie d'accueil.
+  scope: z.enum(["cars", "collaborations", "home"]).default("cars"),
   // Nature du média : conditionne les MIME/taille autorisés et la durée de
   // l'URL signée. Par défaut "image" (rétrocompatible).
   kind: z.enum(["image", "video"]).default("image"),

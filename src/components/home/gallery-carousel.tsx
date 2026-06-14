@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { GALLERY_ITEMS } from "@/lib/home/gallery-items";
+import type { GalleryItem } from "@/lib/home/gallery-items";
 import { GalleryTile } from "./gallery-tile";
 
 /**
  * Mode carrousel horizontal — mobile (< 640px).
  *
- * Les 8 tuiles, empilées, feraient ~3000px de haut sur un téléphone. On les
- * pose donc en bande horizontale à défilement par accroche (scroll-snap) :
+ * Les tuiles, empilées, feraient plusieurs milliers de px de haut sur un
+ * téléphone. On les pose donc en bande horizontale à défilement par accroche :
  * une tuile par écran avec un aperçu (« peek ») de la suivante, et une fine
  * barre de progression or sous la bande.
  *
@@ -16,7 +16,7 @@ import { GalleryTile } from "./gallery-tile";
  * suffit, inutile d'ajouter une logique de glissé. La progression est écrite
  * directement via une ref (pas de re-render à chaque pixel de scroll).
  */
-export function GalleryCarousel() {
+export function GalleryCarousel({ items }: { items: GalleryItem[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
 
@@ -45,7 +45,7 @@ export function GalleryCarousel() {
         style={{ scrollbarWidth: "none", touchAction: "pan-x pan-y" }}
         aria-label="Galerie, faites défiler horizontalement"
       >
-        {GALLERY_ITEMS.map((item, index) => (
+        {items.map((item, index) => (
           <div
             key={index}
             className="w-[82%] flex-shrink-0 snap-center first:ml-0"

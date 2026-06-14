@@ -1,0 +1,58 @@
+[
+  {
+    "mediaType": "VIDEO",
+    "src": "/video/background.mp4",
+    "poster": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80",
+    "alt": "Berline de prestige en mouvement, lumière basse",
+    "ratio": "LANDSCAPE"
+  },
+  {
+    "mediaType": "IMAGE",
+    "src": "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1400&q=80",
+    "poster": null,
+    "alt": "Feu arrière allumé d'une voiture de sport à la tombée du jour",
+    "ratio": "LANDSCAPE"
+  },
+  {
+    "mediaType": "VIDEO",
+    "src": "/video/background2.mp4",
+    "poster": "https://images.unsplash.com/photo-1517994112540-009c47ea476b?auto=format&fit=crop&w=1200&q=80",
+    "alt": "Face avant d'une voiture de sport, éclairage tamisé",
+    "ratio": "SQUARE"
+  },
+  {
+    "mediaType": "IMAGE",
+    "src": "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1000&q=80",
+    "poster": null,
+    "alt": "Coupé sportif de profil, carrosserie sombre",
+    "ratio": "PORTRAIT"
+  },
+  {
+    "mediaType": "VIDEO",
+    "src": "/video/background3.mp4",
+    "poster": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=80",
+    "alt": "Détail de carrosserie filmé en lumière rasante",
+    "ratio": "PORTRAIT"
+  },
+  {
+    "mediaType": "IMAGE",
+    "src": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80",
+    "poster": null,
+    "alt": "Voiture de sport en extérieur à la tombée du jour",
+    "ratio": "LANDSCAPE"
+  },
+  {
+    "mediaType": "IMAGE",
+    "src": "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1000&q=80",
+    "poster": null,
+    "alt": "Supercar à l'arrêt, reflets nocturnes",
+    "ratio": "PORTRAIT"
+  },
+  {
+    "mediaType": "IMAGE",
+    "src": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1400&q=80",
+    "poster": null,
+    "alt": "Voiture de collection, traitement sombre et sculptural",
+    "ratio": "LANDSCAPE"
+  }
+]

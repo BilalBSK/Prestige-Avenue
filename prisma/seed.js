@@ -1,5 +1,6 @@
 const { PrismaClient, Role } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
+const galleryDemo = require("../src/lib/home/gallery-demo.json");
 
 const prisma = new PrismaClient();
 
@@ -39,6 +40,26 @@ function buildShots(byAngle) {
   return Object.entries(byAngle)
     .filter(([, images]) => Array.isArray(images) && images.length > 0)
     .map(([angle, images]) => ({ angle, images }));
+}
+
+// Galerie d'accueil : insère les visuels de démonstration UNIQUEMENT si la
+// table est vide, pour ne jamais écraser le travail éditorial fait depuis
+// l'admin. Même garde-fou que l'action seedDemoGallery. Source partagée :
+// src/lib/home/gallery-demo.json.
+async function ensureDemoGallery() {
+  const existing = await prisma.galleryItem.count();
+  if (existing > 0) return;
+  await prisma.galleryItem.createMany({
+    data: galleryDemo.map((item, index) => ({
+      mediaType: item.mediaType,
+      src: item.src,
+      poster: item.mediaType === "VIDEO" ? item.poster : null,
+      alt: item.alt,
+      ratio: item.ratio,
+      isPublished: true,
+      displayOrder: index + 1,
+    })),
+  });
 }
 
 async function main() {
@@ -276,7 +297,9 @@ async function main() {
     displayOrder: 3,
   });
 
-  console.log("Seed done: 3 cars + admin & test users (idempotent).");
+  await ensureDemoGallery();
+
+  console.log("Seed done: 3 cars + admin & test users + home gallery (idempotent).");
   console.log("Admin login: admin@prestige-avenue.com / Admin12345!");
 }
 

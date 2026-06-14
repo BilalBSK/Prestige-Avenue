@@ -116,7 +116,7 @@ export function CreateAdminForm() {
             ref={nameRef}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Mohamed Amrani"
+            placeholder="John Doe"
             autoComplete="off"
             error={!!errors.name}
             disabled={pending}
@@ -129,7 +129,7 @@ export function CreateAdminForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="mohamed@prestige-avenue.fr"
+            placeholder="john@prestige-avenue.fr"
             autoComplete="off"
             error={!!errors.email}
             disabled={pending}
