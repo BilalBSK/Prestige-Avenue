@@ -3,13 +3,11 @@
 import {
   DndContext,
   DragEndEvent,
-  PointerSensor,
   closestCenter,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { toast } from "@/components/admin/ui/toast";
+import { useSortableSensors } from "@/hooks/use-sortable-sensors";
 import { reorderCars } from "@/server/admin/cars.actions";
 import { useState, useTransition } from "react";
 import { CarsListCard, CarsListRow, type CarRow } from "./cars-list-row";
@@ -33,7 +31,7 @@ const HEADERS = [
 export function CarsList({ cars }: CarsListProps) {
   const [items, setItems] = useState(cars);
   const [, startTransition] = useTransition();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSortableSensors();
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;

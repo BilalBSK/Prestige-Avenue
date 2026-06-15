@@ -3,16 +3,14 @@
 import {
   DndContext,
   DragEndEvent,
-  PointerSensor,
   closestCenter,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { buttonVariants } from "@/components/admin/ui/button-variants";
 import { toast } from "@/components/admin/ui/toast";
+import { useSortableSensors } from "@/hooks/use-sortable-sensors";
 import { reorderCollaborations } from "@/server/admin/collaborations.actions";
 import {
   CollaborationsListCard,
@@ -32,7 +30,7 @@ const HEADERS = [
 export function CollaborationsList({ collaborations }: { collaborations: CollaborationRow[] }) {
   const [items, setItems] = useState(collaborations);
   const [, startTransition] = useTransition();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSortableSensors();
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;

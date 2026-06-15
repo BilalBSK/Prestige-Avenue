@@ -83,7 +83,7 @@ export function CarsListRow({ car, bookingCount }: CarsListRowProps) {
           type="button"
           {...attributes}
           {...listeners}
-          className="flex h-6 w-6 cursor-grab items-center justify-center rounded-md text-[color:var(--admin-text-muted)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text-soft)] active:cursor-grabbing"
+          className="flex h-6 w-6 cursor-grab touch-none items-center justify-center rounded-md text-[color:var(--admin-text-muted)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text-soft)] active:cursor-grabbing"
           aria-label="Réordonner"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

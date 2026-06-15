@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useTransition } from "react";
 import { GALLERY_RATIO_OPTIONS } from "@/lib/home/gallery-items";
 import { confirmDialog } from "@/components/admin/ui/confirm-dialog";
+import { DragHandle } from "@/components/admin/ui/drag-handle";
 import { toast } from "@/components/admin/ui/toast";
 import {
   deleteGalleryItem,
@@ -73,7 +74,7 @@ export function GalleryCard({ row, index, onEdit }: GalleryCardProps) {
         transition,
         opacity: isDragging ? 0.5 : 1,
       }}
-      className={`group relative rounded-xl border bg-[color:var(--admin-bg-elev)] p-2 transition-colors ${
+      className={`admin-media-tile group relative rounded-xl border bg-[color:var(--admin-bg-elev)] p-2 transition-colors ${
         isDragging
           ? "border-[color:var(--admin-accent)]/60"
           : "border-[color:var(--admin-line-strong)]"
@@ -92,22 +93,7 @@ export function GalleryCard({ row, index, onEdit }: GalleryCardProps) {
       </div>
 
       {/* --- Poignée de glissé (coin haut-gauche) --- */}
-      <button
-        type="button"
-        {...attributes}
-        {...listeners}
-        aria-label="Réordonner"
-        className="absolute left-3 top-3 flex h-7 w-7 cursor-grab items-center justify-center rounded-md bg-black/65 text-white/90 backdrop-blur-sm transition-colors hover:bg-black/80 active:cursor-grabbing"
-      >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-          <circle cx="5" cy="3" r="1" fill="currentColor" />
-          <circle cx="9" cy="3" r="1" fill="currentColor" />
-          <circle cx="5" cy="7" r="1" fill="currentColor" />
-          <circle cx="9" cy="7" r="1" fill="currentColor" />
-          <circle cx="5" cy="11" r="1" fill="currentColor" />
-          <circle cx="9" cy="11" r="1" fill="currentColor" />
-        </svg>
-      </button>
+      <DragHandle {...attributes} {...listeners} className="absolute left-3 top-3" />
 
       {/* --- Badge d'ordre (coin haut-droit) --- */}
       <span
@@ -117,8 +103,9 @@ export function GalleryCard({ row, index, onEdit }: GalleryCardProps) {
         {index + 1}
       </span>
 
-      {/* --- Actions au survol (publier / éditer / supprimer) --- */}
-      <div className="absolute right-3 top-12 flex flex-col gap-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-within:opacity-100">
+      {/* --- Actions (publier / éditer / supprimer) — toujours visibles au doigt,
+              révélées au survol sur souris (cf. .admin-media-controls). --- */}
+      <div className="admin-media-controls absolute right-3 top-12 flex flex-col gap-1.5">
         <CardAction
           label={row.isPublished ? "Masquer" : "Publier"}
           onClick={handleToggle}
@@ -188,7 +175,7 @@ function CardAction({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex h-7 w-7 items-center justify-center rounded-md bg-black/65 backdrop-blur-sm transition-colors hover:bg-black/80 ${
+      className={`flex h-7 w-7 items-center justify-center rounded-md bg-black/65 backdrop-blur-sm transition-colors hover:bg-black/80 coarse:h-9 coarse:w-9 ${
         danger ? "text-white hover:text-[color:var(--admin-danger-soft)]" : "text-white/90"
       }`}
     >

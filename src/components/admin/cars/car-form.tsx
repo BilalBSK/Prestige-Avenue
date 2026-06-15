@@ -183,7 +183,7 @@ export function CarForm({ mode, carId, initial, uploadFolder }: CarFormProps) {
           </Field>
           <Field
             label="Prises de vue"
-            hint="Rangez les photos par angle (extérieur & intérieur). Chaque angle renseigné apparaît sur la fiche ; survolez une photo pour la définir comme couverture."
+            hint="Rangez les photos par angle (extérieur & intérieur). Chaque angle renseigné apparaît sur la fiche ; touchez l'étoile sur une photo pour la définir comme couverture."
           >
             <Controller
               control={control}

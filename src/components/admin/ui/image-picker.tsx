@@ -64,16 +64,17 @@ export function ImagePicker({ value, onChange, folder, scope }: ImagePickerProps
         }}
       />
       {value ? (
-        <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)]">
+        <div className="admin-media-tile relative h-48 w-full overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)]">
           <Image src={value} alt="Aperçu" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="admin-media-controls absolute bottom-3 right-3 flex gap-2">
             <Button
               type="button"
               variant="secondary"
               size="sm"
               loading={uploading}
               onClick={() => inputRef.current?.click()}
+              className="coarse:h-10 coarse:px-4"
             >
               Remplacer
             </Button>
@@ -82,6 +83,7 @@ export function ImagePicker({ value, onChange, folder, scope }: ImagePickerProps
               variant="danger"
               size="sm"
               onClick={() => onChange("")}
+              className="coarse:h-10 coarse:px-4"
             >
               Retirer
             </Button>

@@ -95,7 +95,7 @@ export function VideoPicker({ value, onChange, folder, scope }: VideoPickerProps
           </p>
         </div>
       ) : value ? (
-        <div className="group relative w-full overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-black">
+        <div className="admin-media-tile relative w-full overflow-hidden rounded-lg border border-[color:var(--admin-line-strong)] bg-black">
           <video
             src={value}
             controls
@@ -103,12 +103,16 @@ export function VideoPicker({ value, onChange, folder, scope }: VideoPickerProps
             preload="metadata"
             className="h-48 w-full bg-black object-contain"
           />
-          <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+          {/* Coin haut-droit pour ne pas recouvrir les contrôles vidéo natifs
+              (lecture / barre de progression / plein écran), désormais que les
+              boutons restent visibles au doigt. */}
+          <div className="admin-media-controls absolute right-3 top-3 flex gap-2">
             <Button
               type="button"
               variant="secondary"
               size="sm"
               onClick={() => inputRef.current?.click()}
+              className="coarse:h-10 coarse:px-4"
             >
               Remplacer
             </Button>
@@ -117,6 +121,7 @@ export function VideoPicker({ value, onChange, folder, scope }: VideoPickerProps
               variant="danger"
               size="sm"
               onClick={() => onChange(null)}
+              className="coarse:h-10 coarse:px-4"
             >
               Retirer
             </Button>

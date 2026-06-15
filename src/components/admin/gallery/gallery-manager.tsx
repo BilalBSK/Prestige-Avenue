@@ -3,10 +3,7 @@
 import {
   DndContext,
   DragEndEvent,
-  PointerSensor,
   closestCenter,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -17,6 +14,7 @@ import { useState, useTransition } from "react";
 import type { GalleryMediaType, GalleryRatio } from "@prisma/client";
 import { Button } from "@/components/admin/ui/button";
 import { toast } from "@/components/admin/ui/toast";
+import { useSortableSensors } from "@/hooks/use-sortable-sensors";
 import {
   reorderGalleryItems,
   seedDemoGallery,
@@ -43,7 +41,7 @@ export function GalleryManager({ initialItems }: { initialItems: GalleryItemRow[
   const [editorTarget, setEditorTarget] = useState<EditorTarget>(undefined);
   const [, startReorder] = useTransition();
   const [seeding, startSeeding] = useTransition();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSortableSensors();
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -123,7 +121,7 @@ export function GalleryManager({ initialItems }: { initialItems: GalleryItemRow[
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="text-[0.8125rem] text-[color:var(--admin-text-muted)]">
           <span className="admin-tabular text-[color:var(--admin-text-soft)]">{items.length}</span>{" "}
-          tuile{items.length > 1 ? "s" : ""} · glissez pour réordonner
+          tuile{items.length > 1 ? "s" : ""} · maintenir la poignée pour réordonner
         </p>
         <Button type="button" variant="primary" size="md" onClick={() => setEditorTarget(null)}>
           Ajouter un visuel

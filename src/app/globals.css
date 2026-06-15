@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Pointeur grossier (doigt) → permet d'agrandir les cibles tactiles en JSX
+   via `coarse:` (ex. `coarse:h-10`). Min. recommandé : 44 px au doigt. */
+@custom-variant coarse {
+  @media (pointer: coarse) {
+    @slot;
+  }
+}
+
 :root {
   /* Tell the UA to render native form controls (date pickers, scrollbars,
      calendar indicators) in dark mode — fixes black-on-black icons. */
@@ -141,6 +149,36 @@
 }
 .admin-row:hover {
   background-color: var(--admin-surface-2);
+}
+
+/* ============================================
+   Contrôles de gestion d'images — révélation adaptée à l'entrée.
+   Problème corrigé : au doigt (iPad / mobile) aucun `:hover` n'existe, donc les
+   boutons supprimer / couverture / remplacer cachés derrière `group-hover`
+   restaient invisibles → gestion d'images impossible en prod.
+   Solution : les contrôles sont TOUJOURS visibles par défaut (tactile), et l'on
+   ne masque-puis-révèle-au-survol QUE sur pointeur précis (souris / trackpad),
+   en conservant la révélation élégante du desktop.
+   `.admin-media-tile`     : la vignette/carte parente qui déclenche la révélation.
+   `.admin-media-controls` : le conteneur des boutons d'action.
+   ============================================ */
+.admin-theme .admin-media-controls {
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .admin-theme .admin-media-tile .admin-media-controls {
+    opacity: 0;
+  }
+  .admin-theme .admin-media-tile:hover .admin-media-controls,
+  .admin-theme .admin-media-tile:focus-within .admin-media-controls {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-theme .admin-media-controls {
+    transition: none;
+  }
 }
 
 /* Focus ring — keyboard only, soft accent */

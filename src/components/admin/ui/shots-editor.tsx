@@ -66,13 +66,13 @@ function Thumb({
 }) {
   return (
     <div
-      className={`group/thumb relative aspect-[4/3] w-[104px] shrink-0 overflow-hidden rounded-md border bg-[color:var(--admin-surface)] ${
+      className={`admin-media-tile relative aspect-[4/3] w-[104px] shrink-0 overflow-hidden rounded-md border bg-[color:var(--admin-surface)] coarse:w-[132px] ${
         isMain
           ? "border-[color:var(--admin-accent)] ring-1 ring-[color:var(--admin-accent)]/40"
           : "border-[color:var(--admin-line-strong)]"
       }`}
     >
-      <Image src={url} alt="" fill sizes="104px" className="object-cover" />
+      <Image src={url} alt="" fill sizes="(pointer: coarse) 132px, 104px" className="object-cover" />
 
       {isMain && (
         <span className="pointer-events-none absolute bottom-1 left-1 inline-flex items-center gap-1 rounded bg-[color:var(--admin-accent)] px-1.5 py-0.5 text-[0.625rem] font-medium text-black">
@@ -83,16 +83,17 @@ function Thumb({
         </span>
       )}
 
-      {/* Réordonnancement intra-angle — flèches au survol, robustes sur mobile. */}
-      <div className="absolute inset-x-1 bottom-1 flex justify-center gap-1 opacity-0 transition-opacity group-hover/thumb:opacity-100">
+      {/* Réordonnancement intra-angle par flèches (toujours visible au doigt,
+          révélé au survol souris) — robuste et accessible, sans glissé. */}
+      <div className="admin-media-controls absolute inset-x-1 bottom-1 flex justify-center gap-1">
         {canMoveLeft && (
           <button
             type="button"
             onClick={() => onMove(-1)}
-            className="flex h-5 w-5 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-accent)] hover:text-black"
+            className="flex h-6 w-6 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-accent)] hover:text-black coarse:h-8 coarse:w-8"
             aria-label="Déplacer vers la gauche"
           >
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path d="M7.5 2.5L4 6l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
@@ -101,26 +102,26 @@ function Thumb({
           <button
             type="button"
             onClick={() => onMove(1)}
-            className="flex h-5 w-5 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-accent)] hover:text-black"
+            className="flex h-6 w-6 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-accent)] hover:text-black coarse:h-8 coarse:w-8"
             aria-label="Déplacer vers la droite"
           >
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         )}
       </div>
 
-      <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover/thumb:opacity-100">
+      <div className="admin-media-controls absolute right-1 top-1 flex gap-1">
         {onSetMain && !isMain && (
           <button
             type="button"
             onClick={onSetMain}
-            className="flex h-5 w-5 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-accent)] hover:text-black"
+            className="flex h-6 w-6 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-accent)] hover:text-black coarse:h-8 coarse:w-8"
             aria-label="Définir comme couverture"
             title="Définir comme couverture"
           >
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+            <svg width="11" height="11" viewBox="0 0 10 10" fill="none" aria-hidden>
               <path d="M5 1L6.2 3.6L9 4L7 6L7.5 9L5 7.5L2.5 9L3 6L1 4L3.8 3.6L5 1Z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
             </svg>
           </button>
@@ -128,11 +129,11 @@ function Thumb({
         <button
           type="button"
           onClick={onRemove}
-          className="flex h-5 w-5 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-danger)]"
+          className="flex h-6 w-6 items-center justify-center rounded bg-black/75 text-white hover:bg-[color:var(--admin-danger)] coarse:h-8 coarse:w-8"
           aria-label="Retirer"
           title="Retirer"
         >
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M3 3L9 9M9 3L3 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>

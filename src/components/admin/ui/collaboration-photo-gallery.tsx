@@ -3,10 +3,7 @@
 import {
   DndContext,
   DragEndEvent,
-  PointerSensor,
   closestCenter,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -20,8 +17,10 @@ import { useRef, useState } from "react";
 import { ALLOWED_IMAGE_MIMES, MAX_IMAGE_SIZE_BYTES } from "@/lib/blob";
 import { uploadImageToR2 } from "@/lib/upload-client";
 import { useCsrfToken } from "@/hooks/use-csrf-token";
+import { useSortableSensors } from "@/hooks/use-sortable-sensors";
 import type { CollaborationPhoto } from "@/server/admin/collaborations.schema";
 import { Button } from "./button";
+import { DragHandle } from "./drag-handle";
 import { toast } from "./toast";
 
 const ALLOWED_MIMES: readonly string[] = ALLOWED_IMAGE_MIMES;
@@ -84,24 +83,18 @@ function SortableItem({
         transition,
         opacity: isDragging ? 0.45 : 1,
       }}
-      className="group relative aspect-[4/3] overflow-hidden rounded-md border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)]"
+      className="admin-media-tile group relative aspect-[4/3] overflow-hidden rounded-md border border-[color:var(--admin-line-strong)] bg-[color:var(--admin-surface)]"
     >
-      <div {...attributes} {...listeners} className="absolute inset-0 cursor-grab active:cursor-grabbing">
-        <Image
-          src={photo.url}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-          className="object-cover"
-        />
-      </div>
+      <Image
+        src={photo.url}
+        alt=""
+        fill
+        sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+        className="pointer-events-none object-cover"
+      />
 
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-1.5 top-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[0.6875rem] font-medium text-white"
-      >
-        {index + 1}
-      </span>
+      {/* Poignée dédiée : le glissé ne part QUE d'ici, le reste laisse défiler. */}
+      <DragHandle {...attributes} {...listeners} className="admin-media-controls absolute left-1.5 top-1.5" />
 
       <span
         aria-hidden
@@ -110,11 +103,18 @@ function SortableItem({
         {isPortrait ? "Portrait" : "Paysage"}
       </span>
 
-      <div className="absolute right-1.5 top-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-1.5 right-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[0.6875rem] font-medium text-white"
+      >
+        {index + 1}
+      </span>
+
+      <div className="admin-media-controls absolute right-1.5 top-1.5 flex gap-1">
         <button
           type="button"
           onClick={onRemove}
-          className="flex h-6 w-6 items-center justify-center rounded-md bg-black/75 text-white hover:bg-[color:var(--admin-danger)]"
+          className="flex h-7 w-7 items-center justify-center rounded-md bg-black/75 text-white hover:bg-[color:var(--admin-danger)] coarse:h-9 coarse:w-9"
           aria-label="Retirer"
           title="Retirer"
         >
@@ -135,7 +135,7 @@ export function CollaborationPhotoGallery({
 }: CollaborationPhotoGalleryProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSortableSensors();
   const csrfToken = useCsrfToken();
 
   async function handleFiles(files: FileList) {
@@ -239,7 +239,7 @@ export function CollaborationPhotoGallery({
           <span className="admin-tabular text-[color:var(--admin-text-soft)]">{value.length}</span>
           <span className="mx-1">/</span>
           <span className="admin-tabular">{maxItems}</span>
-          <span className="ml-2">· glisser pour réordonner</span>
+          <span className="ml-2">· maintenir la poignée pour réordonner</span>
         </p>
         {value.length > 0 && (
           <Button type="button" variant="ghost" size="sm" onClick={() => onChange([])}>
