@@ -24,3 +24,11 @@ export function getCalendarDayOfWeekISO(date: Date): number {
   const day = date.getUTCDay();
   return day === 0 ? 7 : day;
 }
+
+/** Jour calendaire `YYYY-MM-DD` (UTC) — réciproque de `parseCalendarDate`. */
+export function formatCalendarDate(date: Date): string {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}

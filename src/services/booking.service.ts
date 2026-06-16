@@ -3,6 +3,7 @@ import {
   normalizeBookingDates,
   validateBusinessBookingRules,
 } from "@/lib/booking";
+import { formatCalendarDate } from "@/lib/calendar-date";
 import { prisma } from "@/lib/prisma";
 import {
   notifyBookingConfirmed,
@@ -156,6 +157,69 @@ export async function checkAvailability(input: AvailabilityInput) {
   }
 
   return { isAvailable: true };
+}
+
+export interface UnavailableRange {
+  /** Premier jour occupé, inclus — `YYYY-MM-DD`. */
+  start: string;
+  /** Jour de restitution, exclu — `YYYY-MM-DD`. Reste sélectionnable comme arrivée. */
+  end: string;
+}
+
+/**
+ * Périodes pendant lesquelles ce véhicule ne peut PAS être réservé sur la fenêtre
+ * `[from, to[` : réservations bloquantes (CONFIRMED / IN_PROGRESS) et
+ * indisponibilités saisies par l'agence (BlockedDate). Les demandes PENDING_REVIEW
+ * ne bloquent pas (cf. BLOCKING_STATUSES) — l'agence arbitre manuellement.
+ *
+ * Les segments sont renvoyés fusionnés (intervalles disjoints, triés) au format
+ * `YYYY-MM-DD`, bornes demi-ouvertes cohérentes avec toute la logique d'overlap du
+ * projet. Sert à griser le calendrier public ; ce n'est PAS un contrôle d'accès —
+ * la transaction `assertNoOverlap` reste le garde-fou autoritatif à la soumission.
+ */
+export async function getUnavailableRanges(
+  carId: string,
+  from: Date,
+  to: Date,
+): Promise<UnavailableRange[]> {
+  const overlap = { startDate: { lt: to }, endDate: { gt: from } };
+
+  const [bookings, blocks] = await Promise.all([
+    prisma.booking.findMany({
+      where: { carId, status: { in: BLOCKING_STATUSES }, ...overlap },
+      select: { startDate: true, endDate: true },
+    }),
+    prisma.blockedDate.findMany({
+      where: { carId, ...overlap },
+      select: { startDate: true, endDate: true },
+    }),
+  ]);
+
+  // Bornage à la fenêtre puis tri par début, pour une fusion en une passe.
+  const segments = [...bookings, ...blocks]
+    .map((s) => ({
+      start: s.startDate.getTime() < from.getTime() ? from : s.startDate,
+      end: s.endDate.getTime() > to.getTime() ? to : s.endDate,
+    }))
+    .filter((s) => s.end.getTime() > s.start.getTime())
+    .sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  // Coalescence des intervalles qui se chevauchent ou se touchent (end == start
+  // suivant) → intervalles disjoints, payload minimal, calcul client trivial.
+  const merged: { start: Date; end: Date }[] = [];
+  for (const seg of segments) {
+    const last = merged[merged.length - 1];
+    if (last && seg.start.getTime() <= last.end.getTime()) {
+      if (seg.end.getTime() > last.end.getTime()) last.end = seg.end;
+    } else {
+      merged.push({ start: seg.start, end: seg.end });
+    }
+  }
+
+  return merged.map((s) => ({
+    start: formatCalendarDate(s.start),
+    end: formatCalendarDate(s.end),
+  }));
 }
 
 export async function createBookingRequest(input: CreateBookingRequestInput) {

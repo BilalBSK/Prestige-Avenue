@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { BookingCalendar } from "./booking-calendar";
+import { BookingCalendar, type UnavailableRange } from "./booking-calendar";
 
 interface BookingCalendarModalProps {
   open: boolean;
@@ -9,6 +9,8 @@ interface BookingCalendarModalProps {
   startDate: string;
   endDate: string;
   onChange: (next: { startDate: string; endDate: string }) => void;
+  unavailableRanges?: UnavailableRange[];
+  loading?: boolean;
 }
 
 export function BookingCalendarModal({
@@ -17,6 +19,8 @@ export function BookingCalendarModal({
   startDate,
   endDate,
   onChange,
+  unavailableRanges,
+  loading,
 }: BookingCalendarModalProps) {
   // Escape closes the calendar only. Capture-phase + stopImmediatePropagation
   // intercepts the key before the parent Sheet's window listener fires, so the
@@ -83,7 +87,13 @@ export function BookingCalendarModal({
 
         {/* Calendar */}
         <div className="relative flex-1 overflow-y-auto overscroll-contain px-6 py-6">
-          <BookingCalendar startDate={startDate} endDate={endDate} onChange={onChange} />
+          <BookingCalendar
+            startDate={startDate}
+            endDate={endDate}
+            onChange={onChange}
+            unavailableRanges={unavailableRanges}
+            loading={loading}
+          />
         </div>
 
         {/* Footer actions */}

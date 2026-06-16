@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sheet } from "@/components/ui/sheet";
 import { useCsrfToken } from "@/hooks/use-csrf-token";
 import { getCalendarDayOfWeekISO, parseCalendarDate } from "@/lib/calendar-date";
+import type { UnavailableRange } from "./booking-calendar";
 import { BookingProgress } from "./booking-progress";
 import { BookingStepDates } from "./booking-step-dates";
 import { BookingStepContact, type ContactValues } from "./booking-step-contact";
@@ -85,6 +86,31 @@ export function BookingRequestSheet({
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const submissionTokenRef = useRef<string>("");
+
+  // Disponibilités du véhicule, chargées à l'ouverture du drawer pour griser le
+  // calendrier. Un échec n'empêche jamais de réserver : la transaction serveur
+  // (assertNoOverlap) reste le garde-fou autoritatif.
+  const [unavailableRanges, setUnavailableRanges] = useState<UnavailableRange[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    setAvailabilityLoading(true);
+    fetch(`/api/cars/${carId}/unavailable`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((r) => r.json())
+      .then((data: { ranges?: UnavailableRange[] }) => {
+        setUnavailableRanges(Array.isArray(data.ranges) ? data.ranges : []);
+      })
+      .catch(() => {
+        // Repli silencieux : sélection libre, le serveur arbitrera à la soumission.
+      })
+      .finally(() => setAvailabilityLoading(false));
+    return () => controller.abort();
+  }, [open, carId]);
 
   const estimatedTotal = useMemo(
     () =>
@@ -195,6 +221,8 @@ export function BookingRequestSheet({
               }}
               onContinue={() => setStep(2)}
               estimatedTotal={estimatedTotal}
+              unavailableRanges={unavailableRanges}
+              availabilityLoading={availabilityLoading}
             />
           )}
           {step === 2 && (

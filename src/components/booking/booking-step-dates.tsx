@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BookingCalendarModal } from "./booking-calendar-modal";
+import type { UnavailableRange } from "./booking-calendar";
 
 const MONTHS_FR = [
   "janvier", "février", "mars", "avril", "mai", "juin",
@@ -26,6 +27,8 @@ interface BookingStepDatesProps {
   onChange: (next: { startDate: string; endDate: string }) => void;
   onContinue: () => void;
   estimatedTotal: number;
+  unavailableRanges: UnavailableRange[];
+  availabilityLoading: boolean;
 }
 
 interface AvailabilityState {
@@ -44,6 +47,8 @@ export function BookingStepDates({
   onChange,
   onContinue,
   estimatedTotal,
+  unavailableRanges,
+  availabilityLoading,
 }: BookingStepDatesProps) {
   const [availability, setAvailability] = useState<AvailabilityState>({ status: "idle" });
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -136,6 +141,8 @@ export function BookingStepDates({
           startDate={startDate}
           endDate={endDate}
           onChange={onChange}
+          unavailableRanges={unavailableRanges}
+          loading={availabilityLoading}
         />
 
         <div
