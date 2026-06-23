@@ -51,7 +51,8 @@ function calculateEstimate(
   }
   if (
     days === 2 &&
-    ((startDow === 5 && endDow === 0) || (startDow === 6 && endDow === 1)) &&
+    // dimanche = 7 en ISO 8601 (cf. getCalendarDayOfWeekISO)
+    ((startDow === 5 && endDow === 7) || (startDow === 6 && endDow === 1)) &&
     weekendPackagePrice48h !== null
   ) {
     return Number(weekendPackagePrice48h.toFixed(2));

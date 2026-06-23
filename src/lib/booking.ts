@@ -61,7 +61,8 @@ export function classifyWeekendPattern(
   if (rentalDays === 3 && startDow === 5 && endDow === 1) return "72h";
 
   // 48h — vendredi → dimanche, ou samedi → lundi
-  if (rentalDays === 2 && ((startDow === 5 && endDow === 0) || (startDow === 6 && endDow === 1))) {
+  // (dimanche = 7 en ISO 8601, cf. getCalendarDayOfWeekISO)
+  if (rentalDays === 2 && ((startDow === 5 && endDow === 7) || (startDow === 6 && endDow === 1))) {
     return "48h";
   }
 

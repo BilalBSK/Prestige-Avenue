@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AdminBrand, AdminNavList } from "./admin-sidebar";
 import { AdminViewSiteFooter } from "./admin-view-site";
@@ -11,9 +11,18 @@ export function AdminMobileNav() {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
 
+  // Filet de sécurité : referme le tiroir à chaque changement de route.
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  // Fermeture « intentionnelle » (croix, scrim, Échap) : on referme ET on
+  // restitue le focus au déclencheur — comportement attendu d'une boîte de
+  // dialogue. À NE PAS utiliser sur l'activation d'un onglet : voir plus bas.
+  const dismiss = useCallback(() => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -22,20 +31,14 @@ export function AdminMobileNav() {
     // Déplace le focus dans le tiroir pour la navigation clavier / lecteur d'écran.
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") dismiss();
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open]);
-
-  const close = () => {
-    setOpen(false);
-    // Rend le focus au déclencheur à la fermeture.
-    triggerRef.current?.focus();
-  };
+  }, [open, dismiss]);
 
   return (
     <div className="lg:hidden">
@@ -54,7 +57,7 @@ export function AdminMobileNav() {
 
       {/* Scrim */}
       <div
-        onClick={close}
+        onClick={dismiss}
         aria-hidden
         className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-[3px] transition-opacity duration-300 ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
@@ -73,7 +76,7 @@ export function AdminMobileNav() {
           <button
             ref={closeRef}
             type="button"
-            onClick={close}
+            onClick={dismiss}
             aria-label="Fermer le menu"
             className="flex h-8 w-8 items-center justify-center rounded-md text-[color:var(--admin-text-muted)] transition-colors hover:bg-[color:var(--admin-surface)] hover:text-[color:var(--admin-text)]"
           >
@@ -87,10 +90,17 @@ export function AdminMobileNav() {
           <p className="px-6 pb-1 pt-4 text-[0.625rem] font-medium uppercase tracking-[0.18em] text-[color:var(--admin-text-muted)]">
             Navigation
           </p>
-          <AdminNavList variant="drawer" stagger={open} onNavigate={close} />
+          {/* Au clic sur un onglet, on se contente de refermer le tiroir et on
+              laisse le routeur naviguer. On NE restitue PAS le focus au
+              déclencheur ici : déplacer le focus en plein tap « avalait » le
+              clic sur mobile (la navigation ne partait pas, l'admin devait
+              rouvrir le menu). C'est la cause du bug de changement d'onglet. */}
+          <AdminNavList variant="drawer" stagger={open} onNavigate={() => setOpen(false)} />
         </div>
 
-        <AdminViewSiteFooter onNavigate={close} />
+        {/* Ouvre le site public dans un nouvel onglet : même logique, on referme
+            sans voler le focus pour ne pas neutraliser le tap. */}
+        <AdminViewSiteFooter onNavigate={() => setOpen(false)} />
       </aside>
     </div>
   );
