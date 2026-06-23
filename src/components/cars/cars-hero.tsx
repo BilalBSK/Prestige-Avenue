@@ -34,11 +34,6 @@ export function CarsHero({ totalCount }: CarsHeroProps) {
           <p className="hero-lede2 mt-6 max-w-[580px] font-[family:var(--font-fraunces)] text-[19px] font-light leading-[1.45] text-[var(--ink-text)]">
             Sélection serrée. Mécaniques irréprochables. Choisissez la voiture, on s&apos;occupe du reste.
           </p>
-
-          <div className="hero-marker mt-8 flex items-center gap-3 font-[family:var(--font-dm-sans)] text-[11px] uppercase tracking-[0.28em] text-[var(--ink-muted)]">
-            <span className="inline-block h-px w-8 bg-[var(--ink-dim)]" />
-            {count} véhicules disponibles
-          </div>
         </div>
       </div>
     </section>
