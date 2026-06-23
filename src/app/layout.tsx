@@ -13,7 +13,12 @@ import { AppLoader } from "@/components/layout/app-loader";
 // on the footer), forcing every load to start at the top; (2) flag the document
 // as loading so the splash can lock scroll and hold the hero entry animation,
 // killing the content flash.
-const LOADER_BOOTSTRAP = `(function(){try{if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);document.documentElement.classList.add('app-loading');}catch(e){}})();`;
+//
+// The splash is a PUBLIC brand moment only. The back-office (`/admin/*`) must
+// open instantly — so we never add `app-loading` there (no scroll lock, no
+// opaque overlay). `<AppLoader />` is likewise mounted via `decoration`, which
+// PublicChrome already strips on admin routes, keeping the two in lockstep.
+const LOADER_BOOTSTRAP = `(function(){try{if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);if(location.pathname.indexOf('/admin')!==0){document.documentElement.classList.add('app-loading');}}catch(e){}})();`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,10 +76,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${dmSans.variable} min-h-screen bg-black text-zinc-100 antialiased`}
       >
-        <AppLoader />
         <PublicChrome
           decoration={
             <>
+              <AppLoader />
               <SmoothScroll />
               <ScrollProgress />
             </>

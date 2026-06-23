@@ -143,6 +143,35 @@
   animation: admin-nav-reveal 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Skeleton shimmer for loading.tsx — a calm sweep across placeholder blocks,
+   so a route transition reads as "loading content" rather than the bare
+   "Chargement..." text that felt broken/slow. */
+@keyframes admin-shimmer {
+  100% { transform: translateX(100%); }
+}
+.admin-theme .admin-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--admin-surface-2);
+  border-radius: 0.5rem;
+}
+.admin-theme .admin-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.04),
+    transparent
+  );
+  animation: admin-shimmer 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-theme .admin-skeleton::after { animation: none; }
+}
+
 /* Row hover — subtle fill, no decoration */
 .admin-row {
   transition: background-color 120ms ease;
