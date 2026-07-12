@@ -203,6 +203,7 @@ export function BookingStepDates({
           <ul className="mt-3 space-y-1.5 font-[family:var(--font-dm-sans)] text-[12px] leading-[1.6] text-[var(--ink-text-soft)]">
             <li>— Week-end : 48h (ven→dim ou sam→lun) ou 72h (ven→lun).</li>
             <li>— 1 jour : lundi à jeudi, 1 à 2 semaines à l&apos;avance.</li>
+            <li>— Dimanche → lundi : une nuit, si le dimanche est libre.</li>
             <li>— Calendrier ouvert sur 2 mois.</li>
             {pricePerKm !== null && (
               <li>— Kilométrage facturé au retour selon compteur.</li>

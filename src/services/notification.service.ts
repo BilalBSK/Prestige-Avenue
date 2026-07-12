@@ -1,5 +1,5 @@
 import { calculateRentalDays } from "@/lib/booking";
-import { BOOKING_NOTIFICATION_EMAIL, sendEmail } from "@/lib/email";
+import { BOOKING_NOTIFICATION_EMAIL, sendEmail, type SendEmailResult } from "@/lib/email";
 
 /**
  * Notifications e-mail liées aux réservations.
@@ -43,6 +43,26 @@ function shortReference(bookingId: string): string {
 /** Prénom seul, pour une salutation chaleureuse ("Bonjour Marie,"). */
 function firstNameOf(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] || fullName.trim();
+}
+
+/**
+ * Trace l'issue d'un envoi pour laisser une preuve dans les logs de l'hébergeur.
+ * - envoyé  → `info` avec l'id Resend (corrélable au dashboard Resend → Logs) ;
+ * - skipped → config e-mail absente ; `error` en prod (anomalie), `warn` sinon.
+ * Sert à diagnostiquer sans deviner : on sait si un e-mail est réellement parti.
+ */
+function logSendOutcome(
+  kind: string,
+  bookingId: string,
+  result: SendEmailResult,
+): void {
+  const ref = shortReference(bookingId);
+  if (result.skipped) {
+    const log = process.env.NODE_ENV === "production" ? console.error : console.warn;
+    log("[notification] %s NON envoyé (%s) — envoi e-mail désactivé (config).", kind, ref);
+  } else {
+    console.info("[notification] %s envoyé (%s) — Resend id %s.", kind, ref, result.id);
+  }
 }
 
 /** URL absolue vers la liste des réservations de l'admin. */
@@ -157,8 +177,13 @@ export async function notifyNewBookingRequest(
 ): Promise<void> {
   try {
     if (!BOOKING_NOTIFICATION_EMAIL) {
-      console.warn(
-        "[notification] BOOKING_NOTIFICATION_EMAIL absente — alerte non envoyée (%s).",
+      // Destinataire agence non configuré : aucune alerte ne peut partir. En prod
+      // c'est une erreur de config (le patron ne reçoit rien), on la remonte en
+      // `error` pour qu'elle soit visible dans les logs de l'hébergeur.
+      const log = process.env.NODE_ENV === "production" ? console.error : console.warn;
+      log(
+        "[notification] BOOKING_NOTIFICATION_EMAIL absente — alerte agence NON envoyée (%s). " +
+          "Renseigner BOOKING_NOTIFICATION_EMAIL en production.",
         shortReference(input.bookingId),
       );
       return;
@@ -202,7 +227,7 @@ export async function notifyNewBookingRequest(
       ),
     );
 
-    await sendEmail({
+    const result = await sendEmail({
       to: BOOKING_NOTIFICATION_EMAIL,
       // Permet à l'agence de répondre directement au client depuis sa boîte.
       replyTo: input.customerEmail,
@@ -214,6 +239,7 @@ export async function notifyNewBookingRequest(
         blocks,
       }),
     });
+    logSendOutcome("alerte agence", input.bookingId, result);
   } catch (error) {
     console.error(
       "[notification] Échec de l'alerte de nouvelle demande (%s) :",
@@ -308,7 +334,7 @@ export async function notifyBookingConfirmed(
       ),
     ];
 
-    await sendEmail({
+    const result = await sendEmail({
       to: input.customerEmail,
       // Les réponses du client arrivent dans la boîte de l'agence.
       ...(BOOKING_NOTIFICATION_EMAIL ? { replyTo: BOOKING_NOTIFICATION_EMAIL } : {}),
@@ -321,6 +347,7 @@ export async function notifyBookingConfirmed(
         blocks,
       }),
     });
+    logSendOutcome("confirmation client", input.bookingId, result);
   } catch (error) {
     console.error(
       "[notification] Échec de l'e-mail de confirmation client (%s) :",
@@ -411,7 +438,7 @@ export async function notifyBookingDeclined(
       ),
     );
 
-    await sendEmail({
+    const result = await sendEmail({
       to: input.customerEmail,
       ...(BOOKING_NOTIFICATION_EMAIL ? { replyTo: BOOKING_NOTIFICATION_EMAIL } : {}),
       subject: `Votre demande de réservation — ${car}`,
@@ -423,6 +450,7 @@ export async function notifyBookingDeclined(
         blocks,
       }),
     });
+    logSendOutcome("refus client", input.bookingId, result);
   } catch (error) {
     console.error(
       "[notification] Échec de l'e-mail de refus client (%s) :",

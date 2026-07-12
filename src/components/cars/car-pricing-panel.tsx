@@ -91,7 +91,7 @@ export function CarPricingPanel({
                 ? `+ ${pricePerKm.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € / km`
                 : undefined
             }
-            hint="Du lundi au jeudi, sur réservation 1 à 2 semaines à l'avance."
+            hint="Du lundi au jeudi (1 à 2 semaines à l'avance), ou dimanche → lundi si le dimanche est libre."
           />
           {weekendPackagePrice48h !== null && (
             <Row

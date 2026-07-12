@@ -53,8 +53,14 @@ export type SendEmailResult =
  */
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
   if (!resend) {
-    console.warn(
-      "[email] RESEND_API_KEY absente — e-mail non envoyé (sujet : %s)",
+    // En dev, l'absence de clé est normale (envoi désactivé) → simple avertissement.
+    // En production, c'est une ERREUR de configuration : on la remonte au niveau
+    // `error` pour qu'elle ressorte dans les logs de l'hébergeur (Vercel), sinon
+    // la panne reste invisible — c'est précisément ce qui masque les non-envois.
+    const log = process.env.NODE_ENV === "production" ? console.error : console.warn;
+    log(
+      "[email] RESEND_API_KEY absente — e-mail NON envoyé (sujet : %s). " +
+        "Renseigner RESEND_API_KEY dans les variables d'environnement de production.",
       input.subject,
     );
     return { skipped: true };

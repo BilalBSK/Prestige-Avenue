@@ -103,6 +103,16 @@ export function validateBusinessBookingRules(startDate: Date, endDate: Date, now
 
   if (rentalDays === 1) {
     const startDay = getCalendarDayOfWeekISO(startDate);
+
+    // Dimanche → lundi : une nuit (la restitution du lundi n'est pas facturée).
+    // Autorisée dès que la nuit de dimanche est libre — c'est le contrôle de
+    // chevauchement à la soumission qui l'arbitre, pas ici. Pas de délai 1–2
+    // semaines : seul l'horizon 2 mois (vérifié plus haut) borne la date. On
+    // laisse ce motif NON classifié en week-end → il est facturé au tarif jour.
+    if (startDay === 7) {
+      return;
+    }
+
     const minOneDayStart = addDays(today, 7);
     const maxOneDayStart = addDays(today, 14);
 
